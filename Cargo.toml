@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "httpserver/rust",
+    "httpclient/rust",
+    "numbergen/rust",
+]
