@@ -4,6 +4,7 @@ project_dir = $(abspath $(shell pwd))
 subdirs     = core httpclient httpserver numbergen
 
 include build/makefiles/interface.mk
+include build/makefiles/rust.mk
 
 
 # this expression makes the simplifying assumption that all .smithy files

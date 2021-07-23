@@ -1,7 +1,11 @@
 [package]
 name = "wasmcloud-interface-httpclient"
 version = "0.1.0"
-#description = ""
+description = "interface for actors to issue http/https requests (wasmcloud:httpclient)"
+repository = "https://github.com/wasmcloud/interfaces"
+homepage = "https://github.com/wasmcloud/wasmcloud"
+keywords = "wasmcloud,wasm.actor,webassembly.capability"
+categories = [ "api-bindings","network-programming","wasm" ]
 authors = [ "wasmcloud Team" ]
 edition = "2018"
 license = "Apache-2.0"

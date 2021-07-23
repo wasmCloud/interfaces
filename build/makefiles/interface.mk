@@ -6,7 +6,7 @@
 
 html_target     ?= html
 codegen_config  ?= $(project_dir)/codegen.toml
-top_targets     ?= all build release clean lint validate test
+top_targets     ?= all build clean lint validate
 
 platform_id = $$( uname -s )
 platform = $$( \
