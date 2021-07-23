@@ -6,6 +6,7 @@
 
 html_target     ?= html
 codegen_config  ?= $(project_dir)/codegen.toml
+top_targets     ?= all build release clean lint validate test
 
 platform_id = $$( uname -s )
 platform = $$( \
@@ -23,23 +24,38 @@ ifeq ($(weld),)
 	endif
 endif
 
+# traverse subdirs
+.ONESHELL:
+ifneq ($(subdirs),)
+$(top_targets)::
+	for dir in $(subdirs); do \
+		$(MAKE) -C $$dir $@ weld=$(weld); \
+	done
+endif
+
 all::
 
 
 clean::
 	rm -rf $(html_target)/*.html
 
+ifneq ($(wildcard $(codegen_config)),)
 # Run smithy model lint or validation checks
-lint validate:: $(codegen_config) $(weld)
+lint validate:: $(weld)
 	$(weld) $@ --config $(codegen_config)
+
+endif
 
 
 # for debugging - show variables make is using
 make-vars:
-	@echo "weld:          :$(weld)"
-	@echo "codegen_config :$(codegen_config)"
-	@echo "platform_id    :$(platform_id)"
-	@echo "platform       :$(platform)"
+	@echo "weld:          : $(weld)"
+	@echo "codegen_config : $(codegen_config)"
+	@echo "platform_id    : $(platform_id)"
+	@echo "platform       : $(platform)"
+	@echo "project_dir    : $(project_dir)"
+	@echo "subdirs        : $(subdirs)"
+	@echo "top_targets    : $(top_targets)"
 
 
-.PHONY: all clean lint validate $(weld)
+.PHONY: all build release clean lint validate test $(weld)
