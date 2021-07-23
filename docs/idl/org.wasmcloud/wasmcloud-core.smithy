@@ -115,6 +115,10 @@ structure HostData {
     providerKey: String,
 
     @required
+    @serialization(name: "invocation_seed")
+    invocationSeed: String,
+
+    @required
     @serialization(name: "env_values")
     envValues: HostEnvValues,
 }
