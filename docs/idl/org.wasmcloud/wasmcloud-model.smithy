@@ -73,7 +73,9 @@ byte U8
 /// Rust codegen traits
 @trait(selector: "structure")
 structure codegenRust {
-    /// Instructs rust codegen to add `#[derive(Default)]` (default false)
+    /// Instructs rust codegen to add `#[derive(Default)]`
+    /// If the codegenRust trait is not applied to a structure,
+    /// 'Default' is generated for that structure.
     deriveDefault: Boolean,
 }
 
@@ -94,7 +96,6 @@ structure wasmbus {
 /// data sent via wasmbus
 /// This trait is required for all messages sent via wasmbus
 @trait(selector: "simpleType,list,set,map,structure")
-@codegenRust( deriveDefault: true )
 structure wasmbusData {}
 
 /// Capability contract id, e.g. 'wasmcloud:httpserver'

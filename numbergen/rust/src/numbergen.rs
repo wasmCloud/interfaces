@@ -18,7 +18,7 @@ pub const SMITHY_VERSION: &str = "1.0";
 /// Input range for RandomInRange. Result will be >= min and < max
 /// Example:
 /// random_in_range(RangeLimit{0,5}) returns one the values, 0, 1, 2, 3, or 4.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct RangeLimit {
     pub max: u32,
     pub min: u32,

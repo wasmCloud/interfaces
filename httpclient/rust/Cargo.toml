@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-httpclient"
-version = "0.1.0"
+version = "0.1.1"
 description = "interface for actors to issue http/https requests (wasmcloud:httpclient)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
@@ -35,4 +35,5 @@ base64 = "0.13"
 # build-dependencies needed for build.rs
 [build-dependencies.weld-codegen]
 version = "0.1"
+#path = "../../../weld/codegen"
 

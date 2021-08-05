@@ -23,7 +23,7 @@ service Actor {
   operations: [ HealthRequest ]
 }
 
-/// Link definition for an actor
+/// Link definition for binding actor to provider
 @wasmbusData
 structure LinkDefinition {
     /// actor public key

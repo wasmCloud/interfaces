@@ -22,7 +22,7 @@ pub type HeaderMap = std::collections::HashMap<String, HeaderValues>;
 pub type HeaderValues = Vec<String>;
 
 /// HttpRequest contains data sent to actor about the http request
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct HttpRequest {
     /// Request body as a byte array. May be empty.
     #[serde(with = "serde_bytes")]
