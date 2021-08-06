@@ -1,7 +1,7 @@
 # top-level makefile for wasmcloud/interfaces
 
 project_dir = $(abspath $(shell pwd))
-subdirs     = core httpclient httpserver numbergen
+subdirs     = core control httpclient httpserver numbergen
 
 include build/makefiles/interface.mk
 include build/makefiles/rust.mk
@@ -19,6 +19,8 @@ publish: $(published)
 
 
 docs/idl/org.wasmcloud/%.smithy:  core/%.smithy
+	cp -p $< $@
+docs/idl/org.wasmcloud/%.smithy:  control/%.smithy
 	cp -p $< $@
 docs/idl/org.wasmcloud/%.smithy:  httpclient/%.smithy
 	cp -p $< $@
