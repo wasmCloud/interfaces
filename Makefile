@@ -20,8 +20,6 @@ publish: $(published)
 
 docs/idl/org.wasmcloud/%.smithy:  core/%.smithy
 	cp -p $< $@
-docs/idl/org.wasmcloud/%.smithy:  control/%.smithy
-	cp -p $< $@
 docs/idl/org.wasmcloud/%.smithy:  httpclient/%.smithy
 	cp -p $< $@
 docs/idl/org.wasmcloud/%.smithy:  httpserver/%.smithy
