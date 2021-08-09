@@ -79,7 +79,7 @@ structure HostInventory {
 
     @required
     @serialization(name: "host_id")
-    host_id: String,
+    hostId: String,
 
     @required
     labels: LabelsMap,
@@ -110,7 +110,7 @@ structure ActorDescription {
     id: String,
 
     @serialization(name: "image_ref")
-    image_ref: String,
+    imageRef: String,
 
     name: String,
 
@@ -125,10 +125,10 @@ structure ProviderDescription {
 
     @required
     @serialization(name: "link_name")
-    link_name: String,
+    linkName: String,
 
     @serialization(name: "image_ref")
-    image_ref: String,
+    imageRef: String,
 
     name: String,
 

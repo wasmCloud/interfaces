@@ -13,7 +13,7 @@ files = [ "wasmcloud-core.smithy", "wasmcloud-model.smithy" ]
 [rust]
 
 # top-level output directory for rust files.
-output_dir = "."
+output_dir = "rust"
 
 [rust.parameters]
 

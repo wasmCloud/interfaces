@@ -7,10 +7,11 @@ use async_trait::async_trait;
 #[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use std::{borrow::Cow, string::ToString};
 #[allow(unused_imports)]
 use wasmbus_rpc::{
-    client, context, deserialize, serialize, Message, MessageDispatch, RpcError, Transport,
+    context::Context, deserialize, serialize, Message, MessageDispatch, RpcError, RpcResult,
+    SendOpts, Transport,
 };
 
 pub const SMITHY_VERSION: &str = "1.0";
@@ -62,22 +63,14 @@ pub struct HttpResponse {
 /// wasmbus.actorReceive
 #[async_trait]
 pub trait HttpServer {
-    async fn handle_request(
-        &self,
-        ctx: &context::Context<'_>,
-        arg: &HttpRequest,
-    ) -> Result<HttpResponse, RpcError>;
+    async fn handle_request(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<HttpResponse>;
 }
 
 /// HttpServerReceiver receives messages defined in the HttpServer service trait
 /// HttpServer is the contract to be implemented by actor
 #[async_trait]
 pub trait HttpServerReceiver: MessageDispatch + HttpServer {
-    async fn dispatch(
-        &self,
-        ctx: &context::Context<'_>,
-        message: &Message<'_>,
-    ) -> Result<Message<'_>, RpcError> {
+    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "HandleRequest" => {
                 let value: HttpRequest = deserialize(message.arg.as_ref())?;
@@ -99,38 +92,35 @@ pub trait HttpServerReceiver: MessageDispatch + HttpServer {
 /// HttpServerSender sends messages to a HttpServer service
 /// HttpServer is the contract to be implemented by actor
 #[derive(Debug)]
-pub struct HttpServerSender<T> {
-    transport: T,
-    config: client::SendConfig,
+pub struct HttpServerSender<'send, T> {
+    transport: &'send T,
 }
 
-impl<T: Transport> HttpServerSender<T> {
-    pub fn new(config: client::SendConfig, transport: T) -> Self {
-        HttpServerSender { transport, config }
+impl<'send, T: Transport> HttpServerSender<'send, T> {
+    pub fn new(transport: &'send T) -> Self {
+        HttpServerSender { transport }
     }
 }
 
 #[async_trait]
-impl<T: Transport + std::marker::Sync + std::marker::Send> HttpServer for HttpServerSender<T> {
+impl<'send, T: Transport + std::marker::Sync + std::marker::Send> HttpServer
+    for HttpServerSender<'send, T>
+{
     #[allow(unused)]
-    async fn handle_request(
-        &self,
-        ctx: &context::Context<'_>,
-        arg: &HttpRequest,
-    ) -> Result<HttpResponse, RpcError> {
+    async fn handle_request(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<HttpResponse> {
         let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
-                &self.config,
                 Message {
                     method: "HandleRequest",
                     arg: Cow::Borrowed(&arg),
                 },
+                None,
             )
             .await?;
-        let value = deserialize(resp.arg.as_ref())?;
+        let value = deserialize(&resp)?;
         Ok(value)
     }
 }

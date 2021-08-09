@@ -7,10 +7,11 @@ use async_trait::async_trait;
 #[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use std::{borrow::Cow, string::ToString};
 #[allow(unused_imports)]
 use wasmbus_rpc::{
-    client, context, deserialize, serialize, Message, MessageDispatch, RpcError, Transport,
+    context::Context, deserialize, serialize, Message, MessageDispatch, RpcError, RpcResult,
+    SendOpts, Transport,
 };
 
 pub const SMITHY_VERSION: &str = "1.0";

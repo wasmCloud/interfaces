@@ -79,6 +79,17 @@ structure codegenRust {
     deriveDefault: Boolean,
 }
 
+/// indicates that a trait or class extends one or more bases
+@trait(selector: "structure")
+structure extends {
+    base: IdentifierList,
+}
+
+/// list of identifiers
+list IdentifierList {
+    member: String,
+}
+
 /// a protocol defines the semantics
 /// of how a client and server communicate.
 @trait(selector: "service")

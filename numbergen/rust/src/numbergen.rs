@@ -7,10 +7,11 @@ use async_trait::async_trait;
 #[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use std::{borrow::Cow, string::ToString};
 #[allow(unused_imports)]
 use wasmbus_rpc::{
-    client, context, deserialize, serialize, Message, MessageDispatch, RpcError, Transport,
+    context::Context, deserialize, serialize, Message, MessageDispatch, RpcError, RpcResult,
+    SendOpts, Transport,
 };
 
 pub const SMITHY_VERSION: &str = "1.0";
@@ -32,26 +33,18 @@ pub trait NumberGen {
     /// GenerateGuid - return a 128-bit guid in the form 123e4567-e89b-12d3-a456-426655440000
     /// These guids are known as "version 4", meaning all bits are random or pseudo-random.
     ///
-    async fn generate_guid(&self, ctx: &context::Context<'_>) -> Result<String, RpcError>;
+    async fn generate_guid(&self, ctx: &Context) -> RpcResult<String>;
     /// Request a random integer within a range
     /// The result will will be in the range [min,max), i.e., >= min and < max.
-    async fn random_in_range(
-        &self,
-        ctx: &context::Context<'_>,
-        arg: &RangeLimit,
-    ) -> Result<u32, RpcError>;
+    async fn random_in_range(&self, ctx: &Context, arg: &RangeLimit) -> RpcResult<u32>;
     /// Request a 32-bit random number
-    async fn random_32(&self, ctx: &context::Context<'_>) -> Result<u32, RpcError>;
+    async fn random_32(&self, ctx: &Context) -> RpcResult<u32>;
 }
 
 /// NumberGenReceiver receives messages defined in the NumberGen service trait
 #[async_trait]
 pub trait NumberGenReceiver: MessageDispatch + NumberGen {
-    async fn dispatch(
-        &self,
-        ctx: &context::Context<'_>,
-        message: &Message<'_>,
-    ) -> Result<Message<'_>, RpcError> {
+    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "GenerateGuid" => {
                 let resp = NumberGen::generate_guid(self, ctx).await?;
@@ -88,79 +81,76 @@ pub trait NumberGenReceiver: MessageDispatch + NumberGen {
 
 /// NumberGenSender sends messages to a NumberGen service
 #[derive(Debug)]
-pub struct NumberGenSender<T> {
-    transport: T,
-    config: client::SendConfig,
+pub struct NumberGenSender<'send, T> {
+    transport: &'send T,
 }
 
-impl<T: Transport> NumberGenSender<T> {
-    pub fn new(config: client::SendConfig, transport: T) -> Self {
-        NumberGenSender { transport, config }
+impl<'send, T: Transport> NumberGenSender<'send, T> {
+    pub fn new(transport: &'send T) -> Self {
+        NumberGenSender { transport }
     }
 }
 
 #[async_trait]
-impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberGenSender<T> {
+impl<'send, T: Transport + std::marker::Sync + std::marker::Send> NumberGen
+    for NumberGenSender<'send, T>
+{
     #[allow(unused)]
     ///
     /// GenerateGuid - return a 128-bit guid in the form 123e4567-e89b-12d3-a456-426655440000
     /// These guids are known as "version 4", meaning all bits are random or pseudo-random.
     ///
-    async fn generate_guid(&self, ctx: &context::Context<'_>) -> Result<String, RpcError> {
+    async fn generate_guid(&self, ctx: &Context) -> RpcResult<String> {
         let arg = *b"";
         let resp = self
             .transport
             .send(
                 ctx,
-                &self.config,
                 Message {
                     method: "GenerateGuid",
                     arg: Cow::Borrowed(&arg),
                 },
+                None,
             )
             .await?;
-        let value = deserialize(resp.arg.as_ref())?;
+        let value = deserialize(&resp)?;
         Ok(value)
     }
     #[allow(unused)]
     /// Request a random integer within a range
     /// The result will will be in the range [min,max), i.e., >= min and < max.
-    async fn random_in_range(
-        &self,
-        ctx: &context::Context<'_>,
-        arg: &RangeLimit,
-    ) -> Result<u32, RpcError> {
+    async fn random_in_range(&self, ctx: &Context, arg: &RangeLimit) -> RpcResult<u32> {
         let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
-                &self.config,
                 Message {
                     method: "RandomInRange",
                     arg: Cow::Borrowed(&arg),
                 },
+                None,
             )
             .await?;
-        let value = deserialize(resp.arg.as_ref())?;
+        let value = deserialize(&resp)?;
         Ok(value)
     }
     #[allow(unused)]
     /// Request a 32-bit random number
-    async fn random_32(&self, ctx: &context::Context<'_>) -> Result<u32, RpcError> {
+    async fn random_32(&self, ctx: &Context) -> RpcResult<u32> {
         let arg = *b"";
         let resp = self
             .transport
             .send(
                 ctx,
-                &self.config,
                 Message {
                     method: "Random32",
                     arg: Cow::Borrowed(&arg),
                 },
+                None,
             )
             .await?;
-        let value = deserialize(resp.arg.as_ref())?;
+        let value = deserialize(&resp)?;
         Ok(value)
     }
 }

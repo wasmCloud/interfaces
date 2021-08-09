@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-control-interface"
-version = "0.5.0"
+version = "0.4.0"
 authors = ["wasmCloud Team"]
 edition = "2018"
 homepage = "https://wasmcloud.dev"
@@ -33,7 +33,7 @@ uuid = {version = "0.8", features  = ["serde", "v4"]}
 wascap = "0.6.0"
 
 [dependencies.wasmbus-rpc]
-version = "0.2"
+version = "0.3"
 #path = "../../../weld/rpc-rs"
 
 [build-dependencies.weld-codegen]
