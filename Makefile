@@ -26,6 +26,8 @@ docs/idl/org.wasmcloud/%.smithy:  httpclient/%.smithy
 	cp -p $< $@
 docs/idl/org.wasmcloud/%.smithy:  httpserver/%.smithy
 	cp -p $< $@
+docs/idl/org.wasmcloud/%.smithy:  keyvalue/%.smithy
+	cp -p $< $@
 docs/idl/org.wasmcloud/%.smithy:  numbergen/%.smithy
 	cp -p $< $@
 
