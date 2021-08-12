@@ -10,8 +10,8 @@ use serde::{Deserialize, Serialize};
 use std::{borrow::Cow, string::ToString};
 #[allow(unused_imports)]
 use wasmbus_rpc::{
-    context::Context, deserialize, serialize, Message, MessageDispatch, RpcError, RpcResult,
-    SendOpts, Transport,
+    deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
+    Transport,
 };
 
 pub const SMITHY_VERSION: &str = "1.0";
@@ -59,6 +59,17 @@ pub struct ListDelRequest {
     pub list_name: String,
     #[serde(default)]
     pub value: String,
+}
+
+#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct ListRangeRequest {
+    /// name of list
+    #[serde(default)]
+    pub list_name: String,
+    /// start index of the range, 0-based, inclusive.
+    pub start: i32,
+    /// end index of the range, 0-based, inclusive.
+    pub stop: i32,
 }
 
 #[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -126,13 +137,19 @@ pub trait KeyValue {
     async fn list_add(&self, ctx: &Context, arg: &ListAddRequest) -> RpcResult<u32>;
     /// Deletes a list and its contents
     /// input: list name
+    /// output: true if the list existed and was deleted
     async fn list_clear<TS: ToString + ?Sized + std::marker::Sync>(
         &self,
         ctx: &Context,
         arg: &TS,
-    ) -> RpcResult<()>;
+    ) -> RpcResult<bool>;
     /// Deletes a value from a list. Returns true if the item was removed.
     async fn list_del(&self, ctx: &Context, arg: &ListDelRequest) -> RpcResult<bool>;
+    /// Retrieves a range of values from a list using 0-based indices.
+    /// Start and end values are inclusive, for example, (0,10) returns
+    /// 11 items if the list contains at least 11 items. If the stop value
+    /// is beyond the end of the list, it is treated as the end of the list.
+    async fn list_range(&self, ctx: &Context, arg: &ListRangeRequest) -> RpcResult<StringList>;
     /// Sets the value of a key.
     /// expires is an optional number of seconds before the value should be automatically deleted,
     /// or 0 for no expiration.
@@ -157,6 +174,14 @@ pub trait KeyValue {
     /// input: list of sets for performing union (at least two)
     /// output: union of values
     async fn set_union(&self, ctx: &Context, arg: &StringList) -> RpcResult<StringList>;
+    /// clears all values from the set and removes it
+    /// input: set name
+    /// output: true if the set existed and was deleted
+    async fn set_clear<TS: ToString + ?Sized + std::marker::Sync>(
+        &self,
+        ctx: &Context,
+        arg: &TS,
+    ) -> RpcResult<bool>;
 }
 
 /// KeyValueReceiver receives messages defined in the KeyValue service trait
@@ -227,6 +252,15 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                     arg: buf,
                 })
             }
+            "ListRange" => {
+                let value: ListRangeRequest = deserialize(message.arg.as_ref())?;
+                let resp = KeyValue::list_range(self, ctx, &value).await?;
+                let buf = Cow::Owned(serialize(&resp)?);
+                Ok(Message {
+                    method: "KeyValue.ListRange",
+                    arg: buf,
+                })
+            }
             "Set" => {
                 let value: SetRequest = deserialize(message.arg.as_ref())?;
                 let resp = KeyValue::set(self, ctx, &value).await?;
@@ -278,6 +312,15 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.SetUnion",
+                    arg: buf,
+                })
+            }
+            "SetClear" => {
+                let value: String = deserialize(message.arg.as_ref())?;
+                let resp = KeyValue::set_clear(self, ctx, &value).await?;
+                let buf = Cow::Owned(serialize(&resp)?);
+                Ok(Message {
+                    method: "KeyValue.SetClear",
                     arg: buf,
                 })
             }
@@ -412,11 +455,12 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
     #[allow(unused)]
     /// Deletes a list and its contents
     /// input: list name
+    /// output: true if the list existed and was deleted
     async fn list_clear<TS: ToString + ?Sized + std::marker::Sync>(
         &self,
         ctx: &Context,
         arg: &TS,
-    ) -> RpcResult<()> {
+    ) -> RpcResult<bool> {
         let arg = serialize(&arg.to_string())?;
         let resp = self
             .transport
@@ -429,7 +473,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        Ok(())
+        let value = deserialize(&resp)?;
+        Ok(value)
     }
     #[allow(unused)]
     /// Deletes a value from a list. Returns true if the item was removed.
@@ -441,6 +486,27 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 ctx,
                 Message {
                     method: "ListDel",
+                    arg: Cow::Borrowed(&arg),
+                },
+                None,
+            )
+            .await?;
+        let value = deserialize(&resp)?;
+        Ok(value)
+    }
+    #[allow(unused)]
+    /// Retrieves a range of values from a list using 0-based indices.
+    /// Start and end values are inclusive, for example, (0,10) returns
+    /// 11 items if the list contains at least 11 items. If the stop value
+    /// is beyond the end of the list, it is treated as the end of the list.
+    async fn list_range(&self, ctx: &Context, arg: &ListRangeRequest) -> RpcResult<StringList> {
+        let arg = serialize(arg)?;
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "ListRange",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -560,6 +626,30 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 ctx,
                 Message {
                     method: "SetUnion",
+                    arg: Cow::Borrowed(&arg),
+                },
+                None,
+            )
+            .await?;
+        let value = deserialize(&resp)?;
+        Ok(value)
+    }
+    #[allow(unused)]
+    /// clears all values from the set and removes it
+    /// input: set name
+    /// output: true if the set existed and was deleted
+    async fn set_clear<TS: ToString + ?Sized + std::marker::Sync>(
+        &self,
+        ctx: &Context,
+        arg: &TS,
+    ) -> RpcResult<bool> {
+        let arg = serialize(&arg.to_string())?;
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "SetClear",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
