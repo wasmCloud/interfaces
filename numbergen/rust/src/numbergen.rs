@@ -16,9 +16,9 @@ use wasmbus_rpc::{
 
 pub const SMITHY_VERSION: &str = "1.0";
 
-/// Input range for RandomInRange. Result will be >= min and < max
+/// Input range for RandomInRange, inclusive. Result will be >= min and <= max
 /// Example:
-/// random_in_range(RangeLimit{0,5}) returns one the values, 0, 1, 2, 3, or 4.
+/// random_in_range(RangeLimit{0,4}) returns one the values, 0, 1, 2, 3, or 4.
 #[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct RangeLimit {
     pub max: u32,
@@ -55,7 +55,12 @@ pub trait NumberGenReceiver: MessageDispatch + NumberGen {
                 })
             }
             "RandomInRange" => {
-                let value: RangeLimit = deserialize(message.arg.as_ref())?;
+                let value: RangeLimit = deserialize(message.arg.as_ref()).map_err(|e| {
+                    RpcError::Deser(format!(
+                        "deserialization for message '{}': {}",
+                        message.method, e
+                    ))
+                })?;
                 let resp = NumberGen::random_in_range(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -113,7 +118,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> NumberGen
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "GenerateGuid", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -132,7 +138,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> NumberGen
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "RandomInRange", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -150,7 +157,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> NumberGen
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Random32", e)))?;
         Ok(value)
     }
 }
