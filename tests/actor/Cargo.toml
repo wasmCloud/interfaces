@@ -1,0 +1,16 @@
+# Cargo.toml for building all wasm projects in this repo
+#
+# This is separate from top-level Cargo.toml because Cargo workspaces can't handle
+# workspaces with mixed targets
+# issue: https://github.com/rust-lang/cargo/issues/9406
+
+[workspace]
+members = [
+    "builtins",
+]
+
+
+[profile.release]
+# Optimize for small code size
+lto = true
+opt-level = "s"
