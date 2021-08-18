@@ -64,6 +64,10 @@ pub struct HttpResponse {
 /// wasmbus.providerReceive
 #[async_trait]
 pub trait HttpClient {
+    /// returns the capability contract id for this interface
+    fn contract_id() -> &'static str {
+        "wasmcloud:httpclient"
+    }
     /// Issue outgoing http request
     async fn request(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<HttpResponse>;
 }
@@ -77,7 +81,8 @@ pub trait HttpClientReceiver: MessageDispatch + HttpClient {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "Request" => {
-                let value: HttpRequest = deserialize(message.arg.as_ref())?;
+                let value: HttpRequest = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = HttpClient::request(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -97,21 +102,40 @@ pub trait HttpClientReceiver: MessageDispatch + HttpClient {
 /// HttpClient - issue outgoing http requests via an external provider
 /// To use this capability, the actor must be linked
 /// with "wasmcloud:httpclient"
+/// client for sending HttpClient messages
 #[derive(Debug)]
-pub struct HttpClientSender<'send, T> {
-    transport: &'send T,
+pub struct HttpClientSender<T: Transport> {
+    transport: T,
 }
 
-impl<'send, T: Transport> HttpClientSender<'send, T> {
-    pub fn new(transport: &'send T) -> Self {
-        HttpClientSender { transport }
+impl<T: Transport> HttpClientSender<T> {
+    /// Constructs a HttpClientSender with the specified transport
+    pub fn via(transport: T) -> Self {
+        Self { transport }
     }
 }
 
+#[cfg(target_arch = "wasm32")]
+impl HttpClientSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for sending to a HttpClient provider
+    /// implementing the 'wasmcloud:httpclient' capability contract, with the "default" link
+    pub fn new() -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:httpclient", "default")
+                .unwrap();
+        Self { transport }
+    }
+
+    /// Constructs a client for sending to a HttpClient provider
+    /// implementing the 'wasmcloud:httpclient' capability contract, with the specified link name
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::RpcResult<Self> {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:httpclient", link_name)?;
+        Ok(Self { transport })
+    }
+}
 #[async_trait]
-impl<'send, T: Transport + std::marker::Sync + std::marker::Send> HttpClient
-    for HttpClientSender<'send, T>
-{
+impl<T: Transport + std::marker::Sync + std::marker::Send> HttpClient for HttpClientSender<T> {
     #[allow(unused)]
     /// Issue outgoing http request
     async fn request(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<HttpResponse> {
@@ -127,7 +151,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> HttpClient
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Request", e)))?;
         Ok(value)
     }
 }

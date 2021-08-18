@@ -29,6 +29,10 @@ pub struct RangeLimit {
 /// wasmbus.providerReceive
 #[async_trait]
 pub trait NumberGen {
+    /// returns the capability contract id for this interface
+    fn contract_id() -> &'static str {
+        "wasmcloud:builtin:numbergen"
+    }
     ///
     /// GenerateGuid - return a 128-bit guid in the form 123e4567-e89b-12d3-a456-426655440000
     /// These guids are known as "version 4", meaning all bits are random or pseudo-random.
@@ -55,12 +59,8 @@ pub trait NumberGenReceiver: MessageDispatch + NumberGen {
                 })
             }
             "RandomInRange" => {
-                let value: RangeLimit = deserialize(message.arg.as_ref()).map_err(|e| {
-                    RpcError::Deser(format!(
-                        "deserialization for message '{}': {}",
-                        message.method, e
-                    ))
-                })?;
+                let value: RangeLimit = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = NumberGen::random_in_range(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -85,21 +85,44 @@ pub trait NumberGenReceiver: MessageDispatch + NumberGen {
 }
 
 /// NumberGenSender sends messages to a NumberGen service
+/// client for sending NumberGen messages
 #[derive(Debug)]
-pub struct NumberGenSender<'send, T> {
-    transport: &'send T,
+pub struct NumberGenSender<T: Transport> {
+    transport: T,
 }
 
-impl<'send, T: Transport> NumberGenSender<'send, T> {
-    pub fn new(transport: &'send T) -> Self {
-        NumberGenSender { transport }
+impl<T: Transport> NumberGenSender<T> {
+    /// Constructs a NumberGenSender with the specified transport
+    pub fn via(transport: T) -> Self {
+        Self { transport }
     }
 }
 
+#[cfg(target_arch = "wasm32")]
+impl NumberGenSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for sending to a NumberGen provider
+    /// implementing the 'wasmcloud:builtin:numbergen' capability contract, with the "default" link
+    pub fn new() -> Self {
+        let transport = wasmbus_rpc::actor::prelude::WasmHost::to_provider(
+            "wasmcloud:builtin:numbergen",
+            "default",
+        )
+        .unwrap();
+        Self { transport }
+    }
+
+    /// Constructs a client for sending to a NumberGen provider
+    /// implementing the 'wasmcloud:builtin:numbergen' capability contract, with the specified link name
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::RpcResult<Self> {
+        let transport = wasmbus_rpc::actor::prelude::WasmHost::to_provider(
+            "wasmcloud:builtin:numbergen",
+            link_name,
+        )?;
+        Ok(Self { transport })
+    }
+}
 #[async_trait]
-impl<'send, T: Transport + std::marker::Sync + std::marker::Send> NumberGen
-    for NumberGenSender<'send, T>
-{
+impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberGenSender<T> {
     #[allow(unused)]
     ///
     /// GenerateGuid - return a 128-bit guid in the form 123e4567-e89b-12d3-a456-426655440000

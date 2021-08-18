@@ -111,6 +111,10 @@ pub type StringList = Vec<String>;
 /// wasmbus.providerReceive
 #[async_trait]
 pub trait KeyValue {
+    /// returns the capability contract id for this interface
+    fn contract_id() -> &'static str {
+        "wasmcloud:keyvalue"
+    }
     /// Increments a numeric value, returning the new value
     async fn increment(&self, ctx: &Context, arg: &IncrementRequest) -> RpcResult<i32>;
     /// returns whether the store contains the key
@@ -190,7 +194,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "Increment" => {
-                let value: IncrementRequest = deserialize(message.arg.as_ref())?;
+                let value: IncrementRequest = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::increment(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -199,7 +204,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "Contains" => {
-                let value: String = deserialize(message.arg.as_ref())?;
+                let value: String = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::contains(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -208,7 +214,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "Del" => {
-                let value: String = deserialize(message.arg.as_ref())?;
+                let value: String = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::del(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -217,7 +224,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "Get" => {
-                let value: String = deserialize(message.arg.as_ref())?;
+                let value: String = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::get(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -226,7 +234,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "ListAdd" => {
-                let value: ListAddRequest = deserialize(message.arg.as_ref())?;
+                let value: ListAddRequest = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::list_add(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -235,7 +244,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "ListClear" => {
-                let value: String = deserialize(message.arg.as_ref())?;
+                let value: String = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::list_clear(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -244,7 +254,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "ListDel" => {
-                let value: ListDelRequest = deserialize(message.arg.as_ref())?;
+                let value: ListDelRequest = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::list_del(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -253,7 +264,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "ListRange" => {
-                let value: ListRangeRequest = deserialize(message.arg.as_ref())?;
+                let value: ListRangeRequest = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::list_range(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -262,7 +274,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "Set" => {
-                let value: SetRequest = deserialize(message.arg.as_ref())?;
+                let value: SetRequest = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -271,7 +284,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "SetAdd" => {
-                let value: SetAddRequest = deserialize(message.arg.as_ref())?;
+                let value: SetAddRequest = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_add(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -280,7 +294,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "SetDel" => {
-                let value: SetDelRequest = deserialize(message.arg.as_ref())?;
+                let value: SetDelRequest = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_del(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -289,7 +304,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "SetIntersection" => {
-                let value: StringList = deserialize(message.arg.as_ref())?;
+                let value: StringList = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_intersection(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -298,7 +314,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "SetQuery" => {
-                let value: String = deserialize(message.arg.as_ref())?;
+                let value: String = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_query(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -307,7 +324,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "SetUnion" => {
-                let value: StringList = deserialize(message.arg.as_ref())?;
+                let value: StringList = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_union(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -316,7 +334,8 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 })
             }
             "SetClear" => {
-                let value: String = deserialize(message.arg.as_ref())?;
+                let value: String = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_clear(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -333,21 +352,40 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
 }
 
 /// KeyValueSender sends messages to a KeyValue service
+/// client for sending KeyValue messages
 #[derive(Debug)]
-pub struct KeyValueSender<'send, T> {
-    transport: &'send T,
+pub struct KeyValueSender<T: Transport> {
+    transport: T,
 }
 
-impl<'send, T: Transport> KeyValueSender<'send, T> {
-    pub fn new(transport: &'send T) -> Self {
-        KeyValueSender { transport }
+impl<T: Transport> KeyValueSender<T> {
+    /// Constructs a KeyValueSender with the specified transport
+    pub fn via(transport: T) -> Self {
+        Self { transport }
     }
 }
 
+#[cfg(target_arch = "wasm32")]
+impl KeyValueSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for sending to a KeyValue provider
+    /// implementing the 'wasmcloud:keyvalue' capability contract, with the "default" link
+    pub fn new() -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:keyvalue", "default")
+                .unwrap();
+        Self { transport }
+    }
+
+    /// Constructs a client for sending to a KeyValue provider
+    /// implementing the 'wasmcloud:keyvalue' capability contract, with the specified link name
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::RpcResult<Self> {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:keyvalue", link_name)?;
+        Ok(Self { transport })
+    }
+}
 #[async_trait]
-impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
-    for KeyValueSender<'send, T>
-{
+impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValueSender<T> {
     #[allow(unused)]
     /// Increments a numeric value, returning the new value
     async fn increment(&self, ctx: &Context, arg: &IncrementRequest) -> RpcResult<i32> {
@@ -363,7 +401,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Increment", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -385,7 +424,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Contains", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -407,7 +447,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Del", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -431,7 +472,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Get", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -449,7 +491,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "ListAdd", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -473,7 +516,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "ListClear", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -491,7 +535,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "ListDel", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -512,7 +557,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "ListRange", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -549,7 +595,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "SetAdd", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -567,7 +614,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "SetDel", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -587,7 +635,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "SetIntersection", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -611,7 +660,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "SetQuery", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -631,7 +681,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "SetUnion", e)))?;
         Ok(value)
     }
     #[allow(unused)]
@@ -655,7 +706,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> KeyValue
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "SetClear", e)))?;
         Ok(value)
     }
 }

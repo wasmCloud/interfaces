@@ -22,15 +22,12 @@ mod wasm_log {
     /// You can also use this crate's macros `debug`,`info`,`warn`, and `error`
     pub async fn log<T1: ToString, T2: ToString>(level: T1, text: T2) -> RpcResult<()> {
         use crate::logging::{Logging, LoggingSender};
-        use wasmbus_rpc::{actor::prelude::WasmHost, Context};
-
         let entry = crate::logging::LogEntry {
             level: level.to_string(),
             text: text.to_string(),
         };
-        let tx = WasmHost::to_provider("wasmcloud:builtin:logging", "default").unwrap();
-        let ctx = Context::default();
-        let logger = LoggingSender::new(&tx);
+        let ctx = wasmbus_rpc::Context::default();
+        let logger = LoggingSender::new();
         logger.write_log(&ctx, &entry).await
     }
 

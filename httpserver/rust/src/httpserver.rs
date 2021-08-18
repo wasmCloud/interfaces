@@ -63,6 +63,10 @@ pub struct HttpResponse {
 /// wasmbus.actorReceive
 #[async_trait]
 pub trait HttpServer {
+    /// returns the capability contract id for this interface
+    fn contract_id() -> &'static str {
+        "wasmcloud:httpserver"
+    }
     async fn handle_request(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<HttpResponse>;
 }
 
@@ -73,7 +77,8 @@ pub trait HttpServerReceiver: MessageDispatch + HttpServer {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "HandleRequest" => {
-                let value: HttpRequest = deserialize(message.arg.as_ref())?;
+                let value: HttpRequest = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = HttpServer::handle_request(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -91,21 +96,20 @@ pub trait HttpServerReceiver: MessageDispatch + HttpServer {
 
 /// HttpServerSender sends messages to a HttpServer service
 /// HttpServer is the contract to be implemented by actor
+/// client for sending HttpServer messages
 #[derive(Debug)]
-pub struct HttpServerSender<'send, T> {
-    transport: &'send T,
+pub struct HttpServerSender<T: Transport> {
+    transport: T,
 }
 
-impl<'send, T: Transport> HttpServerSender<'send, T> {
-    pub fn new(transport: &'send T) -> Self {
-        HttpServerSender { transport }
+impl<T: Transport> HttpServerSender<T> {
+    /// Constructs a HttpServerSender with the specified transport
+    pub fn via(transport: T) -> Self {
+        Self { transport }
     }
 }
-
 #[async_trait]
-impl<'send, T: Transport + std::marker::Sync + std::marker::Send> HttpServer
-    for HttpServerSender<'send, T>
-{
+impl<T: Transport + std::marker::Sync + std::marker::Send> HttpServer for HttpServerSender<T> {
     #[allow(unused)]
     async fn handle_request(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<HttpResponse> {
         let arg = serialize(arg)?;
@@ -120,7 +124,8 @@ impl<'send, T: Transport + std::marker::Sync + std::marker::Send> HttpServer
                 None,
             )
             .await?;
-        let value = deserialize(&resp)?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "HandleRequest", e)))?;
         Ok(value)
     }
 }

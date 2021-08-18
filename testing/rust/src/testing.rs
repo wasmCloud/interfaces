@@ -61,6 +61,10 @@ pub type TestResults = Vec<TestResult>;
 /// wasmbus.actorReceive
 #[async_trait]
 pub trait Testing {
+    /// returns the capability contract id for this interface
+    fn contract_id() -> &'static str {
+        "wasmcloud:testing"
+    }
     /// Begin tests
     async fn start(&self, ctx: &Context, arg: &TestOptions) -> RpcResult<TestResults>;
 }
@@ -72,12 +76,8 @@ pub trait TestingReceiver: MessageDispatch + Testing {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "Start" => {
-                let value: TestOptions = deserialize(message.arg.as_ref()).map_err(|e| {
-                    RpcError::Deser(format!(
-                        "deserialization for message '{}': {}",
-                        message.method, e
-                    ))
-                })?;
+                let value: TestOptions = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = Testing::start(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
@@ -95,21 +95,40 @@ pub trait TestingReceiver: MessageDispatch + Testing {
 
 /// TestingSender sends messages to a Testing service
 /// Test api for testable actors and providers
+/// client for sending Testing messages
 #[derive(Debug)]
-pub struct TestingSender<'send, T> {
-    transport: &'send T,
+pub struct TestingSender<T: Transport> {
+    transport: T,
 }
 
-impl<'send, T: Transport> TestingSender<'send, T> {
-    pub fn new(transport: &'send T) -> Self {
-        TestingSender { transport }
+impl<T: Transport> TestingSender<T> {
+    /// Constructs a TestingSender with the specified transport
+    pub fn via(transport: T) -> Self {
+        Self { transport }
     }
 }
 
+#[cfg(target_arch = "wasm32")]
+impl TestingSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for sending to a Testing provider
+    /// implementing the 'wasmcloud:testing' capability contract, with the "default" link
+    pub fn new() -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:testing", "default")
+                .unwrap();
+        Self { transport }
+    }
+
+    /// Constructs a client for sending to a Testing provider
+    /// implementing the 'wasmcloud:testing' capability contract, with the specified link name
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::RpcResult<Self> {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:testing", link_name)?;
+        Ok(Self { transport })
+    }
+}
 #[async_trait]
-impl<'send, T: Transport + std::marker::Sync + std::marker::Send> Testing
-    for TestingSender<'send, T>
-{
+impl<T: Transport + std::marker::Sync + std::marker::Send> Testing for TestingSender<T> {
     #[allow(unused)]
     /// Begin tests
     async fn start(&self, ctx: &Context, arg: &TestOptions) -> RpcResult<TestResults> {
