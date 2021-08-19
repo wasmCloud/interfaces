@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-httpclient"
-version = "0.1.4"
+version = "0.1.5"
 description = "interface for actors to issue http/https requests (wasmcloud:httpclient)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
