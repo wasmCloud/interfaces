@@ -53,7 +53,7 @@ structure HttpRequest {
 }
 
 /// HttpResponse contains the actor's response to return to the http client
-// don't generate Default since we want to customize it
+// don't generate Default so we can customize it
 @codegenRust( deriveDefault: false )
 structure HttpResponse {
   /// statusCode is a three-digit number, usually in the range 100-599,

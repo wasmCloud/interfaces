@@ -46,9 +46,9 @@ operation Random32 {
     output: U32
 }
 
-/// Input range for RandomInRange. Result will be >= min and < max
+/// Input range for RandomInRange, inclusive. Result will be >= min and <= max
 /// Example:
-///    random_in_range(RangeLimit{0,5}) returns one the values, 0, 1, 2, 3, or 4.
+///    random_in_range(RangeLimit{0,4}) returns one the values, 0, 1, 2, 3, or 4.
 structure RangeLimit {
     @required
     min: U32,

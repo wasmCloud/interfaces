@@ -19,8 +19,8 @@ service KeyValue {
   version: "0.1.1",
   operations: [
     Increment, Contains, Del, Get,
-    ListAdd, ListClear, ListDel,
-    Set, , SetAdd, SetDel, SetIntersection, SetQuery, SetUnion,
+    ListAdd, ListClear, ListDel, ListRange,
+    Set, , SetAdd, SetDel, SetIntersection, SetQuery, SetUnion, SetClear,
   ]
 }
 
@@ -126,8 +126,34 @@ structure ListDelRequest {
 
 /// Deletes a list and its contents
 /// input: list name
+/// output: true if the list existed and was deleted
 operation ListClear {
   input: String,
+  output: Boolean
+}
+
+/// Retrieves a range of values from a list using 0-based indices.
+/// Start and end values are inclusive, for example, (0,10) returns
+/// 11 items if the list contains at least 11 items. If the stop value
+/// is beyond the end of the list, it is treated as the end of the list.
+operation ListRange {
+    input: ListRangeRequest,
+    output: StringList,
+}
+
+structure ListRangeRequest {
+
+    /// name of list
+    @required
+    listName: String,
+
+    /// start index of the range, 0-based, inclusive.
+    @required
+    start: I32,
+
+    /// end index of the range, 0-based, inclusive.
+    @required
+    stop: I32,
 }
 
 /// Add an item into a set. Returns number of items added (1 or 0)
@@ -187,5 +213,13 @@ operation SetQuery {
 operation Contains {
   input: String,
   output: Boolean,
+}
+
+/// clears all values from the set and removes it
+/// input: set name
+/// output: true if the set existed and was deleted
+operation SetClear {
+    input: String
+    output: Boolean
 }
 

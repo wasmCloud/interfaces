@@ -1,0 +1,789 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="../css/tailwind.min.css" rel="stylesheet">
+	<title>org.wasmcloud.interface.keyvalue</title>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" type="text/javascript" defer></script>
+    <script src='https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js' type="text/javascript"></script>
+</head>
+<body class="p-4">
+
+    <div id="content">
+        <div class="p-4 overflow-y-auto">
+            <h1 id="org_wasmcloud_interface_keyvalue" class="text-2xl font-serif">Namespace org.wasmcloud.interface.keyvalue</h1>
+            <div class="table m-4 ml-12">            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Services
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_key_value"><a href="#key_value">KeyValue</a></a></li>                    </ul>
+                </div>
+            </div>            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Operations
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_contains"><a href="#contains">Contains</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_del"><a href="#del">Del</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_get"><a href="#get">Get</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_increment"><a href="#increment">Increment</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_list_add"><a href="#list_add">ListAdd</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_list_clear"><a href="#list_clear">ListClear</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_list_del"><a href="#list_del">ListDel</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_list_range"><a href="#list_range">ListRange</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_set"><a href="#set">Set</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_set_add"><a href="#set_add">SetAdd</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_set_clear"><a href="#set_clear">SetClear</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_set_del"><a href="#set_del">SetDel</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_set_intersection"><a href="#set_intersection">SetIntersection</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_set_query"><a href="#set_query">SetQuery</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_set_union"><a href="#set_union">SetUnion</a></a></li>                    </ul>
+                </div>
+            </div>            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Structures
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_get_response"><a href="#get_response">GetResponse</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_increment_request"><a href="#increment_request">IncrementRequest</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_list_add_request"><a href="#list_add_request">ListAddRequest</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_list_del_request"><a href="#list_del_request">ListDelRequest</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_list_range_request"><a href="#list_range_request">ListRangeRequest</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_set_add_request"><a href="#set_add_request">SetAddRequest</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_set_del_request"><a href="#set_del_request">SetDelRequest</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_set_request"><a href="#set_request">SetRequest</a></a></li>                    </ul>
+                </div>
+            </div>            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Lists
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_keyvalue_string_list"><a href="#string_list">StringList</a></a></li>                    </ul>
+                </div>
+            </div>            </div>
+
+
+    <h2 id="contains" class="mt-8 border-t-2 border-gray-300">
+        <a href="#contains">Contains</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">returns whether the store contains the key</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td>Boolean</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+        <div class="ml-12">
+            <p class="font-medium mt-4">Traits
+            <p>
+            <table>                    <tr>
+                            <td>readonly</td>
+                            <td>[object]</td>
+                    </tr>            </table>
+        </div>
+
+
+    <h2 id="del" class="mt-8 border-t-2 border-gray-300">
+        <a href="#del">Del</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Deletes a key, returning true if the key was deleted</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td>Boolean</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="get" class="mt-8 border-t-2 border-gray-300">
+        <a href="#get">Get</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Gets a value for a specified key. If the key exists,
+the return structure contains exists: true and the value,
+otherwise the return structure contains exists == false.</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="#get_response">GetResponse</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+        <div class="ml-12">
+            <p class="font-medium mt-4">Traits
+            <p>
+            <table>                    <tr>
+                            <td>readonly</td>
+                            <td>[object]</td>
+                    </tr>            </table>
+        </div>
+
+
+    <h2 id="get_response" class="mt-8 border-t-2 border-gray-300">
+        <a href="#get_response">GetResponse</a><span class="text-lg pl-4">(structure)</span>
+    </h2><p class="font-light ml-6">Response to get request</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>exists:</td>
+                                        <td>Boolean</td>
+                                        <td><span class="font-light">whether or not the value existed</span></td>
+                                    </tr>                                    <tr>
+                                        <td>value:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">the value, if it existed</span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+    <h2 id="increment" class="mt-8 border-t-2 border-gray-300">
+        <a href="#increment">Increment</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Increments a numeric value, returning the new value</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#increment_request">IncrementRequest</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="./org_wasmcloud_model.html#i32">org.wasmcloud.model#I32</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="increment_request" class="mt-8 border-t-2 border-gray-300">
+        <a href="#increment_request">IncrementRequest</a><span class="text-lg pl-4">(structure)</span>
+    </h2>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>key:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">name of value to increment</span></td>
+                                    </tr>                                    <tr>
+                                        <td>value:</td>
+                                        <td><a href="./org_wasmcloud_model.html#i32">org.wasmcloud.model#I32</a></td>
+                                        <td><span class="font-light">amount to add to value</span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+    <h2 id="key_value" class="mt-8 border-t-2 border-gray-300">
+        <a href="#key_value">KeyValue</a><span class="text-lg pl-4">(service)</span>
+    </h2>
+                        <div class="ml-12">                                <div class="table my-4">
+                                    <div class="table-row">
+                                        <div class="table-cell align-top pr-6 w-48">
+                                            <span class="font-medium my-4">
+                                                Operations
+                                            </span>
+                                        </div>
+                                        <div class="table-cell align-top">
+                                            <ul>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_increment">
+                                                            <a href="#increment">Increment</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_contains">
+                                                            <a href="#contains">Contains</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_del">
+                                                            <a href="#del">Del</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_get">
+                                                            <a href="#get">Get</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_list_add">
+                                                            <a href="#list_add">ListAdd</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_list_clear">
+                                                            <a href="#list_clear">ListClear</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_list_del">
+                                                            <a href="#list_del">ListDel</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_list_range">
+                                                            <a href="#list_range">ListRange</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_set">
+                                                            <a href="#set">Set</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_set_add">
+                                                            <a href="#set_add">SetAdd</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_set_del">
+                                                            <a href="#set_del">SetDel</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_set_intersection">
+                                                            <a href="#set_intersection">SetIntersection</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_set_query">
+                                                            <a href="#set_query">SetQuery</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_set_union">
+                                                            <a href="#set_union">SetUnion</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_keyvalue_set_clear">
+                                                            <a href="#set_clear">SetClear</a>
+                                                        </a>
+                                                    </li>                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>                        </div>
+        <div class="ml-12">
+            <p class="font-medium mt-4">Traits
+            <p>
+            <table>                    <tr>
+                            <td><a href="./org_wasmcloud_model.html#wasmbus">org.wasmcloud.model#wasmbus</a></td>
+                            <td>[object]</td>
+                    </tr>            </table>
+        </div>
+
+
+    <h2 id="list_add" class="mt-8 border-t-2 border-gray-300">
+        <a href="#list_add">ListAdd</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Append a value onto the end of a list. Returns the new list size</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#list_add_request">ListAddRequest</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="./org_wasmcloud_model.html#u32">org.wasmcloud.model#U32</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="list_add_request" class="mt-8 border-t-2 border-gray-300">
+        <a href="#list_add_request">ListAddRequest</a><span class="text-lg pl-4">(structure)</span>
+    </h2><p class="font-light ml-6">Parameter to ListAdd operation</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>listName:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">name of the list to modify</span></td>
+                                    </tr>                                    <tr>
+                                        <td>value:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">value to append to the list</span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+    <h2 id="list_clear" class="mt-8 border-t-2 border-gray-300">
+        <a href="#list_clear">ListClear</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Deletes a list and its contents
+input: list name
+output: true if the list existed and was deleted</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td>Boolean</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="list_del" class="mt-8 border-t-2 border-gray-300">
+        <a href="#list_del">ListDel</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Deletes a value from a list. Returns true if the item was removed.</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#list_del_request">ListDelRequest</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td>Boolean</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="list_del_request" class="mt-8 border-t-2 border-gray-300">
+        <a href="#list_del_request">ListDelRequest</a><span class="text-lg pl-4">(structure)</span>
+    </h2><p class="font-light ml-6">Removes an item from the list. If the item occurred more than once,
+removes only the first item.
+Returns true if the item was found.</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>listName:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">name of list to modify</span></td>
+                                    </tr>                                    <tr>
+                                        <td>value:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+    <h2 id="list_range" class="mt-8 border-t-2 border-gray-300">
+        <a href="#list_range">ListRange</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Retrieves a range of values from a list using 0-based indices.
+Start and end values are inclusive, for example, (0,10) returns
+11 items if the list contains at least 11 items. If the stop value
+is beyond the end of the list, it is treated as the end of the list.</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#list_range_request">ListRangeRequest</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="#string_list">StringList</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="list_range_request" class="mt-8 border-t-2 border-gray-300">
+        <a href="#list_range_request">ListRangeRequest</a><span class="text-lg pl-4">(structure)</span>
+    </h2>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>listName:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">name of list</span></td>
+                                    </tr>                                    <tr>
+                                        <td>start:</td>
+                                        <td><a href="./org_wasmcloud_model.html#i32">org.wasmcloud.model#I32</a></td>
+                                        <td><span class="font-light">start index of the range, 0-based, inclusive.</span></td>
+                                    </tr>                                    <tr>
+                                        <td>stop:</td>
+                                        <td><a href="./org_wasmcloud_model.html#i32">org.wasmcloud.model#I32</a></td>
+                                        <td><span class="font-light">end index of the range, 0-based, inclusive.</span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+    <h2 id="set" class="mt-8 border-t-2 border-gray-300">
+        <a href="#set">Set</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Sets the value of a key.
+expires is an optional number of seconds before the value should be automatically deleted,
+or 0 for no expiration.</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#set_request">SetRequest</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="set_add" class="mt-8 border-t-2 border-gray-300">
+        <a href="#set_add">SetAdd</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Add an item into a set. Returns number of items added (1 or 0)</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#set_add_request">SetAddRequest</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="./org_wasmcloud_model.html#u32">org.wasmcloud.model#U32</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="set_add_request" class="mt-8 border-t-2 border-gray-300">
+        <a href="#set_add_request">SetAddRequest</a><span class="text-lg pl-4">(structure)</span>
+    </h2>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>setName:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">name of the set</span></td>
+                                    </tr>                                    <tr>
+                                        <td>value:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">value to add to the set</span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+    <h2 id="set_clear" class="mt-8 border-t-2 border-gray-300">
+        <a href="#set_clear">SetClear</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">clears all values from the set and removes it
+input: set name
+output: true if the set existed and was deleted</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td>Boolean</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="set_del" class="mt-8 border-t-2 border-gray-300">
+        <a href="#set_del">SetDel</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Deletes an item from the set. Returns number of items removed from the set (1 or 0)</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#set_del_request">SetDelRequest</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="./org_wasmcloud_model.html#u32">org.wasmcloud.model#U32</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="set_del_request" class="mt-8 border-t-2 border-gray-300">
+        <a href="#set_del_request">SetDelRequest</a><span class="text-lg pl-4">(structure)</span>
+    </h2>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>setName:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>value:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+    <h2 id="set_intersection" class="mt-8 border-t-2 border-gray-300">
+        <a href="#set_intersection">SetIntersection</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">perform intersection of sets and returns values from the intersection.
+input: list of sets for performing intersection (at least two)
+output: values</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#string_list">StringList</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="#string_list">StringList</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="set_query" class="mt-8 border-t-2 border-gray-300">
+        <a href="#set_query">SetQuery</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Retrieves all items from a set
+input: String
+output: set members</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="#string_list">StringList</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="set_request" class="mt-8 border-t-2 border-gray-300">
+        <a href="#set_request">SetRequest</a><span class="text-lg pl-4">(structure)</span>
+    </h2>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>expires:</td>
+                                        <td><a href="./org_wasmcloud_model.html#u32">org.wasmcloud.model#U32</a></td>
+                                        <td><span class="font-light">expiration time in seconds 0 for no expiration</span></td>
+                                    </tr>                                    <tr>
+                                        <td>key:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">the key name to change (or create)</span></td>
+                                    </tr>                                    <tr>
+                                        <td>value:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">the new value</span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+    <h2 id="set_union" class="mt-8 border-t-2 border-gray-300">
+        <a href="#set_union">SetUnion</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">perform union of sets and returns values from the union
+input: list of sets for performing union (at least two)
+output: union of values</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#string_list">StringList</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="#string_list">StringList</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="string_list" class="mt-8 border-t-2 border-gray-300">
+        <a href="#string_list">StringList</a><span class="text-lg pl-4">(list)</span>
+    </h2><p class="font-light ml-6">list of strings</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>member:</td>
+                                    <td>String</td>
+                                    <td><span class="font-light">&nbsp;</span></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+        </div>
+    </div></body>
+</html>

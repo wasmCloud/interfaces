@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="../css/tailwind.min.css" rel="stylesheet">
+	<title>org.wasmcloud.interface.numbergen</title>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" type="text/javascript" defer></script>
+    <script src='https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js' type="text/javascript"></script>
+</head>
+<body class="p-4">
+
+    <div id="content">
+        <div class="p-4 overflow-y-auto">
+            <h1 id="org_wasmcloud_interface_numbergen" class="text-2xl font-serif">Namespace org.wasmcloud.interface.numbergen</h1>
+            <div class="table m-4 ml-12">            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Services
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_numbergen_number_gen"><a href="#number_gen">NumberGen</a></a></li>                    </ul>
+                </div>
+            </div>            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Operations
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_numbergen_generate_guid"><a href="#generate_guid">GenerateGuid</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_numbergen_random_32"><a href="#random_32">Random32</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_numbergen_random_in_range"><a href="#random_in_range">RandomInRange</a></a></li>                    </ul>
+                </div>
+            </div>            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Structures
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_numbergen_range_limit"><a href="#range_limit">RangeLimit</a></a></li>                    </ul>
+                </div>
+            </div>            </div>
+
+
+    <h2 id="generate_guid" class="mt-8 border-t-2 border-gray-300">
+        <a href="#generate_guid">GenerateGuid</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">
+GenerateGuid - return a 128-bit guid in the form 123e4567-e89b-12d3-a456-426655440000
+These guids are known as "version 4", meaning all bits are random or pseudo-random.
+</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>output:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="number_gen" class="mt-8 border-t-2 border-gray-300">
+        <a href="#number_gen">NumberGen</a><span class="text-lg pl-4">(service)</span>
+    </h2>
+                        <div class="ml-12">                                <div class="table my-4">
+                                    <div class="table-row">
+                                        <div class="table-cell align-top pr-6 w-48">
+                                            <span class="font-medium my-4">
+                                                Operations
+                                            </span>
+                                        </div>
+                                        <div class="table-cell align-top">
+                                            <ul>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_numbergen_generate_guid">
+                                                            <a href="#generate_guid">GenerateGuid</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_numbergen_random_in_range">
+                                                            <a href="#random_in_range">RandomInRange</a>
+                                                        </a>
+                                                    </li>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_numbergen_random_32">
+                                                            <a href="#random_32">Random32</a>
+                                                        </a>
+                                                    </li>                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>                        </div>
+        <div class="ml-12">
+            <p class="font-medium mt-4">Traits
+            <p>
+            <table>                    <tr>
+                            <td><a href="./org_wasmcloud_model.html#wasmbus">org.wasmcloud.model#wasmbus</a></td>
+                            <td>[object]</td>
+                    </tr>            </table>
+        </div>
+
+
+    <h2 id="random_32" class="mt-8 border-t-2 border-gray-300">
+        <a href="#random_32">Random32</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Request a 32-bit random number</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="./org_wasmcloud_model.html#u32">org.wasmcloud.model#U32</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="random_in_range" class="mt-8 border-t-2 border-gray-300">
+        <a href="#random_in_range">RandomInRange</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Request a random integer within a range
+The result will will be in the range [min,max), i.e., >= min and < max.</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#range_limit">RangeLimit</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="./org_wasmcloud_model.html#u32">org.wasmcloud.model#U32</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="range_limit" class="mt-8 border-t-2 border-gray-300">
+        <a href="#range_limit">RangeLimit</a><span class="text-lg pl-4">(structure)</span>
+    </h2><p class="font-light ml-6">Input range for RandomInRange, inclusive. Result will be >= min and <= max
+Example:
+random_in_range(RangeLimit{0,4}) returns one the values, 0, 1, 2, 3, or 4.</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>max:</td>
+                                        <td><a href="./org_wasmcloud_model.html#u32">org.wasmcloud.model#U32</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>min:</td>
+                                        <td><a href="./org_wasmcloud_model.html#u32">org.wasmcloud.model#U32</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+        </div>
+    </div></body>
+</html>

@@ -1,0 +1,256 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="../css/tailwind.min.css" rel="stylesheet">
+	<title>org.wasmcloud.interface.httpclient</title>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" type="text/javascript" defer></script>
+    <script src='https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js' type="text/javascript"></script>
+</head>
+<body class="p-4">
+
+    <div id="content">
+        <div class="p-4 overflow-y-auto">
+            <h1 id="org_wasmcloud_interface_httpclient" class="text-2xl font-serif">Namespace org.wasmcloud.interface.httpclient</h1>
+            <div class="table m-4 ml-12">            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Services
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_httpclient_http_client"><a href="#http_client">HttpClient</a></a></li>                    </ul>
+                </div>
+            </div>            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Operations
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_httpclient_request"><a href="#request">Request</a></a></li>                    </ul>
+                </div>
+            </div>            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Structures
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_httpclient_http_request"><a href="#http_request">HttpRequest</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_httpclient_http_response"><a href="#http_response">HttpResponse</a></a></li>                    </ul>
+                </div>
+            </div>            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Lists
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_httpclient_header_values"><a href="#header_values">HeaderValues</a></a></li>                    </ul>
+                </div>
+            </div>            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
+                    Maps
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_interface_httpclient_header_map"><a href="#header_map">HeaderMap</a></a></li>                    </ul>
+                </div>
+            </div>            </div>
+
+
+    <h2 id="header_map" class="mt-8 border-t-2 border-gray-300">
+        <a href="#header_map">HeaderMap</a><span class="text-lg pl-4">(map)</span>
+    </h2><p class="font-light ml-6">map data structure for holding http headers
+</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>key:</td>
+                                    <td>String</td>
+                                    <td><span class="font-light"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>value:</td>
+                                    <td><a href="#header_values">HeaderValues</a></td>
+                                    <td><span class="font-light"></span></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="header_values" class="mt-8 border-t-2 border-gray-300">
+        <a href="#header_values">HeaderValues</a><span class="text-lg pl-4">(list)</span>
+    </h2>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>member:</td>
+                                    <td>String</td>
+                                    <td><span class="font-light">&nbsp;</span></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="http_client" class="mt-8 border-t-2 border-gray-300">
+        <a href="#http_client">HttpClient</a><span class="text-lg pl-4">(service)</span>
+    </h2><p class="font-light ml-6">HttpClient - issue outgoing http requests via an external provider
+To use this capability, the actor must be linked
+with "wasmcloud:httpclient"</p>
+                        <div class="ml-12">                                <div class="table my-4">
+                                    <div class="table-row">
+                                        <div class="table-cell align-top pr-6 w-48">
+                                            <span class="font-medium my-4">
+                                                Operations
+                                            </span>
+                                        </div>
+                                        <div class="table-cell align-top">
+                                            <ul>                                                    <li class="font-light">
+                                                        <a href="#org_wasmcloud_interface_httpclient_request">
+                                                            <a href="#request">Request</a>
+                                                        </a>
+                                                    </li>                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>                        </div>
+        <div class="ml-12">
+            <p class="font-medium mt-4">Traits
+            <p>
+            <table>                    <tr>
+                            <td><a href="./org_wasmcloud_model.html#wasmbus">org.wasmcloud.model#wasmbus</a></td>
+                            <td>[object]</td>
+                    </tr>            </table>
+        </div>
+
+
+    <h2 id="http_request" class="mt-8 border-t-2 border-gray-300">
+        <a href="#http_request">HttpRequest</a><span class="text-lg pl-4">(structure)</span>
+    </h2><p class="font-light ml-6">http request to be sent through the provider</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>body:</td>
+                                        <td>Blob</td>
+                                        <td><span class="font-light">request body, defaults to empty</span></td>
+                                    </tr>                                    <tr>
+                                        <td>headers:</td>
+                                        <td><a href="#header_map">HeaderMap</a></td>
+                                        <td><span class="font-light">optional headers. defaults to empty</span></td>
+                                    </tr>                                    <tr>
+                                        <td>method:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light">http method, defaults to "GET"</span></td>
+                                    </tr>                                    <tr>
+                                        <td>url:</td>
+                                        <td>String</td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+        <div class="ml-12">
+            <p class="font-medium mt-4">Traits
+            <p>
+            <table>                    <tr>
+                            <td><a href="./org_wasmcloud_model.html#codegen_rust">org.wasmcloud.model#codegenRust</a></td>
+                            <td>[object]</td>
+                    </tr>            </table>
+        </div>
+
+
+    <h2 id="http_response" class="mt-8 border-t-2 border-gray-300">
+        <a href="#http_response">HttpResponse</a><span class="text-lg pl-4">(structure)</span>
+    </h2><p class="font-light ml-6">response from the http request</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>body:</td>
+                                        <td>Blob</td>
+                                        <td><span class="font-light">response body</span></td>
+                                    </tr>                                    <tr>
+                                        <td>header:</td>
+                                        <td><a href="#header_map">HeaderMap</a></td>
+                                        <td><span class="font-light">Case is not guaranteed to be normalized, so
+actors checking response headers need to do their own
+case conversion.
+Example (rust):
+// check for 'Content-Type' header
+let content_type:Option<&Vec<String>> = header.iter()
+.map(|(k,_)| k.to_ascii_lowercase())
+.find(|(k,_)| k == "content-type")
+.map(|(_,v)| v);</span></td>
+                                    </tr>                                    <tr>
+                                        <td>statusCode:</td>
+                                        <td><a href="./org_wasmcloud_model.html#u16">org.wasmcloud.model#U16</a></td>
+                                        <td><span class="font-light">response status code</span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+        <div class="ml-12">
+            <p class="font-medium mt-4">Traits
+            <p>
+            <table>                    <tr>
+                            <td><a href="./org_wasmcloud_model.html#codegen_rust">org.wasmcloud.model#codegenRust</a></td>
+                            <td>[object]</td>
+                    </tr>            </table>
+        </div>
+
+
+    <h2 id="request" class="mt-8 border-t-2 border-gray-300">
+        <a href="#request">Request</a><span class="text-lg pl-4">(operation)</span>
+    </h2><p class="font-light ml-6">Issue outgoing http request</p>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>                                    <tr>
+                                        <td>input:</td>
+                                        <td><a href="#http_request">HttpRequest</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                    <tr>
+                                        <td>output:</td>
+                                        <td><a href="#http_response">HttpResponse</a></td>
+                                        <td><span class="font-light"></span></td>
+                                    </tr>                                </tbody>
+                            </table>
+                        </div>
+
+        </div>
+    </div></body>
+</html>
