@@ -13,6 +13,7 @@ files = [
     "keyvalue.smithy",
     "logging.smithy",
     "numbergen.smithy",
+    "testing.smithy",
     ]
 
 ##

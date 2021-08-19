@@ -5,4 +5,5 @@ members = [
     "keyvalue/rust",
     "logging/rust",
     "numbergen/rust",
+    "testing/rust",
 ]
