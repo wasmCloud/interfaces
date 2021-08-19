@@ -23,12 +23,15 @@ pub type HeaderMap = std::collections::HashMap<String, HeaderValues>;
 pub type HeaderValues = Vec<String>;
 
 /// http request to be sent through the provider
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct HttpRequest {
+    /// request body, defaults to empty
     #[serde(with = "serde_bytes")]
     #[serde(default)]
     pub body: Vec<u8>,
+    /// optional headers. defaults to empty
     pub headers: HeaderMap,
+    /// http method, defaults to "GET"
     #[serde(default)]
     pub method: String,
     #[serde(default)]
@@ -36,7 +39,7 @@ pub struct HttpRequest {
 }
 
 /// response from the http request
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct HttpResponse {
     /// response body
     #[serde(with = "serde_bytes")]

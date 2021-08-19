@@ -12,6 +12,7 @@ namespace org.wasmcloud.interface.httpclient
 
 use org.wasmcloud.model#wasmbus
 use org.wasmcloud.model#U16
+use org.wasmcloud.model#codegenRust
 
 /// HttpClient - issue outgoing http requests via an external provider
 /// To use this capability, the actor must be linked
@@ -31,22 +32,27 @@ operation Request {
 }
 
 /// http request to be sent through the provider
+@codegenRust( deriveDefault: false )
 structure HttpRequest {
 
+    /// http method, defaults to "GET"
     @required
     method: String,
 
     @required
     url: String,
 
+    /// optional headers. defaults to empty
     @required
     headers: HeaderMap,
 
+    /// request body, defaults to empty
     @required
     body: Blob,
 }
 
 /// response from the http request
+@codegenRust( deriveDefault: false )
 structure HttpResponse {
     /// response status code
     @required
