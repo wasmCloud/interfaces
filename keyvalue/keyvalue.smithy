@@ -145,7 +145,7 @@ structure ListRangeRequest {
 
     /// name of list
     @required
-    list_name: String,
+    listName: String,
 
     /// start index of the range, 0-based, inclusive.
     @required

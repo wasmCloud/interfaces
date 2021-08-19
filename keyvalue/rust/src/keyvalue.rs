@@ -64,6 +64,7 @@ pub struct ListDelRequest {
 #[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct ListRangeRequest {
     /// name of list
+    #[serde(rename = "listName")]
     #[serde(default)]
     pub list_name: String,
     /// start index of the range, 0-based, inclusive.
