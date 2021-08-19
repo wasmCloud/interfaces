@@ -1,0 +1,33 @@
+# codegen.toml to build ghpages docs for interfaces
+# all paths are relative to the folder containing this file
+
+# model sources
+[[models]]
+path = "docs/idl/org.wasmcloud"
+files = [ 
+    "wasmcloud-core.smithy",
+    "wasmcloud-model.smithy",
+    "control-interface.smithy",
+    "httpclient.smithy",
+    "httpserver.smithy",
+    "keyvalue.smithy",
+    "logging.smithy",
+    "numbergen.smithy",
+    ]
+
+##
+## HTML documentation output
+##
+[html]
+
+# template dir to scan (overrides compiled-in templates)
+templates = "build/templates"
+
+output_dir = "docs/html"
+
+[html.parameters]
+# all parameters specified here are passed directly to doc templates
+
+# whether to use minified tailwind.css (default false)
+minified = true
+
