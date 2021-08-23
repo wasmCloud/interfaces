@@ -4,6 +4,7 @@ members = [
     "httpclient/rust",
     "keyvalue/rust",
     "logging/rust",
+    "messaging/rust",
     "numbergen/rust",
     "testing/rust",
 ]
