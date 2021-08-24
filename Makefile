@@ -1,7 +1,8 @@
 # top-level makefile for wasmcloud/interfaces
 
 project_dir = $(abspath $(shell pwd))
-subdirs     = core control httpclient httpserver keyvalue logging numbergen testing
+subdirs     = core control httpclient httpserver \
+			  keyvalue logging messaging numbergen testing
 
 include build/makefiles/interface.mk
 
