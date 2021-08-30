@@ -7,4 +7,6 @@ members = [
     "messaging/rust",
     "numbergen/rust",
     "testing/rust",
+    # examples
+    "factorial/rust",
 ]
