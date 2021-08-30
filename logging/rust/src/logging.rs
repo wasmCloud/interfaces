@@ -16,7 +16,7 @@ use wasmbus_rpc::{
 
 pub const SMITHY_VERSION: &str = "1.0";
 
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct LogEntry {
     /// severity level: debug,info,warn,error
     #[serde(default)]
@@ -41,6 +41,7 @@ pub trait Logging {
 }
 
 /// LoggingReceiver receives messages defined in the Logging service trait
+#[doc(hidden)]
 #[async_trait]
 pub trait LoggingReceiver: MessageDispatch + Logging {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
@@ -74,6 +75,16 @@ impl<T: Transport> LoggingSender<T> {
     /// Constructs a LoggingSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
+    }
+}
+#[cfg(not(target_arch = "wasm32"))]
+impl<'send> LoggingSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
+    /// Constructs a Sender using an actor's LinkDefinition,
+    /// Uses the provider's HostBridge for rpc
+    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
+        Self {
+            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
+        }
     }
 }
 

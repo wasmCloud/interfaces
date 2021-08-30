@@ -32,7 +32,7 @@ operation Start {
 }
 
 /// Options passed to all test cases
-@codegenRust(deriveDefault:false)
+@codegenRust(noDeriveDefault:true)
 structure TestOptions {
 
     /// List of regex patterns for test names to run

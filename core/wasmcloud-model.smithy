@@ -73,10 +73,10 @@ byte U8
 /// Rust codegen traits
 @trait(selector: "structure")
 structure codegenRust {
-    /// Instructs rust codegen to add `#[derive(Default)]`
-    /// If the codegenRust trait is not applied to a structure,
-    /// 'Default' is generated for that structure.
-    deriveDefault: Boolean,
+    /// if true, disables deriving 'Default' trait
+    noDeriveDefault: Boolean,
+    /// if true, disables deriving 'Eq' trait
+    noDeriveEq: Boolean,
 }
 
 /// indicates that a trait or class extends one or more bases

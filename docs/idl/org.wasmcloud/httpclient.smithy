@@ -32,7 +32,7 @@ operation Request {
 }
 
 /// http request to be sent through the provider
-@codegenRust( deriveDefault: false )
+@codegenRust( noDeriveDefault: true )
 structure HttpRequest {
 
     /// http method, defaults to "GET"
@@ -52,7 +52,7 @@ structure HttpRequest {
 }
 
 /// response from the http request
-@codegenRust( deriveDefault: false )
+@codegenRust( noDeriveDefault: true )
 structure HttpResponse {
     /// response status code
     @required

@@ -23,7 +23,7 @@ pub type HeaderMap = std::collections::HashMap<String, HeaderValues>;
 pub type HeaderValues = Vec<String>;
 
 /// http request to be sent through the provider
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct HttpRequest {
     /// request body, defaults to empty
     #[serde(with = "serde_bytes")]
@@ -39,7 +39,7 @@ pub struct HttpRequest {
 }
 
 /// response from the http request
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct HttpResponse {
     /// response body
     #[serde(with = "serde_bytes")]
@@ -79,6 +79,7 @@ pub trait HttpClient {
 /// HttpClient - issue outgoing http requests via an external provider
 /// To use this capability, the actor must be linked
 /// with "wasmcloud:httpclient"
+#[doc(hidden)]
 #[async_trait]
 pub trait HttpClientReceiver: MessageDispatch + HttpClient {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
@@ -115,6 +116,16 @@ impl<T: Transport> HttpClientSender<T> {
     /// Constructs a HttpClientSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
+    }
+}
+#[cfg(not(target_arch = "wasm32"))]
+impl<'send> HttpClientSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
+    /// Constructs a Sender using an actor's LinkDefinition,
+    /// Uses the provider's HostBridge for rpc
+    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
+        Self {
+            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
+        }
     }
 }
 

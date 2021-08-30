@@ -25,7 +25,7 @@ pub type OptMap = std::collections::HashMap<String, String>;
 pub type PatternList = Vec<String>;
 
 /// Options passed to all test cases
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct TestOptions {
     /// additional test configuration, optional
     /// Keys may be test case names, or other keys meaningful for the test.
@@ -36,7 +36,7 @@ pub struct TestOptions {
     pub patterns: PatternList,
 }
 
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct TestResult {
     /// test case name
     #[serde(default)]
@@ -71,6 +71,7 @@ pub trait Testing {
 
 /// TestingReceiver receives messages defined in the Testing service trait
 /// Test api for testable actors and providers
+#[doc(hidden)]
 #[async_trait]
 pub trait TestingReceiver: MessageDispatch + Testing {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
@@ -105,6 +106,16 @@ impl<T: Transport> TestingSender<T> {
     /// Constructs a TestingSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
+    }
+}
+#[cfg(not(target_arch = "wasm32"))]
+impl<'send> TestingSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
+    /// Constructs a Sender using an actor's LinkDefinition,
+    /// Uses the provider's HostBridge for rpc
+    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
+        Self {
+            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
+        }
     }
 }
 

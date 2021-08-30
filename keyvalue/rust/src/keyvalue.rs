@@ -17,7 +17,7 @@ use wasmbus_rpc::{
 pub const SMITHY_VERSION: &str = "1.0";
 
 /// Response to get request
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetResponse {
     /// whether or not the value existed
     #[serde(default)]
@@ -27,7 +27,7 @@ pub struct GetResponse {
     pub value: String,
 }
 
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct IncrementRequest {
     /// name of value to increment
     #[serde(default)]
@@ -37,7 +37,7 @@ pub struct IncrementRequest {
 }
 
 /// Parameter to ListAdd operation
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ListAddRequest {
     /// name of the list to modify
     #[serde(rename = "listName")]
@@ -51,7 +51,7 @@ pub struct ListAddRequest {
 /// Removes an item from the list. If the item occurred more than once,
 /// removes only the first item.
 /// Returns true if the item was found.
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ListDelRequest {
     /// name of list to modify
     #[serde(rename = "listName")]
@@ -61,7 +61,7 @@ pub struct ListDelRequest {
     pub value: String,
 }
 
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ListRangeRequest {
     /// name of list
     #[serde(rename = "listName")]
@@ -73,7 +73,7 @@ pub struct ListRangeRequest {
     pub stop: i32,
 }
 
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SetAddRequest {
     /// name of the set
     #[serde(rename = "setName")]
@@ -84,7 +84,7 @@ pub struct SetAddRequest {
     pub value: String,
 }
 
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SetDelRequest {
     #[serde(rename = "setName")]
     #[serde(default)]
@@ -93,7 +93,7 @@ pub struct SetDelRequest {
     pub value: String,
 }
 
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SetRequest {
     /// expiration time in seconds 0 for no expiration
     pub expires: u32,
@@ -190,6 +190,7 @@ pub trait KeyValue {
 }
 
 /// KeyValueReceiver receives messages defined in the KeyValue service trait
+#[doc(hidden)]
 #[async_trait]
 pub trait KeyValueReceiver: MessageDispatch + KeyValue {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
@@ -363,6 +364,16 @@ impl<T: Transport> KeyValueSender<T> {
     /// Constructs a KeyValueSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
+    }
+}
+#[cfg(not(target_arch = "wasm32"))]
+impl<'send> KeyValueSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
+    /// Constructs a Sender using an actor's LinkDefinition,
+    /// Uses the provider's HostBridge for rpc
+    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
+        Self {
+            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
+        }
     }
 }
 

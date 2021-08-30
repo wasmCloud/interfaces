@@ -19,7 +19,7 @@ pub const SMITHY_VERSION: &str = "1.0";
 /// Input range for RandomInRange, inclusive. Result will be >= min and <= max
 /// Example:
 /// random_in_range(RangeLimit{0,4}) returns one the values, 0, 1, 2, 3, or 4.
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct RangeLimit {
     pub max: u32,
     pub min: u32,
@@ -46,6 +46,7 @@ pub trait NumberGen {
 }
 
 /// NumberGenReceiver receives messages defined in the NumberGen service trait
+#[doc(hidden)]
 #[async_trait]
 pub trait NumberGenReceiver: MessageDispatch + NumberGen {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
@@ -95,6 +96,16 @@ impl<T: Transport> NumberGenSender<T> {
     /// Constructs a NumberGenSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
+    }
+}
+#[cfg(not(target_arch = "wasm32"))]
+impl<'send> NumberGenSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
+    /// Constructs a Sender using an actor's LinkDefinition,
+    /// Uses the provider's HostBridge for rpc
+    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
+        Self {
+            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
+        }
     }
 }
 

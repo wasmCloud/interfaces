@@ -23,7 +23,7 @@ pub type HeaderMap = std::collections::HashMap<String, HeaderValues>;
 pub type HeaderValues = Vec<String>;
 
 /// HttpRequest contains data sent to actor about the http request
-#[derive(Default, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct HttpRequest {
     /// Request body as a byte array. May be empty.
     #[serde(with = "serde_bytes")]
@@ -44,7 +44,7 @@ pub struct HttpRequest {
 }
 
 /// HttpResponse contains the actor's response to return to the http client
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct HttpResponse {
     /// Body of response as a byte array. May be an empty array.
     #[serde(with = "serde_bytes")]
@@ -72,6 +72,7 @@ pub trait HttpServer {
 
 /// HttpServerReceiver receives messages defined in the HttpServer service trait
 /// HttpServer is the contract to be implemented by actor
+#[doc(hidden)]
 #[async_trait]
 pub trait HttpServerReceiver: MessageDispatch + HttpServer {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
@@ -106,6 +107,16 @@ impl<T: Transport> HttpServerSender<T> {
     /// Constructs a HttpServerSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
+    }
+}
+#[cfg(not(target_arch = "wasm32"))]
+impl<'send> HttpServerSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
+    /// Constructs a Sender using an actor's LinkDefinition,
+    /// Uses the provider's HostBridge for rpc
+    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
+        Self {
+            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
+        }
     }
 }
 #[async_trait]

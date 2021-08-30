@@ -1,4 +1,4 @@
-//! org.wasmcloud.interace.httpserver
+//! org.wasmcloud.interface.httpserver
 
 mod httpserver;
 pub use httpserver::*;

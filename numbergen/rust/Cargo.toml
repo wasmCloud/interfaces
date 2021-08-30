@@ -33,4 +33,3 @@ base64 = "0.13"
 # build-dependencies needed for build.rs
 [build-dependencies]
 weld-codegen = "0.1"
-
