@@ -3,8 +3,8 @@ This is the interface for an HTTP Server capability with the contract ID `wasmcl
 
 This folder contains 
 - Model definition for `wasmcloud:httpserver`
-- Generated documentation (in html)
-- Generated Rust library (in rust)
+- Generated documentation (in HTML)
+- Generated Rust library (in Rust)
 
 Any Rust actor or capability provider using `wasmcloud:httpserver` should rely upon this library. A capability provider implements the trait `HttpServerReceiver`.
 
