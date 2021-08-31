@@ -1,6 +1,7 @@
-# Wasmcloud API Interfaces
+# wasmCloud API Interfaces
+This repository contains the wasmCloud contract interface definitions (defined in the _Smithy_ IDL) for those interfaces that are defined and supported by the wasmCloud team. These interfaces are definitely not the _only_ interfaces available, as teams and companies can create their own private or bespoke interfaces as desired.
 
-## Smithy IDLs and shared libraries
+## Smithy IDLs and Shared Libraries
 
 Each interface is defined in a file with the `.smithy` extension. If
 the folder contains a `codegen.toml` file,
@@ -22,5 +23,5 @@ For more information on Smithy, see
  - [IDL specification](https://awslabs.github.io/smithy/1.0/spec/core/idl.html)
 
 For more on wasmcloud, see
- - [wasmcloud](https://github.com/wasmcloud/wasmcloud)
+ - [wasmCloud](https://wasmcloud.dev)
 

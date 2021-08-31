@@ -1,10 +1,10 @@
-# wasmcloud Control Interface
+# wasmCloud Control Interface
 
-This interface defines the control interface of a wasmcloud host. 
-This api is used by tools such as `wash`, and not by actors or
-capability providers.
+This is the control interface for interacting with the **lattice** by virtue of wasmCloud hosts listening on the appropriate control topics. 
 
-The generated library for using this interface is currently located 
+This API is used by tools such as `wash`, the wasmCloud dashboard web UI, and any other custom consumers. It is **not** meant to be used by actors or capability providers.
+
+The generated library for using this interface via Rust is currently located 
 in the
 [control-interface](https://github.com/wasmcloud/control-interface)
 repository.
