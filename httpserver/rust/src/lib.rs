@@ -55,9 +55,10 @@ impl HttpResponse {
     }
 
     /// Shortcut for creating a 400/Bad Request response
-    pub fn bad_request() -> HttpResponse {
+    pub fn bad_request(msg: &str) -> HttpResponse {
         HttpResponse {
             status_code: 400,
+            body: msg.to_string().as_bytes().into(),
             ..Default::default()
         }
     }
