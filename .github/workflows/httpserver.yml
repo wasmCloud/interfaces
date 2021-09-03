@@ -1,9 +1,16 @@
-name: HTTPSERVER-RELEASE
+name: HTTPSERVER
 
 on:
   push:
+    branches: [ main ]
+    paths:
+    - "httpserver/**"
     tags:
     - 'httpserver-v*'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - "httpserver/**"
 
 env:
   CARGO_TERM_COLOR: always
@@ -20,6 +27,7 @@ jobs:
         working-directory: ${{ env.working-directory }}
 
   github_release:
+    if: startswith(github.ref, 'refs/tags/') # Only run on tag push
     needs: rust_check
     runs-on: ubuntu-latest
     steps:
@@ -35,7 +43,8 @@ jobs:
         prerelease: true
 
   crates_release:
-    needs: [github_release]
+    if: startswith(github.ref, 'refs/tags/') # Only run on tag push
+    needs: github_release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
