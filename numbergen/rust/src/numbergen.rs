@@ -98,16 +98,6 @@ impl<T: Transport> NumberGenSender<T> {
         Self { transport }
     }
 }
-#[cfg(not(target_arch = "wasm32"))]
-impl<'send> NumberGenSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
-    /// Constructs a Sender using an actor's LinkDefinition,
-    /// Uses the provider's HostBridge for rpc
-    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
-        Self {
-            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
-        }
-    }
-}
 
 #[cfg(target_arch = "wasm32")]
 impl NumberGenSender<wasmbus_rpc::actor::prelude::WasmHost> {
@@ -146,7 +136,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .send(
                 ctx,
                 Message {
-                    method: "GenerateGuid",
+                    method: "NumberGen.GenerateGuid",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -166,7 +156,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .send(
                 ctx,
                 Message {
-                    method: "RandomInRange",
+                    method: "NumberGen.RandomInRange",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -185,7 +175,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .send(
                 ctx,
                 Message {
-                    method: "Random32",
+                    method: "NumberGen.Random32",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,

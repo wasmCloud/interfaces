@@ -15,11 +15,11 @@ impl Default for TestOptions {
     }
 }
 
-pub type NamedResult<'nam, T> = (&'nam str, RpcResult<T>);
+pub type NamedResult<'name, T> = (&'name str, RpcResult<T>);
 
 // convert empty RpcResult into a testResult
-impl<'nam, T: Serialize> From<NamedResult<'nam, T>> for TestResult {
-    fn from(name_res: NamedResult<'nam, T>) -> TestResult {
+impl<'name, T: Serialize> From<NamedResult<'name, T>> for TestResult {
+    fn from(name_res: NamedResult<'name, T>) -> TestResult {
         match name_res.1 {
             Ok(res) => {
                 // TODO: if serialization of data fails, it doesn't change

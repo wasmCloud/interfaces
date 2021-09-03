@@ -118,16 +118,6 @@ impl<T: Transport> HttpClientSender<T> {
         Self { transport }
     }
 }
-#[cfg(not(target_arch = "wasm32"))]
-impl<'send> HttpClientSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
-    /// Constructs a Sender using an actor's LinkDefinition,
-    /// Uses the provider's HostBridge for rpc
-    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
-        Self {
-            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
-        }
-    }
-}
 
 #[cfg(target_arch = "wasm32")]
 impl HttpClientSender<wasmbus_rpc::actor::prelude::WasmHost> {
@@ -159,7 +149,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> HttpClient for HttpCl
             .send(
                 ctx,
                 Message {
-                    method: "Request",
+                    method: "HttpClient.Request",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
