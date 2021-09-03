@@ -131,6 +131,14 @@ impl NumberGenSender<wasmbus_rpc::actor::prelude::WasmHost> {
         )?;
         Ok(Self { transport })
     }
+
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
 }
 #[async_trait]
 impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberGenSender<T> {
@@ -146,7 +154,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .send(
                 ctx,
                 Message {
-                    method: "GenerateGuid",
+                    method: "NumberGen.GenerateGuid",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -166,7 +174,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .send(
                 ctx,
                 Message {
-                    method: "RandomInRange",
+                    method: "NumberGen.RandomInRange",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -185,7 +193,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .send(
                 ctx,
                 Message {
-                    method: "Random32",
+                    method: "NumberGen.Random32",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
