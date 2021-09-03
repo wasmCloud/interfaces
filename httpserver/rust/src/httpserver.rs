@@ -109,6 +109,7 @@ impl<T: Transport> HttpServerSender<T> {
         Self { transport }
     }
 }
+
 #[cfg(not(target_arch = "wasm32"))]
 impl<'send> HttpServerSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
     /// Constructs a Sender using an actor's LinkDefinition,
@@ -119,7 +120,6 @@ impl<'send> HttpServerSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
         }
     }
 }
-
 #[cfg(target_arch = "wasm32")]
 impl HttpServerSender<wasmbus_rpc::actor::prelude::WasmHost> {
     /// Constructs a client for actor-to-actor messaging
