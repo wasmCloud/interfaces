@@ -395,6 +395,14 @@ impl KeyValueSender<wasmbus_rpc::actor::prelude::WasmHost> {
             wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:keyvalue", link_name)?;
         Ok(Self { transport })
     }
+
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
 }
 #[async_trait]
 impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValueSender<T> {
@@ -407,7 +415,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "Increment",
+                    method: "KeyValue.Increment",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -430,7 +438,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "Contains",
+                    method: "KeyValue.Contains",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -453,7 +461,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "Del",
+                    method: "KeyValue.Del",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -478,7 +486,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "Get",
+                    method: "KeyValue.Get",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -497,7 +505,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "ListAdd",
+                    method: "KeyValue.ListAdd",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -522,7 +530,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "ListClear",
+                    method: "KeyValue.ListClear",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -541,7 +549,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "ListDel",
+                    method: "KeyValue.ListDel",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -563,7 +571,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "ListRange",
+                    method: "KeyValue.ListRange",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -584,7 +592,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "Set",
+                    method: "KeyValue.Set",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -601,7 +609,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "SetAdd",
+                    method: "KeyValue.SetAdd",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -620,7 +628,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "SetDel",
+                    method: "KeyValue.SetDel",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -641,7 +649,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "SetIntersection",
+                    method: "KeyValue.SetIntersection",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -666,7 +674,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "SetQuery",
+                    method: "KeyValue.SetQuery",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -687,7 +695,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "SetUnion",
+                    method: "KeyValue.SetUnion",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -712,7 +720,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .send(
                 ctx,
                 Message {
-                    method: "SetClear",
+                    method: "KeyValue.SetClear",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
