@@ -129,7 +129,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> HttpServer for HttpSe
             .send(
                 ctx,
                 Message {
-                    method: "HandleRequest",
+                    method: "HttpServer.HandleRequest",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
