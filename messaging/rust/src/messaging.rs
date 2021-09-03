@@ -180,6 +180,14 @@ impl MessagingSender<wasmbus_rpc::actor::prelude::WasmHost> {
             wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:messaging", link_name)?;
         Ok(Self { transport })
     }
+
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
 }
 #[async_trait]
 impl<T: Transport + std::marker::Sync + std::marker::Send> Messaging for MessagingSender<T> {
@@ -196,7 +204,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Messaging for Messagi
             .send(
                 ctx,
                 Message {
-                    method: "Publish",
+                    method: "Messaging.Publish",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -214,7 +222,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Messaging for Messagi
             .send(
                 ctx,
                 Message {
-                    method: "Request",
+                    method: "Messaging.Request",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
@@ -307,7 +315,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> MessageSubscriber
             .send(
                 ctx,
                 Message {
-                    method: "HandleMessage",
+                    method: "MessageSubscriber.HandleMessage",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
