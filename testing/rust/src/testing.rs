@@ -108,6 +108,7 @@ impl<T: Transport> TestingSender<T> {
         Self { transport }
     }
 }
+
 #[cfg(not(target_arch = "wasm32"))]
 impl<'send> TestingSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
     /// Constructs a Sender using an actor's LinkDefinition,
@@ -116,6 +117,16 @@ impl<'send> TestingSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
         Self {
             transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
         }
+    }
+}
+#[cfg(target_arch = "wasm32")]
+impl TestingSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
     }
 }
 
@@ -136,14 +147,6 @@ impl TestingSender<wasmbus_rpc::actor::prelude::WasmHost> {
         let transport =
             wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:testing", link_name)?;
         Ok(Self { transport })
-    }
-
-    /// Constructs a client for actor-to-actor messaging
-    /// using the recipient actor's public key
-    pub fn to_actor(actor_id: &str) -> Self {
-        let transport =
-            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
-        Self { transport }
     }
 }
 #[async_trait]
