@@ -1,0 +1,27 @@
+# Replace all occurrences of "PROVIDER" with the provider name (e.g. `HTTPCLIENT`)
+# Replace all occurrences of "provider" with the folder name of the provider (e.g. `nats`, `httpclient`, etc)
+name: PROVIDER
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - "provider/**"
+  pull_request:
+    branches: [ main ]
+    paths:
+    - "provider/**"
+
+env:
+  CARGO_TERM_COLOR: always
+  working-directory: ./provider
+
+jobs:
+  rust_check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - id: rust-check-action
+      uses: wasmcloud/common-actions/rust-check@main
+      with:
+        working-directory: ${{ env.working-directory }}

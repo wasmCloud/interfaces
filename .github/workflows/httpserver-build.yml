@@ -1,0 +1,25 @@
+name: HTTPSERVER
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - "httpserver/**"
+  pull_request:
+    branches: [ main ]
+    paths:
+    - "httpserver/**"
+
+env:
+  CARGO_TERM_COLOR: always
+  working-directory: ./httpserver/rust
+
+jobs:
+  rust_check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - id: rust-check-action
+      uses: wasmcloud/common-actions/rust-check@main
+      with:
+        working-directory: ${{ env.working-directory }}
