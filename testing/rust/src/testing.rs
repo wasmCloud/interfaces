@@ -137,6 +137,14 @@ impl TestingSender<wasmbus_rpc::actor::prelude::WasmHost> {
             wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:testing", link_name)?;
         Ok(Self { transport })
     }
+
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
 }
 #[async_trait]
 impl<T: Transport + std::marker::Sync + std::marker::Send> Testing for TestingSender<T> {
@@ -149,7 +157,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Testing for TestingSe
             .send(
                 ctx,
                 Message {
-                    method: "Start",
+                    method: "Testing.Start",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
