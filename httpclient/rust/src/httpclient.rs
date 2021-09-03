@@ -147,6 +147,14 @@ impl HttpClientSender<wasmbus_rpc::actor::prelude::WasmHost> {
             wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:httpclient", link_name)?;
         Ok(Self { transport })
     }
+
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
 }
 #[async_trait]
 impl<T: Transport + std::marker::Sync + std::marker::Send> HttpClient for HttpClientSender<T> {
@@ -159,7 +167,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> HttpClient for HttpCl
             .send(
                 ctx,
                 Message {
-                    method: "Request",
+                    method: "HttpClient.Request",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
