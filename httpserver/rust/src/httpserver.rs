@@ -119,6 +119,17 @@ impl<'send> HttpServerSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
         }
     }
 }
+
+#[cfg(target_arch = "wasm32")]
+impl HttpServerSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
+}
 #[async_trait]
 impl<T: Transport + std::marker::Sync + std::marker::Send> HttpServer for HttpServerSender<T> {
     #[allow(unused)]
@@ -129,7 +140,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> HttpServer for HttpSe
             .send(
                 ctx,
                 Message {
-                    method: "HandleRequest",
+                    method: "HttpServer.HandleRequest",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
