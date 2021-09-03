@@ -1,4 +1,4 @@
-# wasmcloud:testing interface
+# wasmCloud Testing Interface
+This is the interface definition for the `wasmcloud:testing` contract.
 
-This api is currently in development
-and should be considered unstable and subject to change.
+**NOTE** - This API is currently in development and should be considered unstable and subject to change.
