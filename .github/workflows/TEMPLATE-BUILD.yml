@@ -1,20 +1,20 @@
-# Replace all occurrences of "PROVIDER" with the provider name (e.g. `HTTPCLIENT`)
-# Replace all occurrences of "provider" with the folder name of the provider (e.g. `nats`, `httpclient`, etc)
-name: PROVIDER
+# Replace all occurrences of "INTERFACE" with the interface name (e.g. `HTTPCLIENT`)
+# Replace all occurrences of "interface" with the folder name of the interface (e.g. `nats`, `httpclient`, etc)
+name: INTERFACE
 
 on:
   push:
     branches: [ main ]
     paths:
-    - "provider/**"
+    - "interface/**"
   pull_request:
     branches: [ main ]
     paths:
-    - "provider/**"
+    - "interface/**"
 
 env:
   CARGO_TERM_COLOR: always
-  working-directory: ./provider
+  working-directory: ./interface
 
 jobs:
   rust_check:
