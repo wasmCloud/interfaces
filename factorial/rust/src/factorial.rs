@@ -105,6 +105,14 @@ impl FactorialSender<wasmbus_rpc::actor::prelude::WasmHost> {
         )?;
         Ok(Self { transport })
     }
+
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
 }
 #[async_trait]
 impl<T: Transport + std::marker::Sync + std::marker::Send> Factorial for FactorialSender<T> {
@@ -117,7 +125,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Factorial for Factori
             .send(
                 ctx,
                 Message {
-                    method: "Calculate",
+                    method: "Factorial.Calculate",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
