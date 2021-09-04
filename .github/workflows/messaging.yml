@@ -1,22 +1,20 @@
-# Replace all occurrences of "INTERFACE" with the interface name (e.g. HTTPCLIENT)
-# Replace all occurrences of "interface" with the folder name of the interface (e.g. `interface`, `httpclient`, etc)
-name: INTERFACE
+name: MESSAGING
 
 on:
   push:
     branches: [ main ]
     paths:
-    - "interface/**"
+    - "messaging/rust/**"
     tags:
-    - 'interface-v*'
+    - 'messaging-v*'
   pull_request:
     branches: [ main ]
     paths:
-    - "interface/**"
+    - "messaging/rust/**"
 
 env:
   CARGO_TERM_COLOR: always
-  working-directory: ./interface
+  working-directory: ./messaging/rust
 
 jobs:
   rust_check:
