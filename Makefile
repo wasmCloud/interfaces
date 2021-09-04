@@ -2,7 +2,8 @@
 
 project_dir = $(abspath $(shell pwd))
 subdirs     = core control httpclient httpserver \
-			  keyvalue logging messaging numbergen testing
+			  keyvalue logging messaging numbergen testing \
+			  tests/actor
 
 include build/makefiles/interface.mk
 

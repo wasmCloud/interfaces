@@ -22,8 +22,7 @@ wasmcloud-interface-numbergen = "0.1"
 wasmcloud-interface-logging = "0.1"
 wasmcloud-test-util = "0.1"
 
-# comment out the following if this is inside a cargo workspace
-#[profile.release]
+[profile.release]
 ## Optimize for small code size
-#lto = true
-#opt-level = "s"
+lto = true
+opt-level = "s"
