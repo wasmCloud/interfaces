@@ -10,3 +10,6 @@ members = [
     # examples
     "factorial/rust",
 ]
+exclude = [
+    "tests/actor",
+]
