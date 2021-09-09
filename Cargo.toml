@@ -1,4 +1,6 @@
 [workspace]
+# Reminder: when adding a crate here, don't forget to update
+# the list of subdirs in Makefile, and the list of smithy files in codegen.toml
 members = [
     "httpserver/rust",
     "httpclient/rust",

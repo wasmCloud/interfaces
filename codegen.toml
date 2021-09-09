@@ -5,15 +5,17 @@
 [[models]]
 path = "docs/idl/org.wasmcloud"
 files = [ 
-    "wasmcloud-core.smithy",
-    "wasmcloud-model.smithy",
     "control-interface.smithy",
+    "factorial.smithy",
     "httpclient.smithy",
     "httpserver.smithy",
     "keyvalue.smithy",
     "logging.smithy",
+    "messaging.smithy",
     "numbergen.smithy",
     "testing.smithy",
+    "wasmcloud-core.smithy",
+    "wasmcloud-model.smithy",
     ]
 
 ##
