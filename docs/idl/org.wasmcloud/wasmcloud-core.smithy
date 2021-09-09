@@ -121,6 +121,15 @@ structure HostData {
     @required
     @serialization(name: "env_values")
     envValues: HostEnvValues,
+
+    @required
+    @serialization(name: "instance_id")
+    instanceId: String,
+
+    /// initial list of links for provider
+    @required
+    @serialization(name: "link_definitions")
+    linkDefinitions: ActorLinks,
 }
 
 /// Environment settings for initializing a capability provider
