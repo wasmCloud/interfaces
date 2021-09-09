@@ -6,7 +6,7 @@ path = "."
 files = [ "testing.smithy" ]
 
 [[models]]
-#url = "https://wasmcloud.github.io/interface/org.wasmcloud"
+#url = "https://wasmcloud.github.io/interfaces/idl/org.wasmcloud"
 path = "../core"
 files = [ "wasmcloud-core.smithy", "wasmcloud-model.smithy" ]
 
