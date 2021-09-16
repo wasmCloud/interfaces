@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-testing"
-version = "0.1.4"
+version = "0.1.5"
 description = "Testing interface (wasmcloud:testing)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"

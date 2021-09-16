@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-messaging"
-version = "0.1.5"
+version = "0.1.6"
 description = "Interface library for the wasmCloud messaging capability, wasmcloud:messaging"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
