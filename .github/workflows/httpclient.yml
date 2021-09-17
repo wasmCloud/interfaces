@@ -6,7 +6,7 @@ on:
     paths:
     - "httpclient/rust/**"
     tags:
-    - 'httpclient-v*'
+    - 'wasmcloud-interface-httpclient-v*'
   pull_request:
     branches: [ main ]
     paths:

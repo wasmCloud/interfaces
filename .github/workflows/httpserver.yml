@@ -6,7 +6,7 @@ on:
     paths:
     - "httpserver/**"
     tags:
-    - 'httpserver-v*'
+    - 'wasmcloud-interface-httpserver-v*'
   pull_request:
     branches: [ main ]
     paths:

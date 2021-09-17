@@ -6,7 +6,7 @@ on:
     paths:
     - "numbergen/rust/**"
     tags:
-    - 'numbergen-v*'
+    - 'wasmcloud-interface-numbergen-v*'
   pull_request:
     branches: [ main ]
     paths:

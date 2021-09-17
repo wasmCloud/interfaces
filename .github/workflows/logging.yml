@@ -6,7 +6,7 @@ on:
     paths:
     - "logging/rust/**"
     tags:
-    - 'logging-v*'
+    - 'wasmcloud-interface-logging-v*'
   pull_request:
     branches: [ main ]
     paths:

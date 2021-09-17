@@ -6,7 +6,7 @@ on:
     paths:
     - "keyvalue/rust/**"
     tags:
-    - 'keyvalue-v*'
+    - 'wasmcloud-interface-keyvalue-v*'
   pull_request:
     branches: [ main ]
     paths:

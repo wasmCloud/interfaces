@@ -6,7 +6,7 @@ on:
     paths:
     - "testing/rust/**"
     tags:
-    - 'testing-v*'
+    - 'wasmcloud-interface-testing-v*'
   pull_request:
     branches: [ main ]
     paths:
