@@ -1,0 +1,31 @@
+# codegen.toml
+
+# `models` contains a list of smithy model file(s),
+# and folder(s) containing .smithy files, used for input to code generators,
+# documentation generator, and linting and validation.
+# Dependencies of the model should also be included in the `models` list
+# because they will improve documentation and validation.
+#
+# The namespaces(s) that will be generated for this library are indicated
+# in the per-language file settings later in this file.
+[[models]]
+path = "sqldb.smithy"
+
+[[models]]
+url = "https://wasmcloud.github.io/interfaces/idl/org.wasmcloud"
+files = [ "wasmcloud-core.smithy", "wasmcloud-model.smithy" ]
+
+##
+## Rust language output
+##
+[rust]
+
+# top-level output directory for rust files.
+output_dir = "rust"
+
+[rust.parameters]
+
+[[rust.files]]
+path = "src/sqldb.rs"
+namespace = "org.wasmcloud.interface.sqldb"
+

@@ -8,6 +8,7 @@ members = [
     "logging/rust",
     "messaging/rust",
     "numbergen/rust",
+    "sqldb/rust",
     "testing/rust",
     # examples
     "factorial/rust",
