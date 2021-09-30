@@ -41,10 +41,12 @@ impl std::fmt::Display for SqlDbError {
     }
 }
 
-
 impl From<minicbor::decode::Error> for SqlDbError {
     fn from(e: minicbor::decode::Error) -> SqlDbError {
-        SqlDbError{ code: "decoding".to_string(), message: e.to_string() }
+        SqlDbError {
+            code: "decoding".to_string(),
+            message: e.to_string(),
+        }
     }
 }
 
