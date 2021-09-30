@@ -17,8 +17,10 @@ about 50-70% denser than JSON, and suitable for constrained
 environments (low cpu and memory requirements). Parsers are simple to
 write, and libraries are available in [several languages](https://cbor.io/impls.html).
 
-This interface currently does not support:
+This interface is **pre-release and subject to change**.
+The following features are currently unsupported:
+- nullable fields
 - transactions
-- streaming results
 - prepared statements
+- streaming results
  

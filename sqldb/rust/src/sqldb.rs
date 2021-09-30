@@ -16,29 +16,31 @@ use wasmbus_rpc::{
 
 pub const SMITHY_VERSION: &str = "1.0";
 
-/// Columns in result set
+/// Metadata about a Column in the result set
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Column {
+    /// column data type as reported by the database
+    #[serde(rename = "dbType")]
+    #[serde(default)]
+    pub db_type: String,
     /// Column name in the result
     #[serde(default)]
     pub name: String,
     /// column ordinal
     pub ordinal: u32,
-    /// Data type of the column
-    #[serde(default)]
-    pub ty: String,
 }
 
-/// list of columns provided in a result set
+/// List of columns in the result set returned by a Fetch operation
 pub type Columns = Vec<Column>;
 
+/// Result of an Execute operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ExecuteResult {
     /// optional error information.
     /// If error is included in the FetchResult, other values should be ignored.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<SqlDbError>,
-    /// number of rows affected by the query
+    /// the number of rows affected by the query
     #[serde(rename = "rowsAffected")]
     pub rows_affected: u64,
 }
@@ -55,18 +57,22 @@ pub struct FetchResult {
     /// number of rows returned
     #[serde(rename = "numRows")]
     pub num_rows: u64,
-    /// result rows
+    /// result rows, encoded in CBOR as
+    /// an array (rows) of arrays (fields per row)
     #[serde(with = "serde_bytes")]
     #[serde(default)]
     pub rows: Vec<u8>,
 }
 
+/// A query is a non-empty string containing an SQL query or statement,
+/// in the syntax of the back-end database.
 pub type Query = String;
 
+/// Detailed error information from the previous operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SqlDbError {
     /// Type of error.
-    /// The list of error codes below may be expanded in the future
+    /// The list of enum variants for this field may be expanded in the future
     /// to provide finer-granularity failure information
     #[serde(default)]
     pub code: String,
@@ -77,7 +83,7 @@ pub struct SqlDbError {
 
 /// SqlDb - SQL Database connections
 /// To use this capability, the actor must be linked
-/// with "wasmcloud:sqldb"
+/// with the capability contract "wasmcloud:sqldb"
 /// wasmbus.contractId: wasmcloud:sqldb
 /// wasmbus.providerReceive
 #[async_trait]
@@ -86,15 +92,16 @@ pub trait SqlDb {
     fn contract_id() -> &'static str {
         "wasmcloud:sqldb"
     }
+    /// Execute an sql statement
     async fn execute(&self, ctx: &Context, arg: &Query) -> RpcResult<ExecuteResult>;
-    /// perform select query on database, returning all result rows
+    /// Perform select query on database, returning all result rows
     async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<FetchResult>;
 }
 
 /// SqlDbReceiver receives messages defined in the SqlDb service trait
 /// SqlDb - SQL Database connections
 /// To use this capability, the actor must be linked
-/// with "wasmcloud:sqldb"
+/// with the capability contract "wasmcloud:sqldb"
 #[doc(hidden)]
 #[async_trait]
 pub trait SqlDbReceiver: MessageDispatch + SqlDb {
@@ -131,7 +138,7 @@ pub trait SqlDbReceiver: MessageDispatch + SqlDb {
 /// SqlDbSender sends messages to a SqlDb service
 /// SqlDb - SQL Database connections
 /// To use this capability, the actor must be linked
-/// with "wasmcloud:sqldb"
+/// with the capability contract "wasmcloud:sqldb"
 /// client for sending SqlDb messages
 #[derive(Debug)]
 pub struct SqlDbSender<T: Transport> {
@@ -167,6 +174,7 @@ impl SqlDbSender<wasmbus_rpc::actor::prelude::WasmHost> {
 #[async_trait]
 impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender<T> {
     #[allow(unused)]
+    /// Execute an sql statement
     async fn execute(&self, ctx: &Context, arg: &Query) -> RpcResult<ExecuteResult> {
         let arg = serialize(arg)?;
         let resp = self
@@ -185,7 +193,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender
         Ok(value)
     }
     #[allow(unused)]
-    /// perform select query on database, returning all result rows
+    /// Perform select query on database, returning all result rows
     async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<FetchResult> {
         let arg = serialize(arg)?;
         let resp = self

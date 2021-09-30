@@ -1,11 +1,12 @@
 [package]
 name = "wasmcloud-interface-sqldb"
 version = "0.1.0"
-description = "interface for actors to issue http/https requests (wasmcloud:httpclient)"
+description = "Interface for wasmCloud actors to connect to a relational database using the capability 'wasmcloud:sqldb'"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
-keywords = ["wasmcloud","wasm","actor","webassembly","capability"]
-categories = [ "api-bindings","network-programming","wasm" ]
+keywords = ["wasmcloud","wasm","database","webassembly","capability"]
+readme = "README.md"
+categories = [ "api-bindings","database","wasm" ]
 authors = [ "wasmcloud Team" ]
 edition = "2018"
 license = "Apache-2.0"
