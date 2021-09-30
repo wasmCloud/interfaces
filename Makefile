@@ -4,7 +4,7 @@ project_dir = $(abspath $(shell pwd))
 # Reminder: when adding a subdir below don't forget to update
 # Cargo.toml (if it's a rust project), and codegen.toml (if there are smithy files)
 subdirs     = core control factorial httpclient httpserver \
-			  keyvalue logging messaging numbergen testing
+			  keyvalue logging messaging numbergen sqldb testing
 
 include build/makefiles/interface.mk
 

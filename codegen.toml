@@ -13,6 +13,7 @@ files = [
     "logging.smithy",
     "messaging.smithy",
     "numbergen.smithy",
+    "sqldb.smithy",
     "testing.smithy",
     "wasmcloud-core.smithy",
     "wasmcloud-model.smithy",
