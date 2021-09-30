@@ -5,7 +5,6 @@ description = "Interface for wasmCloud actors to connect to a relational databas
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
 keywords = ["wasmcloud","wasm","database","webassembly","capability"]
-readme = "README.md"
 categories = [ "api-bindings","database","wasm" ]
 authors = [ "wasmcloud Team" ]
 edition = "2018"
