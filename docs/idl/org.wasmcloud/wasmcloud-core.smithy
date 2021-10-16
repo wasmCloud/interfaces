@@ -130,7 +130,19 @@ structure HostData {
     @required
     @serialization(name: "link_definitions")
     linkDefinitions: ActorLinks,
+
+    /// list of cluster issuers
+    @required
+    @serialization(name: "cluster_issuers")
+    clusterIssuers: ClusterIssuers,
 }
+
+list ClusterIssuers {
+    member: ClusterIssuerKey,
+}
+
+@nonEmptyString
+string ClusterIssuerKey
 
 /// Environment settings for initializing a capability provider
 map HostEnvValues {
