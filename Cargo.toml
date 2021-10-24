@@ -1,4 +1,5 @@
 [workspace]
+resolver = "2"
 # Reminder: when adding a crate here, don't forget to update
 # the list of subdirs in Makefile, and the list of smithy files in codegen.toml
 members = [
@@ -12,4 +13,9 @@ members = [
     "testing/rust",
     # examples
     "factorial/rust",
+]
+
+exclude = [
+    "tests/actor/builtins",
+    "tests/encoding",
 ]
