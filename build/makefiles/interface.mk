@@ -35,7 +35,7 @@ clean::
 
 ifneq ($(wildcard $(codegen_config)),)
 # Run smithy model lint or validation checks
-lint validate:: 
+lint validate gen::
 	$(WASH) $@ --config $(codegen_config)
 endif
 
