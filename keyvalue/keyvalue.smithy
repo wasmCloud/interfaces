@@ -3,11 +3,17 @@
 //
 
 // Tell the code generator how to reference symbols defined in this namespace
-metadata package = [ { namespace: "org.wasmcloud.interface.keyvalue", crate: "wasmcloud-interface-keyvalue" } ]
+metadata package = [{
+    namespace: "org.wasmcloud.interface.keyvalue",
+    crate: "wasmcloud_interface_keyvalue",
+    py_module: "wasmcloud_interface_keyvalue",
+}]
 
 namespace org.wasmcloud.interface.keyvalue
 
 use org.wasmcloud.model#wasmbus
+use org.wasmcloud.model#rename
+use org.wasmcloud.model#n
 use org.wasmcloud.model#U32
 use org.wasmcloud.model#I32
 
@@ -37,9 +43,11 @@ operation Get {
 structure GetResponse {
     /// the value, if it existed
     @required
+    @n(0)
     value: String,
     /// whether or not the value existed
     @required
+    @n(1)
     exists: Boolean,
 }
 
@@ -53,18 +61,22 @@ operation Set {
 structure SetRequest {
     /// the key name to change (or create)
     @required
+    @n(0)
     key: String,
 
     /// the new value
     @required
+    @n(1)
     value: String,
 
     /// expiration time in seconds 0 for no expiration
     @required
+    @n(2)
     expires: U32,
 }
 
 /// Deletes a key, returning true if the key was deleted
+@rename([{lang:"Python", name:"delete"}])
 operation Del {
   input: String,
   output: Boolean,
@@ -79,9 +91,11 @@ operation Increment {
 structure IncrementRequest {
     /// name of value to increment
   @required
+  @n(0)
   key: String,
   /// amount to add to value
   @required
+  @n(1)
   value: I32,
 }
 
@@ -100,10 +114,12 @@ operation ListAdd {
 structure ListAddRequest {
     /// name of the list to modify
     @required
+    @n(0)
     listName: String,
 
     /// value to append to the list
     @required
+    @n(1)
     value: String,
 }
 
@@ -119,8 +135,10 @@ operation ListDel{
 structure ListDelRequest {
     /// name of list to modify
   @required
+  @n(0)
   listName: String,
   @required
+  @n(1)
   value: String
 }
 
@@ -145,14 +163,17 @@ structure ListRangeRequest {
 
     /// name of list
     @required
+    @n(0)
     listName: String,
 
     /// start index of the range, 0-based, inclusive.
     @required
+    @n(1)
     start: I32,
 
     /// end index of the range, 0-based, inclusive.
     @required
+    @n(2)
     stop: I32,
 }
 
@@ -165,9 +186,11 @@ operation SetAdd {
 structure SetAddRequest {
     /// name of the set
     @required
+    @n(0)
     setName: String,
     /// value to add to the set
     @required
+    @n(1)
     value: String,
 }
 
@@ -179,8 +202,11 @@ operation SetDel {
 
 structure SetDelRequest {
   @required
+  @n(0)
   setName: String,
+
   @required
+  @n(1)
   value: String,
 }
 

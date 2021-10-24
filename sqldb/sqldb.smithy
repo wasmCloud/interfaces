@@ -23,16 +23,16 @@
 // - results with NULL values, array column types, or custom column data types
 //
 
-metadata package = [
-    {
-        namespace: "org.wasmcloud.interface.sqldb",
-        crate: "wasmcloud-interface-sqldb"
-     }
-]
+metadata package = [{
+    namespace: "org.wasmcloud.interface.sqldb",
+    crate: "wasmcloud_interface_sqldb",
+    py_module: "wasmcloud_interface_sqldb",
+}]
 
 namespace org.wasmcloud.interface.sqldb
 
 use org.wasmcloud.model#wasmbus
+use org.wasmcloud.model#n
 use org.wasmcloud.model#U32
 use org.wasmcloud.model#U64
 use org.wasmcloud.model#I64
@@ -61,13 +61,15 @@ string Query
 
 /// Result of an Execute operation
 structure ExecuteResult {
-    /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
-    error: SqlDbError,
-
     /// the number of rows affected by the query
     @required
+    @n(0)
     rowsAffected: U64,
+
+    /// optional error information.
+    /// If error is included in the FetchResult, other values should be ignored.
+    @n(1)
+    error: SqlDbError,
 }
 
 /// Perform select query on database, returning all result rows
@@ -79,22 +81,26 @@ operation Fetch {
 
 /// Result of a fetch query
 structure FetchResult {
-    /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
-    error: SqlDbError,
-
     /// number of rows returned
     @required
+    @n(0)
     numRows: U64,
 
     /// description of columns returned
     @required
+    @n(1)
     columns: Columns,
 
     /// result rows, encoded in CBOR as
     /// an array (rows) of arrays (fields per row)
     @required
+    @n(2)
     rows: Blob,
+
+    /// optional error information.
+    /// If error is included in the FetchResult, other values should be ignored.
+    @n(3)
+    error: SqlDbError,
 }
 
 /// Detailed error information from the previous operation
@@ -122,10 +128,12 @@ structure SqlDbError {
       "description": "some other error that could not be categorized as one of the above" },
       ])
     @required
+    @n(0)
     code: String,
 
     /// error message
     @required
+    @n(1)
     message: String,
 }
 
@@ -139,14 +147,17 @@ list Columns {
 structure Column {
     /// column ordinal
     @required
+    @n(0)
     ordinal: U32,
 
     /// Column name in the result
     @required
+    @n(1)
     name: String,
 
     /// column data type as reported by the database
     @required
+    @n(2)
     dbType: String,
 }
 
