@@ -32,7 +32,7 @@ impl<'name, T: Serialize> From<NamedResult<'name, T>> for TestResult {
                 };
                 TestResult {
                     name: name_res.0.to_string(),
-                    pass: true,
+                    passed: true,
                     snap_data: Some(data),
                 }
             }
@@ -45,7 +45,7 @@ impl<'name, T: Serialize> From<NamedResult<'name, T>> for TestResult {
                 .ok();
                 TestResult {
                     name: name_res.0.to_string(),
-                    pass: false,
+                    passed: false,
                     snap_data: data,
                 }
             }

@@ -19,7 +19,7 @@
                 </div>
                 <div class="table-cell align-top">
                     <ul>
-<li class="font-light"><a href="#org_wasmcloud_model_codegen_rust"><a href="#codegen_rust">codegenRust</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_extends"><a href="#extends">extends</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_non_empty_string"><a href="#non_empty_string">nonEmptyString</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_serialization"><a href="#serialization">serialization</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_synonym"><a href="#synonym">synonym</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_unsigned_int"><a href="#unsigned_int">unsignedInt</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_wasmbus"><a href="#wasmbus">wasmbus</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_wasmbus_data"><a href="#wasmbus_data">wasmbusData</a></a></li>                    </ul>
+<li class="font-light"><a href="#org_wasmcloud_model_codegen_rust"><a href="#codegen_rust">codegenRust</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_extends"><a href="#extends">extends</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_n"><a href="#n">n</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_non_empty_string"><a href="#non_empty_string">nonEmptyString</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_serialization"><a href="#serialization">serialization</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_synonym"><a href="#synonym">synonym</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_unsigned_int"><a href="#unsigned_int">unsignedInt</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_wasmbus"><a href="#wasmbus">wasmbus</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_wasmbus_data"><a href="#wasmbus_data">wasmbusData</a></a></li>                    </ul>
                 </div>
             </div>            <div class="table-row">
                 <div class="table-cell align-top pr-6 w-28">
@@ -189,6 +189,35 @@
                             </table>
                         </div>
 
+
+
+    <h2 id="n" class="mt-8 border-t-2 border-gray-300">
+        <a href="#n">n</a><span class="text-lg pl-4">(short)</span>
+    </h2><p class="font-light ml-6">Field sequence number. A zero-based field number for each member of a structure,
+to enable deterministic cbor serialization and improve forward and backward compatibility.
+Although the values are not required to be sequential, gaps are filled with nulls
+during encoding and so will slightly increase the encoding size.</p>
+    <div class="ml-12">
+        <table>
+            <thead>
+            <tr>
+                <th class="w-48"></th>
+                <th class="w-48"></th>
+                <th class=""></th>
+            </tr>
+            </thead>
+            <tbody>            </tbody>
+        </table>
+    </div>
+
+        <div class="ml-12">
+            <p class="font-medium mt-4">Traits
+            <p>
+            <table>                    <tr>
+                            <td>range</td>
+                            <td>[object]</td>
+                    </tr>            </table>
+        </div>
 
 
     <h2 id="non_empty_string" class="mt-8 border-t-2 border-gray-300">

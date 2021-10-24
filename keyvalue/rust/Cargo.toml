@@ -1,15 +1,18 @@
 [package]
 name = "wasmcloud-interface-keyvalue"
-version = "0.2.8"
+version = "0.3.0"
 description = "Key-Value store (wasmcloud:keyvalue)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
 keywords = ["wasmcloud","key-value","redis","capability"]
 categories = [ "api-bindings","database","wasm" ]
 authors = [ "wasmcloud Team" ]
-edition = "2018"
+edition = "2021"
 license = "Apache-2.0"
 exclude = [ "build.rs" ]
+
+[features]
+default = []
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -20,11 +23,11 @@ serde = { version = "1.0" , features = ["derive"] }
 serde_json = "1.0"
 serde_bytes = "0.11"
 log = "0.4"
-wasmbus-rpc = "0.4"
+wasmbus-rpc = "0.5.2"
 
 [dev-dependencies]
 base64 = "0.13"
 
 # build-dependencies needed for build.rs
 [build-dependencies]
-weld-codegen = "0.1"
+weld-codegen = "0.2.3"

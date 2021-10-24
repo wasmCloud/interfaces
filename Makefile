@@ -1,5 +1,6 @@
 # top-level makefile for wasmcloud/interfaces
 
+top_targets = all build clean gen lint validate test
 project_dir = $(abspath $(shell pwd))
 # Reminder: when adding a subdir below don't forget to update
 # Cargo.toml (if it's a rust project), and codegen.toml (if there are smithy files)

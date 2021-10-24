@@ -1,16 +1,16 @@
 // httpclient.smithy
 // definition of http client capability contract
 
-metadata package = [
-    {
-        namespace: "org.wasmcloud.interface.httpclient",
-        crate: "wasmcloud_interface_httpclient"
-     }
-]
+metadata package = [{
+    namespace: "org.wasmcloud.interface.httpclient",
+    crate: "wasmcloud_interface_httpclient"
+    py_module: "wasmcloud_interface_httpclient",
+}]
 
 namespace org.wasmcloud.interface.httpclient
 
 use org.wasmcloud.model#wasmbus
+use org.wasmcloud.model#n
 use org.wasmcloud.model#U16
 use org.wasmcloud.model#codegenRust
 
@@ -37,17 +37,21 @@ structure HttpRequest {
 
     /// http method, defaults to "GET"
     @required
+    @n(0)
     method: String,
 
     @required
+    @n(1)
     url: String,
 
     /// optional headers. defaults to empty
     @required
+    @n(2)
     headers: HeaderMap,
 
     /// request body, defaults to empty
     @required
+    @n(3)
     body: Blob,
 }
 
@@ -56,6 +60,7 @@ structure HttpRequest {
 structure HttpResponse {
     /// response status code
     @required
+    @n(0)
     statusCode: U16,
 
     /// Case is not guaranteed to be normalized, so
@@ -68,10 +73,12 @@ structure HttpResponse {
     ///          .find(|(k,_)| k == "content-type")
     ///          .map(|(_,v)| v);
     @required
+    @n(1)
     header: HeaderMap,
 
     /// response body
     @required
+    @n(2)
     body: Blob,
 }
 

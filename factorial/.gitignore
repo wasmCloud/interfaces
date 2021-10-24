@@ -1,4 +1,4 @@
 html
 rust/target
-rust/Cargl.lock
+rust/Cargo.lock
 

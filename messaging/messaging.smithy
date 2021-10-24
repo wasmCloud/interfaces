@@ -5,16 +5,16 @@
 //
 
 // Tell the code generator how to reference symbols defined in this namespace
-metadata package = [
-    {
-        namespace: "org.wasmcloud.interface.messaging",
-        crate: "wasmcloud_interface_messaging"
-     }
-]
+metadata package = [{
+    namespace: "org.wasmcloud.interface.messaging",
+    crate: "wasmcloud_interface_messaging",
+    py_module: "wasmcloud_interface_messaging",
+}]
 
 namespace org.wasmcloud.interface.messaging
 
 use org.wasmcloud.model#wasmbus
+use org.wasmcloud.model#n
 use org.wasmcloud.model#U32
 use org.wasmcloud.model#U64
 
@@ -52,13 +52,16 @@ operation Publish {
 structure PubMessage {
     /// The subject, or topic, of the message
     @required
+    @n(0)
     subject: String,
 
     /// An optional topic on which the reply should be sent.
+    @n(1)
     replyTo: String,
 
     /// The message payload
     @required
+    @n(2)
     body: Blob,
 }
 
@@ -66,13 +69,16 @@ structure PubMessage {
 structure ReplyMessage {
     /// The subject, or topic, of the message
     @required
+    @n(0)
     subject: String,
 
     /// An optional topic on which the reply should be sent.
+    @n(1)
     replyTo: String,
 
     /// The message payload
     @required
+    @n(2)
     body: Blob,
 }
 
@@ -80,13 +86,16 @@ structure ReplyMessage {
 structure SubMessage {
     /// The subject, or topic, of the message
     @required
+    @n(0)
     subject: String,
 
     /// An optional topic on which the reply should be sent.
+    @n(1)
     replyTo: String,
 
     /// The message payload
     @required
+    @n(2)
     body: Blob,
 }
 
@@ -102,14 +111,17 @@ structure RequestMessage {
 
     /// The subject, or topic, of the message
     @required
+    @n(0)
     subject: String,
 
     /// The message payload
     @required
+    @n(1)
     body: Blob,
 
     /// A timeout, in milliseconds
     @required
+    @n(2)
     timeoutMs: u32,
 }
 
