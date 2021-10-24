@@ -3,11 +3,16 @@
 //
 
 // Tell the code generator how to reference symbols defined in this namespace
-metadata package = [ { namespace: "org.wasmcloud.interface.testing", crate: "wasmcloud-interface-testing" } ]
+metadata package = [{
+    namespace: "org.wasmcloud.interface.testing",
+    crate: "wasmcloud_interface_testing",
+    py_module: "wasmcloud_interface_testing",
+}]
 
 namespace org.wasmcloud.interface.testing
 
 use org.wasmcloud.model#wasmbus
+use org.wasmcloud.model#n
 use org.wasmcloud.model#U32
 use org.wasmcloud.model#I32
 use org.wasmcloud.model#codegenRust
@@ -38,12 +43,14 @@ structure TestOptions {
     /// List of regex patterns for test names to run
     /// Default is ".*", to run all tests.
     @required
+    @n(0)
     patterns: PatternList,
 
     /// additional test configuration, optional
     /// Keys may be test case names, or other keys meaningful for the test.
     /// Values are serialized json, with contents specific to the test
     @required
+    @n(1)
     options: OptMap,
 }
 
@@ -65,15 +72,18 @@ structure TestResult {
 
     /// test case name
     @required
+    @n(0)
     name: String,
 
     /// true if the test case passed
     @required
-    pass: Boolean,
+    @n(1)
+    passed: Boolean,
 
     /// (optional) more detailed results, if available.
     /// data is snap-compressed json
     /// failed tests should have a firsts-level key called "error".
+    @n(2)
     snapData: Blob
 }
 

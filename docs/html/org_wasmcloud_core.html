@@ -39,11 +39,19 @@
                 </div>
             </div>            <div class="table-row">
                 <div class="table-cell align-top pr-6 w-28">
+                    Simple
+                </div>
+                <div class="table-cell align-top">
+                    <ul>
+<li class="font-light"><a href="#org_wasmcloud_core_cluster_issuer_key"><a href="#cluster_issuer_key">ClusterIssuerKey</a></a></li>                    </ul>
+                </div>
+            </div>            <div class="table-row">
+                <div class="table-cell align-top pr-6 w-28">
                     Lists
                 </div>
                 <div class="table-cell align-top">
                     <ul>
-<li class="font-light"><a href="#org_wasmcloud_core_actor_links"><a href="#actor_links">ActorLinks</a></a></li>                    </ul>
+<li class="font-light"><a href="#org_wasmcloud_core_actor_links"><a href="#actor_links">ActorLinks</a></a></li><li class="font-light"><a href="#org_wasmcloud_core_cluster_issuers"><a href="#cluster_issuers">ClusterIssuers</a></a></li>                    </ul>
                 </div>
             </div>            <div class="table-row">
                 <div class="table-cell align-top pr-6 w-28">
@@ -101,6 +109,44 @@
                                 <tr>
                                     <td>member:</td>
                                     <td><a href="#link_definition">LinkDefinition</a></td>
+                                    <td><span class="font-light">&nbsp;</span></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+
+    <h2 id="cluster_issuer_key" class="mt-8 border-t-2 border-gray-300">
+        <a href="#cluster_issuer_key">ClusterIssuerKey</a><span class="text-lg pl-4">(string)</span>
+    </h2>
+
+        <div class="ml-12">
+            <p class="font-medium mt-4">Traits
+            <p>
+            <table>                    <tr>
+                            <td><a href="./org_wasmcloud_model.html#non_empty_string">org.wasmcloud.model#nonEmptyString</a></td>
+                            <td>[object]</td>
+                    </tr>            </table>
+        </div>
+
+
+    <h2 id="cluster_issuers" class="mt-8 border-t-2 border-gray-300">
+        <a href="#cluster_issuers">ClusterIssuers</a><span class="text-lg pl-4">(list)</span>
+    </h2>
+                        <div class="ml-12">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th class="w-48"></th>
+                                    <th class="w-48"></th>
+                                    <th class=""></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>member:</td>
+                                    <td><a href="#cluster_issuer_key">ClusterIssuerKey</a></td>
                                     <td><span class="font-light">&nbsp;</span></td>
                                 </tr>
                                 </tbody>
@@ -206,6 +252,10 @@
                                 </tr>
                                 </thead>
                                 <tbody>                                    <tr>
+                                        <td>clusterIssuers:</td>
+                                        <td><a href="#cluster_issuers">ClusterIssuers</a></td>
+                                        <td><span class="font-light">list of cluster issuers</span></td>
+                                    </tr>                                    <tr>
                                         <td>envValues:</td>
                                         <td><a href="#host_env_values">HostEnvValues</a></td>
                                         <td><span class="font-light"></span></td>

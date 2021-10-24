@@ -3,11 +3,16 @@
 
 
 // Tell the code generator how to reference symbols defined in this namespace
-metadata package = [ { namespace: "org.wasmcloud.interface.factorial", crate: "wasmcloud-interface-factorial" } ]
+metadata package = [ {
+    namespace: "org.wasmcloud.interface.factorial",
+    crate: "wasmcloud_interface_factorial",
+    py_module: "wasmcloud_interface_factorial",
+} ]
 
 namespace org.wasmcloud.interface.factorial
 
 use org.wasmcloud.model#wasmbus
+use org.wasmcloud.model#n
 use org.wasmcloud.model#U32
 use org.wasmcloud.model#U64
 
