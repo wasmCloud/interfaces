@@ -1,17 +1,13 @@
-// This file is generated automatically using wasmcloud-weld and smithy model definitions
+// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
 //
 
-#![allow(clippy::ptr_arg)]
-#[allow(unused_imports)]
+#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
 use async_trait::async_trait;
-#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-#[allow(unused_imports)]
-use std::{borrow::Cow, string::ToString};
-#[allow(unused_imports)]
+use std::{borrow::Cow, io::Write, string::ToString};
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
-    Transport,
+    Timestamp, Transport,
 };
 
 pub const SMITHY_VERSION: &str = "1.0";
@@ -25,26 +21,25 @@ pub type HeaderValues = Vec<String>;
 /// http request to be sent through the provider
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct HttpRequest {
-    /// request body, defaults to empty
-    #[serde(with = "serde_bytes")]
-    #[serde(default)]
-    pub body: Vec<u8>,
-    /// optional headers. defaults to empty
-    pub headers: HeaderMap,
     /// http method, defaults to "GET"
     #[serde(default)]
     pub method: String,
     #[serde(default)]
     pub url: String,
+    /// optional headers. defaults to empty
+    pub headers: HeaderMap,
+    /// request body, defaults to empty
+    #[serde(with = "serde_bytes")]
+    #[serde(default)]
+    pub body: Vec<u8>,
 }
 
 /// response from the http request
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct HttpResponse {
-    /// response body
-    #[serde(with = "serde_bytes")]
-    #[serde(default)]
-    pub body: Vec<u8>,
+    /// response status code
+    #[serde(rename = "statusCode")]
+    pub status_code: u16,
     /// Case is not guaranteed to be normalized, so
     /// actors checking response headers need to do their own
     /// case conversion.
@@ -55,9 +50,10 @@ pub struct HttpResponse {
     /// .find(|(k,_)| k == "content-type")
     /// .map(|(_,v)| v);
     pub header: HeaderMap,
-    /// response status code
-    #[serde(rename = "statusCode")]
-    pub status_code: u16,
+    /// response body
+    #[serde(with = "serde_bytes")]
+    #[serde(default)]
+    pub body: Vec<u8>,
 }
 
 /// HttpClient - issue outgoing http requests via an external provider
@@ -88,10 +84,10 @@ pub trait HttpClientReceiver: MessageDispatch + HttpClient {
                 let value: HttpRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = HttpClient::request(self, ctx, &value).await?;
-                let buf = Cow::Owned(serialize(&resp)?);
+                let buf = serialize(&resp)?;
                 Ok(Message {
                     method: "HttpClient.Request",
-                    arg: buf,
+                    arg: Cow::Owned(buf),
                 })
             }
             _ => Err(RpcError::MethodNotHandled(format!(
@@ -116,6 +112,10 @@ impl<T: Transport> HttpClientSender<T> {
     /// Constructs a HttpClientSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
+    }
+
+    pub fn set_timeout(&self, interval: std::time::Duration) {
+        self.transport.set_timeout(interval);
     }
 }
 
@@ -143,14 +143,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> HttpClient for HttpCl
     #[allow(unused)]
     /// Issue outgoing http request
     async fn request(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<HttpResponse> {
-        let arg = serialize(arg)?;
+        let buf = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "HttpClient.Request",
-                    arg: Cow::Borrowed(&arg),
+                    arg: Cow::Borrowed(&buf),
                 },
                 None,
             )
