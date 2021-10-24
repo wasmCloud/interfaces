@@ -17,15 +17,14 @@ output_dir = "rust"
 #namespace = "org.wasmcloud.model"
 #crate = "wasmbus_rpc_model"
 
-
-#[go]
-#output_dir = "go"
-
-#[[go.files]]
-#path = "wasmbus_model.go"
-#namespace = "org.wasmcloud.model"
+#[python]
+#output_dir = "python"
 #
-#[[go.files]]
-#path = "wasmbus_core.go"
+#[[python.files]]
+#path = "wasmbus_core.py"
 #namespace = "org.wasmcloud.core"
+#
+#[[python.files]]
+#path = "wasmbus_model.py"
+#namespace = "org.wasmcloud.model"
 

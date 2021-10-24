@@ -12,8 +12,8 @@
 path = "numbergen.smithy"
 
 [[models]]
-#url = "https://wasmcloud.github.io/interfaces/idl/org.wasmcloud"
-path = "../core"
+url = "https://wasmcloud.github.io/interfaces/idl/org.wasmcloud"
+#path = "../core"
 files = [ "wasmcloud-core.smithy", "wasmcloud-model.smithy" ]
 
 
@@ -63,4 +63,12 @@ output_dir = "rust"
 [[rust.files]]
 path = "src/numbergen.rs"
 namespace = "org.wasmcloud.interface.numbergen"
+
+
+#[python]
+#output_dir = "python"
+#
+#[[python.files]]
+#path = "src/numbergen.py"
+#namespace = "org.wasmcloud.interface.numbergen"
 

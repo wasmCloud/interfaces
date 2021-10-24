@@ -16,7 +16,7 @@ files = [ "factorial.smithy" ]
 [[models]]
 # Location of dependencies may be either a path to a directory, or a url prefix
 # If a relative path is used, it is relative to the location of this codegen.toml
-#path = "/path/to/my-interfaces"
+#path = "../core"
 url = "https://wasmcloud.github.io/interfaces/idl/org.wasmcloud"
 files = [ "wasmcloud-core.smithy", "wasmcloud-model.smithy" ]
 
@@ -67,3 +67,11 @@ output_dir = "rust"
 [[rust.files]]
 path = "src/factorial.rs"
 namespace = "org.wasmcloud.interface.factorial"
+
+#[python]
+#output_dir = "python"
+#
+#[[python.files]]
+#path = "src/factorial.py"
+#namespace = "org.wasmcloud.interface.factorial"
+
