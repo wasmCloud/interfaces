@@ -3,7 +3,11 @@
 //
 
 // Tell the code generator how to reference symbols defined in this namespace
-metadata package = [ { namespace: "org.wasmcloud.model", crate: "wasmbus_rpc::model" } ]
+metadata package = [ {
+    namespace: "org.wasmcloud.model",
+    crate: "wasmbus_rpc::model",
+    py_module: "wasmbus_rpc.model"
+} ]
 
 namespace org.wasmcloud.model
 
@@ -21,11 +25,18 @@ structure serialization {
     name: String,
 }
 
+/// Field sequence number. A zero-based field number for each member of a structure,
+/// to enable deterministic cbor serialization and improve forward and backward compatibility.
+/// Although the values are not required to be sequential, gaps are filled with nulls
+/// during encoding and so will slightly increase the encoding size.
+@trait(selector: "structure > member")
+@range(min:0)
+short n
+
 /// The unsignedInt trait indicates that one of the number types is unsigned
 @trait(selector: "long,integer,short,byte")
 @range(min:0)
 structure unsignedInt { }
-
 
 /// A non-empty string (minimum length 1)
 @trait(selector: "string")
@@ -112,3 +123,25 @@ structure wasmbusData {}
 /// Capability contract id, e.g. 'wasmcloud:httpserver'
 @nonEmptyString
 string CapabilityContractId
+
+
+/// list element of trait @rename. the item name in the target language
+/// see '@rename'
+@trait
+structure renameItem {
+    /// language
+    @required
+    lang: String,
+    /// the name of the structure/operation/field
+    @required
+    name: String,
+}
+
+/// Rename item(s) in target language.
+/// Useful if the item name (operation, or field) conflicts with a keyword in the target language.
+/// example: @rename({lang:"python",name:"delete"})
+@trait(selector: "operation, structure > member")
+list rename {
+    member: renameItem
+}
+
