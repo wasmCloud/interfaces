@@ -4,16 +4,16 @@
 //
 
 // Tell the code generator how to reference symbols defined in this namespace
-metadata package = [
-    {
-        namespace: "org.wasmcloud.interface.numbergen",
-        crate: "wasmcloud_interface_numbergen"
-     }
-]
+metadata package = [{
+    namespace: "org.wasmcloud.interface.numbergen",
+    crate: "wasmcloud_interface_numbergen",
+    py_module: "wasmcloud_interface_numbergen",
+}]
 
 namespace org.wasmcloud.interface.numbergen
 
 use org.wasmcloud.model#wasmbus
+use org.wasmcloud.model#n
 use org.wasmcloud.model#U32
 use org.wasmcloud.model#U64
 
@@ -51,8 +51,11 @@ operation Random32 {
 ///    random_in_range(RangeLimit{0,4}) returns one the values, 0, 1, 2, 3, or 4.
 structure RangeLimit {
     @required
+    @n(0)
     min: U32,
+
     @required
+    @n(1)
     max: U32,
 }
 
