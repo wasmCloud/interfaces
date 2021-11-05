@@ -1,0 +1,22 @@
+# codegen.toml
+
+[[models]]
+path = "lattice-control-interface.smithy"
+
+[[models]]
+url = "https://wasmcloud.github.io/interfaces/idl/org.wasmcloud" 
+files = [ "wasmcloud-core.smithy", "wasmcloud-model.smithy" ]
+
+##
+## Rust language output
+##
+[rust]
+
+# top-level output directory for rust files.
+output_dir = "rust"
+
+[rust.parameters]
+
+[[rust.files]]
+path = "src/control.rs"
+namespace = "org.wasmcloud.lattice.control"
