@@ -1,10 +1,14 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
+// This file is generated automatically using wasmcloud-weld and smithy model definitions
 //
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#![allow(clippy::ptr_arg)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Cow, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
     Timestamp, Transport,
@@ -257,6 +261,17 @@ pub struct StopActorCommand {
     pub host_id: String,
 }
 
+/// A command sent to request that the given host purge and stop
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct StopHostCommand {
+    /// The ID of the target host
+    #[serde(default)]
+    pub host_id: String,
+    /// An optional timeout, in seconds
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub timeout: Option<u64>,
+}
+
 /// A request to stop the given provider on the indicated host
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StopProviderCommand {
@@ -381,6 +396,8 @@ pub trait LatticeController {
     /// Requests that an actor be stopped on the given host
     async fn stop_actor(&self, ctx: &Context, arg: &StopActorCommand)
         -> RpcResult<CtlOperationAck>;
+    /// Requests that the given host be stopped
+    async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<()>;
 }
 
 /// LatticeControllerReceiver receives messages defined in the LatticeController service trait
@@ -397,124 +414,134 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                 let value: ProviderAuctionRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = LatticeController::auction_provider(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.AuctionProvider",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "AuctionActor" => {
                 let value: ActorAuctionRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = LatticeController::auction_actor(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.AuctionActor",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "GetHosts" => {
                 let resp = LatticeController::get_hosts(self, ctx).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.GetHosts",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "GetHostInventory" => {
                 let value: String = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = LatticeController::get_host_inventory(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.GetHostInventory",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "GetClaims" => {
                 let resp = LatticeController::get_claims(self, ctx).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.GetClaims",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "StartActor" => {
                 let value: StartActorCommand = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = LatticeController::start_actor(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.StartActor",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "AdvertiseLink" => {
                 let value: wasmbus_rpc::core::LinkDefinition = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = LatticeController::advertise_link(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.AdvertiseLink",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "RemoveLink" => {
                 let value: RemoveLinkDefinitionRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = LatticeController::remove_link(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.RemoveLink",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "GetLinks" => {
                 let resp = LatticeController::get_links(self, ctx).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.GetLinks",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "UpdateActor" => {
                 let value: UpdateActorCommand = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = LatticeController::update_actor(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.UpdateActor",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "StartProvider" => {
                 let value: StartProviderCommand = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = LatticeController::start_provider(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.StartProvider",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "StopProvider" => {
                 let value: StopProviderCommand = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = LatticeController::stop_provider(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.StopProvider",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "StopActor" => {
                 let value: StopActorCommand = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = LatticeController::stop_actor(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "LatticeController.StopActor",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
+                })
+            }
+            "StopHost" => {
+                let value: StopHostCommand = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
+                let resp = LatticeController::stop_host(self, ctx, &value).await?;
+                let buf = Cow::Owned(serialize(&resp)?);
+                Ok(Message {
+                    method: "LatticeController.StopHost",
+                    arg: buf,
                 })
             }
             _ => Err(RpcError::MethodNotHandled(format!(
@@ -541,10 +568,6 @@ impl<T: Transport> LatticeControllerSender<T> {
     pub fn via(transport: T) -> Self {
         Self { transport }
     }
-
-    pub fn set_timeout(&self, interval: std::time::Duration) {
-        self.transport.set_timeout(interval);
-    }
 }
 #[async_trait]
 impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
@@ -559,14 +582,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         ctx: &Context,
         arg: &ProviderAuctionRequest,
     ) -> RpcResult<ProviderAuctionAcks> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.AuctionProvider",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -583,14 +606,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         ctx: &Context,
         arg: &ActorAuctionRequest,
     ) -> RpcResult<ActorAuctionAcks> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.AuctionActor",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -604,14 +627,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
     /// a "gather" operation and so can be influenced by short timeouts,
     /// network partition events, etc.
     async fn get_hosts(&self, ctx: &Context) -> RpcResult<Hosts> {
-        let buf = *b"";
+        let arg = *b"";
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.GetHosts",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -627,14 +650,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         ctx: &Context,
         arg: &TS,
     ) -> RpcResult<HostInventory> {
-        let buf = serialize(&arg.to_string())?;
+        let arg = serialize(&arg.to_string())?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.GetHostInventory",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -647,14 +670,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
     /// Queries the lattice for the list of known/cached claims by taking the response
     /// from the first host that answers the query.
     async fn get_claims(&self, ctx: &Context) -> RpcResult<GetClaimsResponse> {
-        let buf = *b"";
+        let arg = *b"";
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.GetClaims",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -670,14 +693,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         ctx: &Context,
         arg: &StartActorCommand,
     ) -> RpcResult<CtlOperationAck> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.StartActor",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -694,14 +717,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         ctx: &Context,
         arg: &wasmbus_rpc::core::LinkDefinition,
     ) -> RpcResult<CtlOperationAck> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.AdvertiseLink",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -719,14 +742,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         ctx: &Context,
         arg: &RemoveLinkDefinitionRequest,
     ) -> RpcResult<CtlOperationAck> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.RemoveLink",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -740,14 +763,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
     /// that receives this response will reply with the contents of the distributed
     /// cache
     async fn get_links(&self, ctx: &Context) -> RpcResult<LinkDefinitionList> {
-        let buf = *b"";
+        let arg = *b"";
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.GetLinks",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -764,14 +787,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         ctx: &Context,
         arg: &UpdateActorCommand,
     ) -> RpcResult<CtlOperationAck> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.UpdateActor",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -787,14 +810,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         ctx: &Context,
         arg: &StartProviderCommand,
     ) -> RpcResult<CtlOperationAck> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.StartProvider",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -810,14 +833,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         ctx: &Context,
         arg: &StopProviderCommand,
     ) -> RpcResult<CtlOperationAck> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.StopProvider",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -833,14 +856,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         ctx: &Context,
         arg: &StopActorCommand,
     ) -> RpcResult<CtlOperationAck> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "LatticeController.StopActor",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -848,5 +871,22 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         let value = deserialize(&resp)
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "StopActor", e)))?;
         Ok(value)
+    }
+    #[allow(unused)]
+    /// Requests that the given host be stopped
+    async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<()> {
+        let arg = serialize(arg)?;
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "LatticeController.StopHost",
+                    arg: Cow::Borrowed(&arg),
+                },
+                None,
+            )
+            .await?;
+        Ok(())
     }
 }

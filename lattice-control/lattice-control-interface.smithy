@@ -36,7 +36,7 @@ service LatticeController {
                  GetHostInventory, GetClaims, StartActor,
                  AdvertiseLink, RemoveLink, GetLinks,
                  UpdateActor, StartProvider, StopProvider,
-                 StopActor]
+                 StopActor, StopHost]
 }
 
 /// Seek out a list of suitable hosts for a capability provider given
@@ -125,6 +125,11 @@ operation StopProvider {
 operation StopActor {
     input: StopActorCommand
     output: CtlOperationAck
+}
+
+/// Requests that the given host be stopped
+operation StopHost {
+    input: StopHostCommand
 }
 
 list ProviderAuctionAcks {
@@ -420,6 +425,17 @@ structure StopProviderCommand {
     /// Optional set of annotations used to describe the nature of this
     /// stop request
     annotations: AnnotationMap
+}
+
+/// A command sent to request that the given host purge and stop
+structure StopHostCommand {
+    /// The ID of the target host
+    @required  
+    @serialization(name: "host_id")  
+    hostId: String,
+
+    /// An optional timeout, in seconds
+    timeout: U64
 }
 
 /// A command instructing a specific host to perform a live update
