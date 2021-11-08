@@ -4,13 +4,13 @@ on:
   push:
     branches: [ main ]
     paths:
-    - "lattice-control/rust/**"
+    - "lattice-control/**"
     tags:
-    - 'lattice-control-interface-v*'
+    - 'wasmcloud-interface-lattice-control-v*'
   pull_request:
     branches: [ main ]
     paths:
-    - "lattice-control/rust/**"
+    - "lattice-control/**"
 
 env:
   CARGO_TERM_COLOR: always
