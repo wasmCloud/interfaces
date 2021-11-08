@@ -1,0 +1,28 @@
+[package]
+name = "lattice-control-interface"
+version = "0.1.0"
+edition = "2021"
+homepage = "https://wasmcloud.dev"
+repository = "https://github.com/wasmCloud/interfaces"
+description = "This library allows different types of consumers to interact with the lattice control interface."
+license = "Apache-2.0"
+documentation = "https://docs.rs/lattice-control-interface"
+readme = "../README.md"
+keywords = ["webassembly", "wasm", "wasmcloud", "control", "ctl"]
+categories = ["wasm", "api-bindings"]
+# don't include build.rs on crates.io build
+exclude = ["build.rs"]
+
+
+[dependencies]
+async-trait = "0.1"
+data-encoding = "2.3.1"
+futures = "0.3"
+log = "0.4.14"
+ring = "0.16.20"
+rmp-serde = "0.15.0"
+serde = { version = "1.0.118", features = ["derive"] }
+wasmbus-rpc = "0.5.2"
+
+[build-dependencies]
+weld-codegen = "0.2.3"

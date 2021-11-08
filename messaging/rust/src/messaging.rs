@@ -75,112 +75,6 @@ pub struct SubMessage {
     pub body: Vec<u8>,
 }
 
-/// The MessageSubscriber interface describes
-/// an actor interface that receives messages
-/// sent by the Messaging provider
-/// wasmbus.contractId: wasmcloud:messaging
-/// wasmbus.actorReceive
-#[async_trait]
-pub trait MessageSubscriber {
-    /// returns the capability contract id for this interface
-    fn contract_id() -> &'static str {
-        "wasmcloud:messaging"
-    }
-    /// subscription handler
-    async fn handle_message(&self, ctx: &Context, arg: &SubMessage) -> RpcResult<()>;
-}
-
-/// MessageSubscriberReceiver receives messages defined in the MessageSubscriber service trait
-/// The MessageSubscriber interface describes
-/// an actor interface that receives messages
-/// sent by the Messaging provider
-#[doc(hidden)]
-#[async_trait]
-pub trait MessageSubscriberReceiver: MessageDispatch + MessageSubscriber {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
-        match message.method {
-            "HandleMessage" => {
-                let value: SubMessage = deserialize(message.arg.as_ref())
-                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
-                let _resp = MessageSubscriber::handle_message(self, ctx, &value).await?;
-                let buf = Vec::new();
-                Ok(Message {
-                    method: "MessageSubscriber.HandleMessage",
-                    arg: Cow::Owned(buf),
-                })
-            }
-            _ => Err(RpcError::MethodNotHandled(format!(
-                "MessageSubscriber::{}",
-                message.method
-            ))),
-        }
-    }
-}
-
-/// MessageSubscriberSender sends messages to a MessageSubscriber service
-/// The MessageSubscriber interface describes
-/// an actor interface that receives messages
-/// sent by the Messaging provider
-/// client for sending MessageSubscriber messages
-#[derive(Debug)]
-pub struct MessageSubscriberSender<T: Transport> {
-    transport: T,
-}
-
-impl<T: Transport> MessageSubscriberSender<T> {
-    /// Constructs a MessageSubscriberSender with the specified transport
-    pub fn via(transport: T) -> Self {
-        Self { transport }
-    }
-
-    pub fn set_timeout(&self, interval: std::time::Duration) {
-        self.transport.set_timeout(interval);
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-impl<'send> MessageSubscriberSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
-    /// Constructs a Sender using an actor's LinkDefinition,
-    /// Uses the provider's HostBridge for rpc
-    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
-        Self {
-            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
-        }
-    }
-}
-#[cfg(target_arch = "wasm32")]
-impl MessageSubscriberSender<wasmbus_rpc::actor::prelude::WasmHost> {
-    /// Constructs a client for actor-to-actor messaging
-    /// using the recipient actor's public key
-    pub fn to_actor(actor_id: &str) -> Self {
-        let transport =
-            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
-        Self { transport }
-    }
-}
-#[async_trait]
-impl<T: Transport + std::marker::Sync + std::marker::Send> MessageSubscriber
-    for MessageSubscriberSender<T>
-{
-    #[allow(unused)]
-    /// subscription handler
-    async fn handle_message(&self, ctx: &Context, arg: &SubMessage) -> RpcResult<()> {
-        let buf = serialize(arg)?;
-        let resp = self
-            .transport
-            .send(
-                ctx,
-                Message {
-                    method: "MessageSubscriber.HandleMessage",
-                    arg: Cow::Borrowed(&buf),
-                },
-                None,
-            )
-            .await?;
-        Ok(())
-    }
-}
-
 /// The Messaging interface describes a service
 /// that can deliver messages
 /// wasmbus.contractId: wasmcloud:messaging
@@ -319,5 +213,111 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Messaging for Messagi
         let value = deserialize(&resp)
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Request", e)))?;
         Ok(value)
+    }
+}
+
+/// The MessageSubscriber interface describes
+/// an actor interface that receives messages
+/// sent by the Messaging provider
+/// wasmbus.contractId: wasmcloud:messaging
+/// wasmbus.actorReceive
+#[async_trait]
+pub trait MessageSubscriber {
+    /// returns the capability contract id for this interface
+    fn contract_id() -> &'static str {
+        "wasmcloud:messaging"
+    }
+    /// subscription handler
+    async fn handle_message(&self, ctx: &Context, arg: &SubMessage) -> RpcResult<()>;
+}
+
+/// MessageSubscriberReceiver receives messages defined in the MessageSubscriber service trait
+/// The MessageSubscriber interface describes
+/// an actor interface that receives messages
+/// sent by the Messaging provider
+#[doc(hidden)]
+#[async_trait]
+pub trait MessageSubscriberReceiver: MessageDispatch + MessageSubscriber {
+    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+        match message.method {
+            "HandleMessage" => {
+                let value: SubMessage = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
+                let _resp = MessageSubscriber::handle_message(self, ctx, &value).await?;
+                let buf = Vec::new();
+                Ok(Message {
+                    method: "MessageSubscriber.HandleMessage",
+                    arg: Cow::Owned(buf),
+                })
+            }
+            _ => Err(RpcError::MethodNotHandled(format!(
+                "MessageSubscriber::{}",
+                message.method
+            ))),
+        }
+    }
+}
+
+/// MessageSubscriberSender sends messages to a MessageSubscriber service
+/// The MessageSubscriber interface describes
+/// an actor interface that receives messages
+/// sent by the Messaging provider
+/// client for sending MessageSubscriber messages
+#[derive(Debug)]
+pub struct MessageSubscriberSender<T: Transport> {
+    transport: T,
+}
+
+impl<T: Transport> MessageSubscriberSender<T> {
+    /// Constructs a MessageSubscriberSender with the specified transport
+    pub fn via(transport: T) -> Self {
+        Self { transport }
+    }
+
+    pub fn set_timeout(&self, interval: std::time::Duration) {
+        self.transport.set_timeout(interval);
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl<'send> MessageSubscriberSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
+    /// Constructs a Sender using an actor's LinkDefinition,
+    /// Uses the provider's HostBridge for rpc
+    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
+        Self {
+            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
+        }
+    }
+}
+#[cfg(target_arch = "wasm32")]
+impl MessageSubscriberSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
+}
+#[async_trait]
+impl<T: Transport + std::marker::Sync + std::marker::Send> MessageSubscriber
+    for MessageSubscriberSender<T>
+{
+    #[allow(unused)]
+    /// subscription handler
+    async fn handle_message(&self, ctx: &Context, arg: &SubMessage) -> RpcResult<()> {
+        let buf = serialize(arg)?;
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "MessageSubscriber.HandleMessage",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+        Ok(())
     }
 }
