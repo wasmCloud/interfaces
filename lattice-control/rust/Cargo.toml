@@ -1,12 +1,12 @@
 [package]
-name = "lattice-control-interface"
+name = "wasmcloud-interface-lattice-control"
 version = "0.1.0"
 edition = "2021"
 homepage = "https://wasmcloud.dev"
 repository = "https://github.com/wasmCloud/interfaces"
 description = "This library allows different types of consumers to interact with the lattice control interface."
 license = "Apache-2.0"
-documentation = "https://docs.rs/lattice-control-interface"
+documentation = "https://docs.rs/wasmcloud-interface-lattice-control"
 readme = "../README.md"
 keywords = ["webassembly", "wasm", "wasmcloud", "control", "ctl"]
 categories = ["wasm", "api-bindings"]
