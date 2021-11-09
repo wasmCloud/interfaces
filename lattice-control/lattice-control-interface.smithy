@@ -499,7 +499,7 @@ structure RemoveLinkDefinitionRequest {
     /// The provider contract
     @required    
     @serialization(name: "contract_id")
-    contractId: String
+    contractId: String,
 
     /// The provider's link name
     @required    
