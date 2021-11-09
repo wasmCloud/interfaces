@@ -192,12 +192,12 @@ pub struct RemoveLinkDefinitionRequest {
     /// The actor's public key. This cannot be an image reference
     #[serde(default)]
     pub actor_id: String,
+    /// The provider contract
+    #[serde(default)]
+    pub contract_id: String,
     /// The provider's link name
     #[serde(default)]
     pub link_name: String,
-    /// The provider's public key. This cannot be an image reference
-    #[serde(default)]
-    pub provider_id: String,
 }
 
 /// A command sent to a specific host instructing it to start the actor
