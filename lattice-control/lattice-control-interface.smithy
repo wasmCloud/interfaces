@@ -124,12 +124,13 @@ operation StopProvider {
 /// Requests that an actor be stopped on the given host
 operation StopActor {
     input: StopActorCommand
-    output: CtlOperationAck
+    output: CtlOperationAck    
 }
 
 /// Requests that the given host be stopped
 operation StopHost {
     input: StopHostCommand
+    output: CtlOperationAck
 }
 
 list ProviderAuctionAcks {
