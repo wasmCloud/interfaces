@@ -496,10 +496,10 @@ structure RemoveLinkDefinitionRequest {
     @serialization(name: "actor_id")
     actorId: String,
 
-    /// The provider's public key. This cannot be an image reference
+    /// The provider contract
     @required    
-    @serialization(name: "provider_id")
-    providerId: String,
+    @serialization(name: "contract_id")
+    contractId: String
 
     /// The provider's link name
     @required    
