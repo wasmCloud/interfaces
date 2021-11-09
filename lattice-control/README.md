@@ -1,6 +1,6 @@
 ![Crates.io](https://img.shields.io/crates/v/wasmcloud-interface-lattice-control)
 [![Documentation](https://img.shields.io/badge/Docs-Documentation-blue)](https://wasmcloud.dev)
-[![Rustdocs](https://docs.rs/lattice-control-interface/badge.svg)](https://docs.rs/wasmcloud-interface-lattice-control)
+[![Rustdocs](https://docs.rs/wasmcloud-interface-lattice-control/badge.svg)](https://docs.rs/wasmcloud-interface-lattice-control)
 
 # Lattice Control Interface
 The lattice control interface is a smithy-defined interface contract that is expected to be consumed in one of two different ways:
