@@ -13,6 +13,7 @@ metadata package = [
 
 namespace org.wasmcloud.lattice.control
 
+use org.wasmcloud.model#wasmbus
 use org.wasmcloud.model#serialization
 use org.wasmcloud.core#LinkDefinition
 use org.wasmcloud.core#ActorLinks
