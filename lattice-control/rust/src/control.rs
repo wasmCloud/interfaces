@@ -315,8 +315,14 @@ pub struct UpdateActorCommand {
 /// to communicate with a lattice controller, enabling developers
 /// to deploy actors that can manipulate the lattice in which they're
 /// running.
+/// wasmbus.contractId: wasmcloud:latticecontrol
+/// wasmbus.providerReceive
 #[async_trait]
 pub trait LatticeController {
+    /// returns the capability contract id for this interface
+    fn contract_id() -> &'static str {
+        "wasmcloud:latticecontrol"
+    }
     /// Seek out a list of suitable hosts for a capability provider given
     /// a set of host label constraints. Hosts on which this provider is already
     /// running will not be among the successful "bidders" in this auction.
@@ -567,6 +573,30 @@ impl<T: Transport> LatticeControllerSender<T> {
 
     pub fn set_timeout(&self, interval: std::time::Duration) {
         self.transport.set_timeout(interval);
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl LatticeControllerSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for sending to a LatticeController provider
+    /// implementing the 'wasmcloud:latticecontrol' capability contract, with the "default" link
+    pub fn new() -> Self {
+        let transport = wasmbus_rpc::actor::prelude::WasmHost::to_provider(
+            "wasmcloud:latticecontrol",
+            "default",
+        )
+        .unwrap();
+        Self { transport }
+    }
+
+    /// Constructs a client for sending to a LatticeController provider
+    /// implementing the 'wasmcloud:latticecontrol' capability contract, with the specified link name
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::RpcResult<Self> {
+        let transport = wasmbus_rpc::actor::prelude::WasmHost::to_provider(
+            "wasmcloud:latticecontrol",
+            link_name,
+        )?;
+        Ok(Self { transport })
     }
 }
 #[async_trait]
