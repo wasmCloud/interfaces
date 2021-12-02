@@ -67,7 +67,7 @@ structure ExecuteResult {
     rowsAffected: U64,
 
     /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
+    /// If error is included in the QueryResult, other values should be ignored.
     @n(1)
     error: SqlDbError,
 }
@@ -75,12 +75,12 @@ structure ExecuteResult {
 /// Perform select query on database, returning all result rows
 operation Fetch {
     input: Query,
-    output: FetchResult
+    output: QueryResult
 }
 
 
-/// Result of a fetch query
-structure FetchResult {
+/// Result of a query
+structure QueryResult {
     /// number of rows returned
     @required
     @n(0)
@@ -98,7 +98,7 @@ structure FetchResult {
     rows: Blob,
 
     /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
+    /// If error is included in the QueryResult, other values should be ignored.
     @n(3)
     error: SqlDbError,
 }
@@ -138,7 +138,7 @@ structure SqlDbError {
 }
 
 
-/// List of columns in the result set returned by a Fetch operation
+/// List of columns in the result set returned by a Query operation
 list Columns {
     member: Column
 }

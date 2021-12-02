@@ -1,10 +1,14 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
+// This file is generated automatically using wasmcloud-weld and smithy model definitions
 //
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#![allow(clippy::ptr_arg)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Cow, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
     Timestamp, Transport,
@@ -15,54 +19,54 @@ pub const SMITHY_VERSION: &str = "1.0";
 /// Metadata about a Column in the result set
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Column {
-    /// column ordinal
-    pub ordinal: u32,
-    /// Column name in the result
-    #[serde(default)]
-    pub name: String,
     /// column data type as reported by the database
     #[serde(rename = "dbType")]
     #[serde(default)]
     pub db_type: String,
+    /// Column name in the result
+    #[serde(default)]
+    pub name: String,
+    /// column ordinal
+    pub ordinal: u32,
 }
 
-/// List of columns in the result set returned by a Fetch operation
+/// List of columns in the result set returned by a Query operation
 pub type Columns = Vec<Column>;
 
 /// Result of an Execute operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ExecuteResult {
+    /// optional error information.
+    /// If error is included in the QueryResult, other values should be ignored.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<SqlDbError>,
     /// the number of rows affected by the query
     #[serde(rename = "rowsAffected")]
     pub rows_affected: u64,
-    /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub error: Option<SqlDbError>,
-}
-
-/// Result of a fetch query
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct FetchResult {
-    /// number of rows returned
-    #[serde(rename = "numRows")]
-    pub num_rows: u64,
-    /// description of columns returned
-    pub columns: Columns,
-    /// result rows, encoded in CBOR as
-    /// an array (rows) of arrays (fields per row)
-    #[serde(with = "serde_bytes")]
-    #[serde(default)]
-    pub rows: Vec<u8>,
-    /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub error: Option<SqlDbError>,
 }
 
 /// A query is a non-empty string containing an SQL query or statement,
 /// in the syntax of the back-end database.
 pub type Query = String;
+
+/// Result of a query
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct QueryResult {
+    /// description of columns returned
+    pub columns: Columns,
+    /// optional error information.
+    /// If error is included in the QueryResult, other values should be ignored.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<SqlDbError>,
+    /// number of rows returned
+    #[serde(rename = "numRows")]
+    pub num_rows: u64,
+    /// result rows, encoded in CBOR as
+    /// an array (rows) of arrays (fields per row)
+    #[serde(with = "serde_bytes")]
+    #[serde(default)]
+    pub rows: Vec<u8>,
+}
 
 /// Detailed error information from the previous operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -91,7 +95,7 @@ pub trait SqlDb {
     /// Execute an sql statement
     async fn execute(&self, ctx: &Context, arg: &Query) -> RpcResult<ExecuteResult>;
     /// Perform select query on database, returning all result rows
-    async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<FetchResult>;
+    async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<QueryResult>;
 }
 
 /// SqlDbReceiver receives messages defined in the SqlDb service trait
@@ -107,20 +111,20 @@ pub trait SqlDbReceiver: MessageDispatch + SqlDb {
                 let value: Query = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = SqlDb::execute(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "SqlDb.Execute",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "Fetch" => {
                 let value: Query = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = SqlDb::fetch(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "SqlDb.Fetch",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             _ => Err(RpcError::MethodNotHandled(format!(
@@ -145,10 +149,6 @@ impl<T: Transport> SqlDbSender<T> {
     /// Constructs a SqlDbSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
-    }
-
-    pub fn set_timeout(&self, interval: std::time::Duration) {
-        self.transport.set_timeout(interval);
     }
 }
 
@@ -176,14 +176,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender
     #[allow(unused)]
     /// Execute an sql statement
     async fn execute(&self, ctx: &Context, arg: &Query) -> RpcResult<ExecuteResult> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "SqlDb.Execute",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -194,15 +194,15 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender
     }
     #[allow(unused)]
     /// Perform select query on database, returning all result rows
-    async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<FetchResult> {
-        let buf = serialize(arg)?;
+    async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<QueryResult> {
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "SqlDb.Fetch",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )

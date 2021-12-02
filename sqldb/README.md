@@ -5,7 +5,7 @@ provider with the capability contract wasmcloud:sqldb.
 
 The initial version of this interface (0.1) supports
 executing sql queries (inserts, update, create table, etc.)
-and fetching data (select).
+and querying data (select).
 
 The api is intended to be independent of any specific relational database implementation
 (postgres, mysql, mariadb, sqlite, etc.).

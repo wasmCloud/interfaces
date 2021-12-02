@@ -50,14 +50,30 @@ service SqlDb {
 
 /// Execute an sql statement
 operation Execute {
-    input: Query,
+    input: Statement,
     output: ExecuteResult,
 }
 
-/// A query is a non-empty string containing an SQL query or statement,
+/// A Statement has a non-empty SQL statement in the syntax of
+/// the back-end database and a list of arguments to be used in the SQL statement.
+structure Statement {
+  args: Args
+  @required
+  sql: Query
+}
+
+/// A query is a non-empty string containing a SQL query or statement,
 /// in the syntax of the back-end database.
 @length(min:1)
 string Query
+
+/// A list of arguments to be used in the SQL statement.
+/// The command uses question marks (?) for placeholders,
+/// which will be replaced by the specified arguments during execution.
+/// The command must have exactly as many placeholders as arguments, or the request will fail.
+list Args {
+  member: String
+}
 
 /// Result of an Execute operation
 structure ExecuteResult {
@@ -67,20 +83,20 @@ structure ExecuteResult {
     rowsAffected: U64,
 
     /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
+    /// If error is included in the QueryResult, other values should be ignored.
     @n(1)
     error: SqlDbError,
 }
 
 /// Perform select query on database, returning all result rows
-operation Fetch {
-    input: Query,
-    output: FetchResult
+operation Query {
+    input: Statement,
+    output: QueryResult
 }
 
 
-/// Result of a fetch query
-structure FetchResult {
+/// Result of a query
+structure QueryResult {
     /// number of rows returned
     @required
     @n(0)
@@ -98,7 +114,7 @@ structure FetchResult {
     rows: Blob,
 
     /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
+    /// If error is included in the QueryResult, other values should be ignored.
     @n(3)
     error: SqlDbError,
 }
@@ -138,7 +154,7 @@ structure SqlDbError {
 }
 
 
-/// List of columns in the result set returned by a Fetch operation
+/// List of columns in the result set returned by a Query operation
 list Columns {
     member: Column
 }
@@ -160,5 +176,3 @@ structure Column {
     @n(2)
     dbType: String,
 }
-
-
