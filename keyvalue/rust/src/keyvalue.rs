@@ -1,10 +1,14 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
+// This file is generated automatically using wasmcloud-weld and smithy model definitions
 //
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#![allow(clippy::ptr_arg)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Cow, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
     Timestamp, Transport,
@@ -15,12 +19,12 @@ pub const SMITHY_VERSION: &str = "1.0";
 /// Response to get request
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetResponse {
-    /// the value, if it existed
-    #[serde(default)]
-    pub value: String,
     /// whether or not the value existed
     #[serde(default)]
     pub exists: bool,
+    /// the value, if it existed
+    #[serde(default)]
+    pub value: String,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -91,14 +95,14 @@ pub struct SetDelRequest {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SetRequest {
+    /// expiration time in seconds 0 for no expiration
+    pub expires: u32,
     /// the key name to change (or create)
     #[serde(default)]
     pub key: String,
     /// the new value
     #[serde(default)]
     pub value: String,
-    /// expiration time in seconds 0 for no expiration
-    pub expires: u32,
 }
 
 /// list of strings
@@ -195,150 +199,150 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 let value: IncrementRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::increment(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.Increment",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "Contains" => {
                 let value: String = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::contains(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.Contains",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "Del" => {
                 let value: String = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::del(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.Del",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "Get" => {
                 let value: String = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::get(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.Get",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "ListAdd" => {
                 let value: ListAddRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::list_add(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.ListAdd",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "ListClear" => {
                 let value: String = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::list_clear(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.ListClear",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "ListDel" => {
                 let value: ListDelRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::list_del(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.ListDel",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "ListRange" => {
                 let value: ListRangeRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::list_range(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.ListRange",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "Set" => {
                 let value: SetRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
-                let _resp = KeyValue::set(self, ctx, &value).await?;
-                let buf = Vec::new();
+                let resp = KeyValue::set(self, ctx, &value).await?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.Set",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "SetAdd" => {
                 let value: SetAddRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_add(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.SetAdd",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "SetDel" => {
                 let value: SetDelRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_del(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.SetDel",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "SetIntersection" => {
                 let value: StringList = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_intersection(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.SetIntersection",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "SetQuery" => {
                 let value: String = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_query(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.SetQuery",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "SetUnion" => {
                 let value: StringList = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_union(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.SetUnion",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "SetClear" => {
                 let value: String = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = KeyValue::set_clear(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "KeyValue.SetClear",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             _ => Err(RpcError::MethodNotHandled(format!(
@@ -360,10 +364,6 @@ impl<T: Transport> KeyValueSender<T> {
     /// Constructs a KeyValueSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
-    }
-
-    pub fn set_timeout(&self, interval: std::time::Duration) {
-        self.transport.set_timeout(interval);
     }
 }
 
@@ -391,14 +391,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
     #[allow(unused)]
     /// Increments a numeric value, returning the new value
     async fn increment(&self, ctx: &Context, arg: &IncrementRequest) -> RpcResult<i32> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.Increment",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -414,14 +414,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
         ctx: &Context,
         arg: &TS,
     ) -> RpcResult<bool> {
-        let buf = serialize(&arg.to_string())?;
+        let arg = serialize(&arg.to_string())?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.Contains",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -437,14 +437,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
         ctx: &Context,
         arg: &TS,
     ) -> RpcResult<bool> {
-        let buf = serialize(&arg.to_string())?;
+        let arg = serialize(&arg.to_string())?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.Del",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -462,14 +462,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
         ctx: &Context,
         arg: &TS,
     ) -> RpcResult<GetResponse> {
-        let buf = serialize(&arg.to_string())?;
+        let arg = serialize(&arg.to_string())?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.Get",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -481,14 +481,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
     #[allow(unused)]
     /// Append a value onto the end of a list. Returns the new list size
     async fn list_add(&self, ctx: &Context, arg: &ListAddRequest) -> RpcResult<u32> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.ListAdd",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -506,14 +506,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
         ctx: &Context,
         arg: &TS,
     ) -> RpcResult<bool> {
-        let buf = serialize(&arg.to_string())?;
+        let arg = serialize(&arg.to_string())?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.ListClear",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -525,14 +525,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
     #[allow(unused)]
     /// Deletes a value from a list. Returns true if the item was removed.
     async fn list_del(&self, ctx: &Context, arg: &ListDelRequest) -> RpcResult<bool> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.ListDel",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -547,14 +547,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
     /// 11 items if the list contains at least 11 items. If the stop value
     /// is beyond the end of the list, it is treated as the end of the list.
     async fn list_range(&self, ctx: &Context, arg: &ListRangeRequest) -> RpcResult<StringList> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.ListRange",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -568,14 +568,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
     /// expires is an optional number of seconds before the value should be automatically deleted,
     /// or 0 for no expiration.
     async fn set(&self, ctx: &Context, arg: &SetRequest) -> RpcResult<()> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.Set",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -585,14 +585,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
     #[allow(unused)]
     /// Add an item into a set. Returns number of items added (1 or 0)
     async fn set_add(&self, ctx: &Context, arg: &SetAddRequest) -> RpcResult<u32> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.SetAdd",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -604,14 +604,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
     #[allow(unused)]
     /// Deletes an item from the set. Returns number of items removed from the set (1 or 0)
     async fn set_del(&self, ctx: &Context, arg: &SetDelRequest) -> RpcResult<u32> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.SetDel",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -625,14 +625,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
     /// input: list of sets for performing intersection (at least two)
     /// output: values
     async fn set_intersection(&self, ctx: &Context, arg: &StringList) -> RpcResult<StringList> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.SetIntersection",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -650,14 +650,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
         ctx: &Context,
         arg: &TS,
     ) -> RpcResult<StringList> {
-        let buf = serialize(&arg.to_string())?;
+        let arg = serialize(&arg.to_string())?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.SetQuery",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -671,14 +671,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
     /// input: list of sets for performing union (at least two)
     /// output: union of values
     async fn set_union(&self, ctx: &Context, arg: &StringList) -> RpcResult<StringList> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.SetUnion",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -696,14 +696,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
         ctx: &Context,
         arg: &TS,
     ) -> RpcResult<bool> {
-        let buf = serialize(&arg.to_string())?;
+        let arg = serialize(&arg.to_string())?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "KeyValue.SetClear",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )

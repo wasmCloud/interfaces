@@ -1,10 +1,14 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
+// This file is generated automatically using wasmcloud-weld and smithy model definitions
 //
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#![allow(clippy::ptr_arg)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Cow, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
     Timestamp, Transport,
@@ -39,10 +43,10 @@ pub trait FactorialReceiver: MessageDispatch + Factorial {
                 let value: u32 = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = Factorial::calculate(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "Factorial.Calculate",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             _ => Err(RpcError::MethodNotHandled(format!(
@@ -66,10 +70,6 @@ impl<T: Transport> FactorialSender<T> {
     /// Constructs a FactorialSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
-    }
-
-    pub fn set_timeout(&self, interval: std::time::Duration) {
-        self.transport.set_timeout(interval);
     }
 }
 
@@ -122,14 +122,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Factorial for Factori
     #[allow(unused)]
     /// Calculates the factorial (n!) of the input parameter
     async fn calculate(&self, ctx: &Context, arg: &u32) -> RpcResult<u64> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "Factorial.Calculate",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )

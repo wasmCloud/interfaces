@@ -1,10 +1,14 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
+// This file is generated automatically using wasmcloud-weld and smithy model definitions
 //
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#![allow(clippy::ptr_arg)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Cow, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
     Timestamp, Transport,
@@ -23,13 +27,13 @@ pub type PatternList = Vec<String>;
 /// Options passed to all test cases
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct TestOptions {
-    /// List of regex patterns for test names to run
-    /// Default is ".*", to run all tests.
-    pub patterns: PatternList,
     /// additional test configuration, optional
     /// Keys may be test case names, or other keys meaningful for the test.
     /// Values are serialized json, with contents specific to the test
     pub options: OptMap,
+    /// List of regex patterns for test names to run
+    /// Default is ".*", to run all tests.
+    pub patterns: PatternList,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -76,10 +80,10 @@ pub trait TestingReceiver: MessageDispatch + Testing {
                 let value: TestOptions = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = Testing::start(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "Testing.Start",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             _ => Err(RpcError::MethodNotHandled(format!(
@@ -102,10 +106,6 @@ impl<T: Transport> TestingSender<T> {
     /// Constructs a TestingSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
-    }
-
-    pub fn set_timeout(&self, interval: std::time::Duration) {
-        self.transport.set_timeout(interval);
     }
 }
 
@@ -154,14 +154,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Testing for TestingSe
     #[allow(unused)]
     /// Begin tests
     async fn start(&self, ctx: &Context, arg: &TestOptions) -> RpcResult<TestResults> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "Testing.Start",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )

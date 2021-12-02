@@ -44,7 +44,7 @@ use org.wasmcloud.model#I64
     contractId: "wasmcloud:sqldb",
     providerReceive: true )
 service SqlDb {
-    version: "0.1",
+    version: "0.2",
     operations: [ Execute, Fetch ],
 }
 
