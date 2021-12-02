@@ -6,7 +6,7 @@
 // Version 0.1 of this interface has the following features:
 //    Execute       - Execute sql operations (insert, update, create table, etc.)
 //                    Returns number of rows affected
-//    Fetch         - Select 0 or more rows from database
+//    Query         - Select 0 or more rows from database
 //                    The returned result set is encoded in CBOR,
 //                    a language-neutral compact representation.
 //
@@ -17,7 +17,7 @@
 //
 // Not currently supported:
 // - transactions
-// - batch operations (multiple execute or fetch queries in single rpc call)
+// - batch operations (multiple execute or queries in single rpc call)
 // - streaming results
 // - prepared statements
 // - results with NULL values, array column types, or custom column data types
@@ -44,8 +44,8 @@ use org.wasmcloud.model#I64
     contractId: "wasmcloud:sqldb",
     providerReceive: true )
 service SqlDb {
-    version: "0.2",
-    operations: [ Execute, Fetch ],
+    version: "0.1",
+    operations: [ Execute, Query ],
 }
 
 /// Execute an sql statement
@@ -58,14 +58,13 @@ operation Execute {
 /// the back-end database and a list of arguments to be used in the SQL statement.
 structure Statement {
   args: Args
-  @required
-  sql: Query
-}
 
-/// A query is a non-empty string containing a SQL query or statement,
-/// in the syntax of the back-end database.
-@length(min:1)
-string Query
+  /// A sql query or statement that is a non-empty string containing
+  /// in the syntax of the back-end database.
+  @required
+  @length(min:1)
+  sql: String
+}
 
 /// A list of arguments to be used in the SQL statement.
 /// The command uses question marks (?) for placeholders,

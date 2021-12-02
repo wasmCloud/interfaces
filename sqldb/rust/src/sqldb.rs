@@ -16,6 +16,12 @@ use wasmbus_rpc::{
 
 pub const SMITHY_VERSION: &str = "1.0";
 
+/// A list of arguments to be used in the SQL statement.
+/// The command uses question marks (?) for placeholders,
+/// which will be replaced by the specified arguments during execution.
+/// The command must have exactly as many placeholders as arguments, or the request will fail.
+pub type Args = Vec<String>;
+
 /// Metadata about a Column in the result set
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Column {
@@ -44,10 +50,6 @@ pub struct ExecuteResult {
     #[serde(rename = "rowsAffected")]
     pub rows_affected: u64,
 }
-
-/// A query is a non-empty string containing an SQL query or statement,
-/// in the syntax of the back-end database.
-pub type Query = String;
 
 /// Result of a query
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -81,6 +83,16 @@ pub struct SqlDbError {
     pub message: String,
 }
 
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct Statement {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub args: Option<Args>,
+    /// A sql query or statement that is a non-empty string containing
+    /// in the syntax of the back-end database.
+    #[serde(default)]
+    pub sql: String,
+}
+
 /// SqlDb - SQL Database connections
 /// To use this capability, the actor must be linked
 /// with the capability contract "wasmcloud:sqldb"
@@ -93,9 +105,9 @@ pub trait SqlDb {
         "wasmcloud:sqldb"
     }
     /// Execute an sql statement
-    async fn execute(&self, ctx: &Context, arg: &Query) -> RpcResult<ExecuteResult>;
+    async fn execute(&self, ctx: &Context, arg: &Statement) -> RpcResult<ExecuteResult>;
     /// Perform select query on database, returning all result rows
-    async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<QueryResult>;
+    async fn query(&self, ctx: &Context, arg: &Statement) -> RpcResult<QueryResult>;
 }
 
 /// SqlDbReceiver receives messages defined in the SqlDb service trait
@@ -108,7 +120,7 @@ pub trait SqlDbReceiver: MessageDispatch + SqlDb {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "Execute" => {
-                let value: Query = deserialize(message.arg.as_ref())
+                let value: Statement = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = SqlDb::execute(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
@@ -117,13 +129,13 @@ pub trait SqlDbReceiver: MessageDispatch + SqlDb {
                     arg: buf,
                 })
             }
-            "Fetch" => {
-                let value: Query = deserialize(message.arg.as_ref())
+            "Query" => {
+                let value: Statement = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
-                let resp = SqlDb::fetch(self, ctx, &value).await?;
+                let resp = SqlDb::query(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
-                    method: "SqlDb.Fetch",
+                    method: "SqlDb.Query",
                     arg: buf,
                 })
             }
@@ -175,7 +187,7 @@ impl SqlDbSender<wasmbus_rpc::actor::prelude::WasmHost> {
 impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender<T> {
     #[allow(unused)]
     /// Execute an sql statement
-    async fn execute(&self, ctx: &Context, arg: &Query) -> RpcResult<ExecuteResult> {
+    async fn execute(&self, ctx: &Context, arg: &Statement) -> RpcResult<ExecuteResult> {
         let arg = serialize(arg)?;
         let resp = self
             .transport
@@ -194,21 +206,21 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender
     }
     #[allow(unused)]
     /// Perform select query on database, returning all result rows
-    async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<QueryResult> {
+    async fn query(&self, ctx: &Context, arg: &Statement) -> RpcResult<QueryResult> {
         let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
-                    method: "SqlDb.Fetch",
+                    method: "SqlDb.Query",
                     arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
             .await?;
         let value = deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Fetch", e)))?;
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Query", e)))?;
         Ok(value)
     }
 }
