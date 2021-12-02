@@ -59,6 +59,10 @@ operation Execute {
 structure Statement {
   args: Args
 
+  /// Optional database in which the statement must be executed.
+  /// The value in this field is case-sensitive.
+  database: String
+
   /// A sql query or statement that is a non-empty string containing
   /// in the syntax of the back-end database.
   @required
@@ -66,9 +70,9 @@ structure Statement {
   sql: String
 }
 
-/// A list of arguments to be used in the SQL statement.
-/// The command uses question marks (?) for placeholders,
-/// which will be replaced by the specified arguments during execution.
+/// An optional list of arguments to be used in the SQL statement.
+/// When a statement uses question marks '?' for placeholders,
+/// the capability provider will replace the specified arguments during execution.
 /// The command must have exactly as many placeholders as arguments, or the request will fail.
 list Args {
   member: String

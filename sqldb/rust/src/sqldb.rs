@@ -16,9 +16,9 @@ use wasmbus_rpc::{
 
 pub const SMITHY_VERSION: &str = "1.0";
 
-/// A list of arguments to be used in the SQL statement.
-/// The command uses question marks (?) for placeholders,
-/// which will be replaced by the specified arguments during execution.
+/// An optional list of arguments to be used in the SQL statement.
+/// When a statement uses question marks '?' for placeholders,
+/// the capability provider will replace the specified arguments during execution.
 /// The command must have exactly as many placeholders as arguments, or the request will fail.
 pub type Args = Vec<String>;
 
@@ -87,6 +87,10 @@ pub struct SqlDbError {
 pub struct Statement {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub args: Option<Args>,
+    /// Optional database in which the statement must be executed.
+    /// The value in this field is case-sensitive.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub database: Option<String>,
     /// A sql query or statement that is a non-empty string containing
     /// in the syntax of the back-end database.
     #[serde(default)]
