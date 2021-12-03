@@ -346,6 +346,11 @@ structure StartActorCommand {
     /// Optional set of annotations used to describe the nature of this actor start command. For
     /// example, autonomous agents may wish to "tag" start requests as part of a given deployment    
     annotations: AnnotationMap
+
+    /// The number of actors to start
+    /// A zero value will be interpreted as 1.
+    @required
+    count: U16,
 }
 
 /// A command sent to a host requesting a capability provider be started with the 
@@ -391,14 +396,15 @@ structure StopActorCommand {
     @serialization(name:"actor_ref")
     actorRef: String,
 
-    /// Optional count. If 0, all instances of this actor will be terminated
+    /// The number of actors to stop
+    /// A zero value means stop all actors
+    @required
     count: U16,
 
     /// Optional set of annotations used to describe the nature of this
     /// stop request. If supplied, the only instances of this actor with these
     /// annotations will be stopped
     annotations: AnnotationMap
-
 }
 
 /// A request to stop the given provider on the indicated host

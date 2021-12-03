@@ -207,6 +207,9 @@ pub struct StartActorCommand {
     /// example, autonomous agents may wish to "tag" start requests as part of a given deployment
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub annotations: Option<AnnotationMap>,
+    /// The number of actors to start
+    /// A zero value will be interpreted as 1.
+    pub count: u16,
     /// Host ID on which this actor should start
     #[serde(default)]
     pub host_id: String,
@@ -249,9 +252,9 @@ pub struct StopActorCommand {
     /// annotations will be stopped
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub annotations: Option<AnnotationMap>,
-    /// Optional count. If 0, all instances of this actor will be terminated
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub count: Option<u16>,
+    /// The number of actors to stop
+    /// A zero value means stop all actors
+    pub count: u16,
     /// The ID of the target host
     #[serde(default)]
     pub host_id: String,
@@ -628,6 +631,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "AuctionProvider", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Seek out a list of suitable hosts for an actor given a set of host
     /// label constraints.
@@ -652,6 +656,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "AuctionActor", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Queries the list of hosts currently visible to the lattice. This is
     /// a "gather" operation and so can be influenced by short timeouts,
@@ -673,6 +678,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "GetHosts", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Queries for the contents of a host given the supplied 56-character unique ID
     async fn get_host_inventory<TS: ToString + ?Sized + std::marker::Sync>(
@@ -696,6 +702,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "GetHostInventory", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Queries the lattice for the list of known/cached claims by taking the response
     /// from the first host that answers the query.
@@ -716,6 +723,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "GetClaims", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Instructs a given host to start the indicated actor
     async fn start_actor(
@@ -739,6 +747,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "StartActor", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Publish a link definition into the lattice, allowing it to be cached and
     /// delivered to the appropriate capability provider instances
@@ -763,6 +772,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "AdvertiseLink", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests the removal of a link definition. The definition will be removed
     /// from the cache and the relevant capability providers will be given a chance
@@ -788,6 +798,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "RemoveLink", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Queries all current link definitions in the lattice. The first host
     /// that receives this response will reply with the contents of the distributed
@@ -809,6 +820,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "GetLinks", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests that a specific host perform a live update on the indicated
     /// actor
@@ -833,6 +845,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "UpdateActor", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests that the given host start the indicated capability provider
     async fn start_provider(
@@ -856,6 +869,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "StartProvider", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests that the given capability provider be stopped on the indicated host
     async fn stop_provider(
@@ -879,6 +893,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "StopProvider", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests that an actor be stopped on the given host
     async fn stop_actor(
@@ -902,6 +917,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "StopActor", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests that the given host be stopped
     async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<CtlOperationAck> {
