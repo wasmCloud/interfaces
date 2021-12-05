@@ -159,6 +159,12 @@ structure HostData {
     @serialization(name: "cluster_issuers")
     @n(11)
     clusterIssuers: ClusterIssuers,
+
+    /// Optional configuration JSON sent to a given link name of a provider
+    /// without an actor context
+    @serialization(name:"config_json")
+    @n(12)
+    configJson: String
 }
 
 list ClusterIssuers {
