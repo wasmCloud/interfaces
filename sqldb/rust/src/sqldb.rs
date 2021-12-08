@@ -1,14 +1,10 @@
-// This file is generated automatically using wasmcloud-weld and smithy model definitions
+// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
 //
 
-#![allow(clippy::ptr_arg)]
-#[allow(unused_imports)]
+#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
 use async_trait::async_trait;
-#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-#[allow(unused_imports)]
-use std::{borrow::Cow, string::ToString};
-#[allow(unused_imports)]
+use std::{borrow::Cow, io::Write, string::ToString};
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
     Timestamp, Transport,
@@ -16,24 +12,18 @@ use wasmbus_rpc::{
 
 pub const SMITHY_VERSION: &str = "1.0";
 
-/// An optional list of arguments to be used in the SQL statement.
-/// When a statement uses question marks '?' for placeholders,
-/// the capability provider will replace the specified arguments during execution.
-/// The command must have exactly as many placeholders as arguments, or the request will fail.
-pub type Args = Vec<String>;
-
 /// Metadata about a Column in the result set
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Column {
+    /// column ordinal
+    pub ordinal: u32,
+    /// Column name in the result
+    #[serde(default)]
+    pub name: String,
     /// column data type as reported by the database
     #[serde(rename = "dbType")]
     #[serde(default)]
     pub db_type: String,
-    /// Column name in the result
-    #[serde(default)]
-    pub name: String,
-    /// column ordinal
-    pub ordinal: u32,
 }
 
 /// List of columns in the result set returned by a Query operation
@@ -42,32 +32,46 @@ pub type Columns = Vec<Column>;
 /// Result of an Execute operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ExecuteResult {
+    /// the number of rows affected by the query
+    #[serde(rename = "rowsAffected")]
+    pub rows_affected: u64,
     /// optional error information.
     /// If error is included in the QueryResult, other values should be ignored.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<SqlDbError>,
-    /// the number of rows affected by the query
-    #[serde(rename = "rowsAffected")]
-    pub rows_affected: u64,
+}
+
+/// An optional list of arguments to be used in the SQL statement.
+/// When a statement uses question marks '?' for placeholders,
+/// the capability provider will replace the specified arguments during execution.
+/// The command must have exactly as many placeholders as arguments, or the request will fail.
+/// The members are CBOR encoded.
+pub type Parameters = Vec<Vec<u8>>;
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct PingResult {
+    /// Optional error information.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<SqlDbError>,
 }
 
 /// Result of a query
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct QueryResult {
-    /// description of columns returned
-    pub columns: Columns,
-    /// optional error information.
-    /// If error is included in the QueryResult, other values should be ignored.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub error: Option<SqlDbError>,
     /// number of rows returned
     #[serde(rename = "numRows")]
     pub num_rows: u64,
+    /// description of columns returned
+    pub columns: Columns,
     /// result rows, encoded in CBOR as
     /// an array (rows) of arrays (fields per row)
     #[serde(with = "serde_bytes")]
     #[serde(default)]
     pub rows: Vec<u8>,
+    /// optional error information.
+    /// If error is included in the QueryResult, other values should be ignored.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<SqlDbError>,
 }
 
 /// Detailed error information from the previous operation
@@ -85,12 +89,12 @@ pub struct SqlDbError {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Statement {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub args: Option<Args>,
     /// Optional database in which the statement must be executed.
     /// The value in this field is case-sensitive.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub database: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parameters: Option<Parameters>,
     /// A sql query or statement that is a non-empty string containing
     /// in the syntax of the back-end database.
     #[serde(default)]
@@ -127,20 +131,20 @@ pub trait SqlDbReceiver: MessageDispatch + SqlDb {
                 let value: Statement = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = SqlDb::execute(self, ctx, &value).await?;
-                let buf = Cow::Owned(serialize(&resp)?);
+                let buf = serialize(&resp)?;
                 Ok(Message {
                     method: "SqlDb.Execute",
-                    arg: buf,
+                    arg: Cow::Owned(buf),
                 })
             }
             "Query" => {
                 let value: Statement = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = SqlDb::query(self, ctx, &value).await?;
-                let buf = Cow::Owned(serialize(&resp)?);
+                let buf = serialize(&resp)?;
                 Ok(Message {
                     method: "SqlDb.Query",
-                    arg: buf,
+                    arg: Cow::Owned(buf),
                 })
             }
             _ => Err(RpcError::MethodNotHandled(format!(
@@ -165,6 +169,10 @@ impl<T: Transport> SqlDbSender<T> {
     /// Constructs a SqlDbSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
+    }
+
+    pub fn set_timeout(&self, interval: std::time::Duration) {
+        self.transport.set_timeout(interval);
     }
 }
 
@@ -192,14 +200,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender
     #[allow(unused)]
     /// Execute an sql statement
     async fn execute(&self, ctx: &Context, arg: &Statement) -> RpcResult<ExecuteResult> {
-        let arg = serialize(arg)?;
+        let buf = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "SqlDb.Execute",
-                    arg: Cow::Borrowed(&arg),
+                    arg: Cow::Borrowed(&buf),
                 },
                 None,
             )
@@ -211,14 +219,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender
     #[allow(unused)]
     /// Perform select query on database, returning all result rows
     async fn query(&self, ctx: &Context, arg: &Statement) -> RpcResult<QueryResult> {
-        let arg = serialize(arg)?;
+        let buf = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "SqlDb.Query",
-                    arg: Cow::Borrowed(&arg),
+                    arg: Cow::Borrowed(&buf),
                 },
                 None,
             )

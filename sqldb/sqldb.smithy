@@ -9,6 +9,8 @@
 //    Query         - Select 0 or more rows from database
 //                    The returned result set is encoded in CBOR,
 //                    a language-neutral compact representation.
+//    Ping          - Ping verifies a connection to the database is still alive,
+//                    establishing a connection if necessary.
 //
 // CBOR is designed to be an extensible format that is language-neutral,
 // about 50-70% denser than JSON, and suitable for constrained
@@ -55,7 +57,7 @@ operation Execute {
 }
 
 structure Statement {
-  args: Args
+  parameters: Parameters
 
   /// Optional database in which the statement must be executed.
   /// The value in this field is case-sensitive.
@@ -72,8 +74,9 @@ structure Statement {
 /// When a statement uses question marks '?' for placeholders,
 /// the capability provider will replace the specified arguments during execution.
 /// The command must have exactly as many placeholders as arguments, or the request will fail.
-list Args {
-  member: String
+/// The members are CBOR encoded.
+list Parameters {
+  member: Blob
 }
 
 /// Result of an Execute operation
@@ -117,6 +120,22 @@ structure QueryResult {
     /// optional error information.
     /// If error is included in the QueryResult, other values should be ignored.
     @n(3)
+    error: SqlDbError,
+}
+
+/// Ping verifies a connection to the database is still alive,
+/// establishing a connection if necessary.
+///
+/// Ping may be used to establish that further queries are possible
+/// as well as if the provided DSN is valid.
+///
+/// Ping may also be used as part of a health checking system.
+operation Ping {
+    output: PingResult
+}
+
+structure PingResult {
+    /// Optional error information.
     error: SqlDbError,
 }
 
