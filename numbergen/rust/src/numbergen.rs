@@ -1,14 +1,10 @@
-// This file is generated automatically using wasmcloud-weld and smithy model definitions
+// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
 //
 
-#![allow(clippy::ptr_arg)]
-#[allow(unused_imports)]
+#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
 use async_trait::async_trait;
-#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-#[allow(unused_imports)]
-use std::{borrow::Cow, string::ToString};
-#[allow(unused_imports)]
+use std::{borrow::Cow, io::Write, string::ToString};
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
     Timestamp, Transport,
@@ -21,8 +17,8 @@ pub const SMITHY_VERSION: &str = "1.0";
 /// random_in_range(RangeLimit{0,4}) returns one the values, 0, 1, 2, 3, or 4.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct RangeLimit {
-    pub max: u32,
     pub min: u32,
+    pub max: u32,
 }
 
 /// wasmbus.contractId: wasmcloud:builtin:numbergen
@@ -53,28 +49,28 @@ pub trait NumberGenReceiver: MessageDispatch + NumberGen {
         match message.method {
             "GenerateGuid" => {
                 let resp = NumberGen::generate_guid(self, ctx).await?;
-                let buf = Cow::Owned(serialize(&resp)?);
+                let buf = serialize(&resp)?;
                 Ok(Message {
                     method: "NumberGen.GenerateGuid",
-                    arg: buf,
+                    arg: Cow::Owned(buf),
                 })
             }
             "RandomInRange" => {
                 let value: RangeLimit = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = NumberGen::random_in_range(self, ctx, &value).await?;
-                let buf = Cow::Owned(serialize(&resp)?);
+                let buf = serialize(&resp)?;
                 Ok(Message {
                     method: "NumberGen.RandomInRange",
-                    arg: buf,
+                    arg: Cow::Owned(buf),
                 })
             }
             "Random32" => {
                 let resp = NumberGen::random_32(self, ctx).await?;
-                let buf = Cow::Owned(serialize(&resp)?);
+                let buf = serialize(&resp)?;
                 Ok(Message {
                     method: "NumberGen.Random32",
-                    arg: buf,
+                    arg: Cow::Owned(buf),
                 })
             }
             _ => Err(RpcError::MethodNotHandled(format!(
@@ -96,6 +92,10 @@ impl<T: Transport> NumberGenSender<T> {
     /// Constructs a NumberGenSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
+    }
+
+    pub fn set_timeout(&self, interval: std::time::Duration) {
+        self.transport.set_timeout(interval);
     }
 }
 
@@ -130,14 +130,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
     /// These guids are known as "version 4", meaning all bits are random or pseudo-random.
     ///
     async fn generate_guid(&self, ctx: &Context) -> RpcResult<String> {
-        let arg = *b"";
+        let buf = *b"";
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "NumberGen.GenerateGuid",
-                    arg: Cow::Borrowed(&arg),
+                    arg: Cow::Borrowed(&buf),
                 },
                 None,
             )
@@ -150,14 +150,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
     /// Request a random integer within a range
     /// The result will will be in the range [min,max), i.e., >= min and < max.
     async fn random_in_range(&self, ctx: &Context, arg: &RangeLimit) -> RpcResult<u32> {
-        let arg = serialize(arg)?;
+        let buf = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "NumberGen.RandomInRange",
-                    arg: Cow::Borrowed(&arg),
+                    arg: Cow::Borrowed(&buf),
                 },
                 None,
             )
@@ -169,14 +169,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
     #[allow(unused)]
     /// Request a 32-bit random number
     async fn random_32(&self, ctx: &Context) -> RpcResult<u32> {
-        let arg = *b"";
+        let buf = *b"";
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "NumberGen.Random32",
-                    arg: Cow::Borrowed(&arg),
+                    arg: Cow::Borrowed(&buf),
                 },
                 None,
             )

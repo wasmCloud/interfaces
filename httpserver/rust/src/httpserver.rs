@@ -1,14 +1,10 @@
-// This file is generated automatically using wasmcloud-weld and smithy model definitions
+// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
 //
 
-#![allow(clippy::ptr_arg)]
-#[allow(unused_imports)]
+#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
 use async_trait::async_trait;
-#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-#[allow(unused_imports)]
-use std::{borrow::Cow, string::ToString};
-#[allow(unused_imports)]
+use std::{borrow::Cow, io::Write, string::ToString};
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
     Timestamp, Transport,
@@ -25,12 +21,6 @@ pub type HeaderValues = Vec<String>;
 /// HttpRequest contains data sent to actor about the http request
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct HttpRequest {
-    /// Request body as a byte array. May be empty.
-    #[serde(with = "serde_bytes")]
-    #[serde(default)]
-    pub body: Vec<u8>,
-    /// map of request headers (string key, string value)
-    pub header: HeaderMap,
     /// HTTP method. One of: GET,POST,PUT,DELETE,HEAD,OPTIONS,CONNECT,PATCH,TRACE
     #[serde(default)]
     pub method: String,
@@ -41,21 +31,27 @@ pub struct HttpRequest {
     #[serde(rename = "queryString")]
     #[serde(default)]
     pub query_string: String,
+    /// map of request headers (string key, string value)
+    pub header: HeaderMap,
+    /// Request body as a byte array. May be empty.
+    #[serde(with = "serde_bytes")]
+    #[serde(default)]
+    pub body: Vec<u8>,
 }
 
 /// HttpResponse contains the actor's response to return to the http client
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct HttpResponse {
-    /// Body of response as a byte array. May be an empty array.
-    #[serde(with = "serde_bytes")]
-    #[serde(default)]
-    pub body: Vec<u8>,
-    /// Map of headers (string keys, list of values)
-    pub header: HeaderMap,
     /// statusCode is a three-digit number, usually in the range 100-599,
     /// A value of 200 indicates success.
     #[serde(rename = "statusCode")]
     pub status_code: u16,
+    /// Map of headers (string keys, list of values)
+    pub header: HeaderMap,
+    /// Body of response as a byte array. May be an empty array.
+    #[serde(with = "serde_bytes")]
+    #[serde(default)]
+    pub body: Vec<u8>,
 }
 
 /// HttpServer is the contract to be implemented by actor
@@ -81,10 +77,10 @@ pub trait HttpServerReceiver: MessageDispatch + HttpServer {
                 let value: HttpRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = HttpServer::handle_request(self, ctx, &value).await?;
-                let buf = Cow::Owned(serialize(&resp)?);
+                let buf = serialize(&resp)?;
                 Ok(Message {
                     method: "HttpServer.HandleRequest",
-                    arg: buf,
+                    arg: Cow::Owned(buf),
                 })
             }
             _ => Err(RpcError::MethodNotHandled(format!(
@@ -107,6 +103,10 @@ impl<T: Transport> HttpServerSender<T> {
     /// Constructs a HttpServerSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
+    }
+
+    pub fn set_timeout(&self, interval: std::time::Duration) {
+        self.transport.set_timeout(interval);
     }
 }
 
@@ -134,14 +134,14 @@ impl HttpServerSender<wasmbus_rpc::actor::prelude::WasmHost> {
 impl<T: Transport + std::marker::Sync + std::marker::Send> HttpServer for HttpServerSender<T> {
     #[allow(unused)]
     async fn handle_request(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<HttpResponse> {
-        let arg = serialize(arg)?;
+        let buf = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "HttpServer.HandleRequest",
-                    arg: Cow::Borrowed(&arg),
+                    arg: Cow::Borrowed(&buf),
                 },
                 None,
             )
