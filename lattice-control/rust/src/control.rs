@@ -196,6 +196,22 @@ pub struct RemoveLinkDefinitionRequest {
     pub link_name: String,
 }
 
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct ScaleActorCommand {
+    /// Reference for the actor. Can be any of the acceptable forms of unique identification
+    #[serde(default)]
+    pub actor_ref: String,
+    /// Optional set of annotations used to describe the nature of this actor scale command. For
+    /// example, autonomous agents may wish to "tag" scale requests as part of a given deployment
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub annotations: Option<AnnotationMap>,
+    /// The target number of actors
+    pub count: u16,
+    /// Host ID on which to scale this actor
+    #[serde(default)]
+    pub host_id: String,
+}
+
 /// A command sent to a specific host instructing it to start the actor
 /// indicated by the reference.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -354,6 +370,12 @@ pub trait LatticeController {
     /// Queries the lattice for the list of known/cached claims by taking the response
     /// from the first host that answers the query.
     async fn get_claims(&self, ctx: &Context) -> RpcResult<GetClaimsResponse>;
+    /// Instructs a given host to scale the indicated actor
+    async fn scale_actor(
+        &self,
+        ctx: &Context,
+        arg: &ScaleActorCommand,
+    ) -> RpcResult<CtlOperationAck>;
     /// Instructs a given host to start the indicated actor
     async fn start_actor(
         &self,
@@ -458,6 +480,16 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                 let buf = serialize(&resp)?;
                 Ok(Message {
                     method: "LatticeController.GetClaims",
+                    arg: Cow::Owned(buf),
+                })
+            }
+            "ScaleActor" => {
+                let value: ScaleActorCommand = deserialize(message.arg.as_ref())
+                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
+                let resp = LatticeController::scale_actor(self, ctx, &value).await?;
+                let buf = serialize(&resp)?;
+                Ok(Message {
+                    method: "LatticeController.ScaleActor",
                     arg: Cow::Owned(buf),
                 })
             }
@@ -717,6 +749,29 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .await?;
         let value = deserialize(&resp)
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "GetClaims", e)))?;
+        Ok(value)
+    }
+    #[allow(unused)]
+    /// Instructs a given host to scale the indicated actor
+    async fn scale_actor(
+        &self,
+        ctx: &Context,
+        arg: &ScaleActorCommand,
+    ) -> RpcResult<CtlOperationAck> {
+        let buf = serialize(arg)?;
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "LatticeController.ScaleActor",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "ScaleActor", e)))?;
         Ok(value)
     }
     #[allow(unused)]
