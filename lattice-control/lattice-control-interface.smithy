@@ -34,10 +34,10 @@ string ConfigurationString
 service LatticeController {
     version: "0.1"
     operations: [AuctionProvider, AuctionActor, GetHosts, 
-                 GetHostInventory, GetClaims, StartActor,
-                 AdvertiseLink, RemoveLink, GetLinks,
-                 UpdateActor, StartProvider, StopProvider,
-                 StopActor, StopHost]
+                 GetHostInventory, GetClaims, ScaleActor,
+                 StartActor, AdvertiseLink, RemoveLink,
+                 GetLinks, UpdateActor, StartProvider,
+                 StopProvider, StopActor, StopHost]
 }
 
 /// Seek out a list of suitable hosts for a capability provider given
@@ -93,6 +93,12 @@ operation RemoveLink {
 /// Instructs a given host to start the indicated actor
 operation StartActor {
     input: StartActorCommand
+    output: CtlOperationAck
+}
+
+/// Instructs a given host to scale the indicated actor
+operation ScaleActor {
+    input: ScaleActorCommand
     output: CtlOperationAck
 }
 
@@ -380,6 +386,26 @@ structure StartProviderCommand {
     /// providers prefer base64-encoded JSON here, though that data should never
     /// exceed 500KB
     configuration: ConfigurationString
+}
+
+structure ScaleActorCommand {
+    /// Reference for the actor. Can be any of the acceptable forms of unique identification
+    @required
+    @serialization(name: "actor_ref")
+    actorRef: String,
+
+    /// Host ID on which to scale this actor
+    @required
+    @serialization(name: "host_id")
+    hostId: String,
+
+    /// Optional set of annotations used to describe the nature of this actor scale command. For
+    /// example, autonomous agents may wish to "tag" scale requests as part of a given deployment
+    annotations: AnnotationMap
+
+    /// The target number of actors
+    @required
+    count: U16,
 }
 
 /// A command sent to a host to request that instances of a given actor
