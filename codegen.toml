@@ -6,6 +6,7 @@
 path = "docs/idl/org.wasmcloud"
 files = [ 
     "control-interface.smithy",
+    "blobstore.smithy",
     "factorial.smithy",
     "httpclient.smithy",
     "httpserver.smithy",
