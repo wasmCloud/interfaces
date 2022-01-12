@@ -198,6 +198,9 @@ pub struct RemoveLinkDefinitionRequest {
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ScaleActorCommand {
+    /// Public Key ID of the actor to scale
+    #[serde(default)]
+    pub actor_id: String,
     /// Reference for the actor. Can be any of the acceptable forms of unique identification
     #[serde(default)]
     pub actor_ref: String,
