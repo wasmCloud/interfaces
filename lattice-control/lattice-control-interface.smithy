@@ -394,6 +394,11 @@ structure ScaleActorCommand {
     @serialization(name: "actor_ref")
     actorRef: String,
 
+    /// Public Key ID of the actor to scale
+    @required
+    @serialization(name: "actor_id")
+    actorId: String,
+
     /// Host ID on which to scale this actor
     @required
     @serialization(name: "host_id")
