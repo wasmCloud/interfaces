@@ -27,23 +27,30 @@ impl HttpResponse {
             .map_err(|e| RpcError::Ser(e.to_string()))?
             .into_bytes();
         let mut header = HeaderMap::new();
-        header.insert("Content-Type".to_string(), vec!("application/json".to_string()));
+        header.insert(
+            "Content-Type".to_string(),
+            vec!["application/json".to_string()],
+        );
         Ok(HttpResponse {
             body,
             status_code,
-            header
+            header,
         })
     }
 
     /// Creates a response with a given status code, JSON-serialized payload, and headers specified by the header argument. Automatically includes the appropriate Content-Type header
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `payload` - Any struct implementing the Serialize trait from serde/serde_json
     /// * `status_code` - A 16-bit unsigned integer representing the outbound HTTP status code, e.g. 200 for successful interactions, 404 for not found, etc..
     /// * `headers` - A std::collections::HashMap from a String to a Vec() of Strings. Always includes the Content-Type header
-    /// 
-    pub fn json_with_headers<T>(payload: T, status_code: u16, headers: std::collections::HashMap<String, Vec<String>>) -> Result<HttpResponse, RpcError>
+    ///
+    pub fn json_with_headers<T>(
+        payload: T,
+        status_code: u16,
+        headers: std::collections::HashMap<String, Vec<String>>,
+    ) -> Result<HttpResponse, RpcError>
     where
         T: Serialize,
     {
@@ -52,12 +59,15 @@ impl HttpResponse {
             .into_bytes();
 
         let mut fixed_header = headers.clone();
-        fixed_header.retain(|k ,_| k.to_lowercase() != "content-type");
-        fixed_header.insert("Content-Type".to_string(), vec!("application/json".to_string()));
+        fixed_header.retain(|k, _| k.to_lowercase() != "content-type");
+        fixed_header.insert(
+            "Content-Type".to_string(),
+            vec!["application/json".to_string()],
+        );
         Ok(HttpResponse {
             body,
             status_code,
-            header: fixed_header
+            header: fixed_header,
         })
     }
 
@@ -122,15 +132,25 @@ mod test {
         let content_type = &r.header.get("Content-Type").unwrap();
         assert_eq!(**content_type, vec!("application/json".to_string()));
 
-        let mut header: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
-        header.insert("X-something-one".to_owned(), vec!("foo".to_owned()));
-        header.insert("X-something-two".to_owned(), vec!("bar".to_owned()));
+        let mut header: std::collections::HashMap<String, Vec<String>> =
+            std::collections::HashMap::new();
+        header.insert("X-something-one".to_owned(), vec!["foo".to_owned()]);
+        header.insert("X-something-two".to_owned(), vec!["bar".to_owned()]);
         let r = HttpResponse::json_with_headers(&obj, 200, header);
         assert!(r.is_ok());
         let r = r.unwrap();
-        assert_eq!(*r.header.get("X-something-one").unwrap(), vec!("foo".to_owned()));
-        assert_eq!(*r.header.get("X-something-two").unwrap(), vec!("bar".to_owned()));
-        assert_eq!(*r.header.get("Content-Type").unwrap(), vec!("application/json".to_owned()));
+        assert_eq!(
+            *r.header.get("X-something-one").unwrap(),
+            vec!("foo".to_owned())
+        );
+        assert_eq!(
+            *r.header.get("X-something-two").unwrap(),
+            vec!("bar".to_owned())
+        );
+        assert_eq!(
+            *r.header.get("Content-Type").unwrap(),
+            vec!("application/json".to_owned())
+        );
     }
 
     struct Thing {
