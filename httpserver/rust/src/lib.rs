@@ -28,7 +28,7 @@ impl HttpResponse {
             .into_bytes();
         let mut header = HeaderMap::new();
         header.insert(
-            "Content-Type".to_string(),
+            "content-type".to_string(),
             vec!["application/json".to_string()],
         );
         Ok(HttpResponse {
@@ -58,12 +58,17 @@ impl HttpResponse {
             .map_err(|e| RpcError::Ser(e.to_string()))?
             .into_bytes();
 
-        let mut fixed_header = headers.clone();
-        fixed_header.retain(|k, _| k.to_lowercase() != "content-type");
-        fixed_header.insert(
-            "Content-Type".to_string(),
-            vec!["application/json".to_string()],
+        let mut fixed_header: HeaderMap = HeaderMap::from_iter(
+            headers
+                .iter()
+                .map(|(k, v)| (k.to_lowercase(), v.to_owned())),
         );
+        if !fixed_header.contains_key("content-type") {
+            fixed_header.insert(
+                "content-type".to_string(),
+                vec!["application/json".to_string()],
+            );
+        }
         Ok(HttpResponse {
             body,
             status_code,
@@ -129,27 +134,37 @@ mod test {
         let r = r.unwrap();
         assert_eq!(r.status_code, 201);
         assert_eq!(&r.body, br#"{"list":[1,2,3]}"#);
-        let content_type = &r.header.get("Content-Type").unwrap();
+        let content_type = &r.header.get("content-type").unwrap();
         assert_eq!(**content_type, vec!("application/json".to_string()));
 
         let mut header: std::collections::HashMap<String, Vec<String>> =
             std::collections::HashMap::new();
-        header.insert("X-something-one".to_owned(), vec!["foo".to_owned()]);
-        header.insert("X-something-two".to_owned(), vec!["bar".to_owned()]);
-        let r = HttpResponse::json_with_headers(&obj, 200, header);
+        header.insert("x-something-one".to_owned(), vec!["foo".to_owned()]);
+        header.insert("X-Something-Two".to_owned(), vec!["bar".to_owned()]);
+        let r = HttpResponse::json_with_headers(&obj, 200, header.clone());
         assert!(r.is_ok());
         let r = r.unwrap();
         assert_eq!(
-            *r.header.get("X-something-one").unwrap(),
+            *r.header.get("x-something-one").unwrap(),
             vec!("foo".to_owned())
         );
         assert_eq!(
-            *r.header.get("X-something-two").unwrap(),
+            *r.header.get("x-something-two").unwrap(),
             vec!("bar".to_owned())
         );
         assert_eq!(
-            *r.header.get("Content-Type").unwrap(),
+            *r.header.get("content-type").unwrap(),
             vec!("application/json".to_owned())
+        );
+
+        header.insert(
+            "Content-Type".to_owned(),
+            vec!["application/text".to_owned()],
+        );
+        let r = HttpResponse::json_with_headers(&obj, 200, header).unwrap();
+        assert_eq!(
+            *r.header.get("content-type").unwrap(),
+            vec!("application/text")
         );
     }
 
