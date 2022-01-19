@@ -44,7 +44,7 @@ impl HttpResponse {
     ///
     /// * `payload` - Any struct implementing the Serialize trait from serde/serde_json
     /// * `status_code` - A 16-bit unsigned integer representing the outbound HTTP status code, e.g. 200 for successful interactions, 404 for not found, etc..
-    /// * `headers` - A std::collections::HashMap from a String to a Vec() of Strings. Always includes the Content-Type header
+    /// * `headers` - A std::collections::HashMap from a String to a Vec() of Strings. The Content-Type header is ignored, for Content-Type will always default to application/json
     ///
     pub fn json_with_headers<T>(
         payload: T,
