@@ -13,15 +13,17 @@
     <div id="content">
         <div class="p-4 overflow-y-auto">
             <h1 id="org_wasmcloud_model" class="text-2xl font-serif">Namespace org.wasmcloud.model</h1>
-            <div class="table m-4 ml-12">            <div class="table-row">
+            <div class="table m-4 ml-12">
+            <div class="table-row">
                 <div class="table-cell align-top pr-6 w-28">
                     Traits
                 </div>
                 <div class="table-cell align-top">
                     <ul>
-<li class="font-light"><a href="#org_wasmcloud_model_codegen_rust"><a href="#codegen_rust">codegenRust</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_extends"><a href="#extends">extends</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_n"><a href="#n">n</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_non_empty_string"><a href="#non_empty_string">nonEmptyString</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_serialization"><a href="#serialization">serialization</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_synonym"><a href="#synonym">synonym</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_unsigned_int"><a href="#unsigned_int">unsignedInt</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_wasmbus"><a href="#wasmbus">wasmbus</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_wasmbus_data"><a href="#wasmbus_data">wasmbusData</a></a></li>                    </ul>
+<li class="font-light"><a href="#org_wasmcloud_model_codegen_rust"><a href="#codegen_rust">codegenRust</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_extends"><a href="#extends">extends</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_n"><a href="#n">n</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_non_empty_string"><a href="#non_empty_string">nonEmptyString</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_rename"><a href="#rename">rename</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_rename_item"><a href="#rename_item">renameItem</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_serialization"><a href="#serialization">serialization</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_synonym"><a href="#synonym">synonym</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_unsigned_int"><a href="#unsigned_int">unsignedInt</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_wasmbus"><a href="#wasmbus">wasmbus</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_wasmbus_data"><a href="#wasmbus_data">wasmbusData</a></a></li>                    </ul>
                 </div>
-            </div>            <div class="table-row">
+            </div>
+            <div class="table-row">
                 <div class="table-cell align-top pr-6 w-28">
                     Simple
                 </div>
@@ -29,7 +31,8 @@
                     <ul>
 <li class="font-light"><a href="#org_wasmcloud_model_capability_contract_id"><a href="#capability_contract_id">CapabilityContractId</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_i8"><a href="#i8">I8</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_i16"><a href="#i16">I16</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_i32"><a href="#i32">I32</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_i64"><a href="#i64">I64</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_u8"><a href="#u8">U8</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_u16"><a href="#u16">U16</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_u32"><a href="#u32">U32</a></a></li><li class="font-light"><a href="#org_wasmcloud_model_u64"><a href="#u64">U64</a></a></li>                    </ul>
                 </div>
-            </div>            <div class="table-row">
+            </div>
+            <div class="table-row">
                 <div class="table-cell align-top pr-6 w-28">
                     Lists
                 </div>
@@ -52,6 +55,8 @@
                             <td>[object]</td>
                     </tr>            </table>
         </div>
+
+
 
 
     <h2 id="codegen_rust" class="mt-8 border-t-2 border-gray-300">
@@ -125,6 +130,8 @@
         </div>
 
 
+
+
     <h2 id="i16" class="mt-8 border-t-2 border-gray-300">
         <a href="#i16">I16</a><span class="text-lg pl-4">(short)</span>
     </h2><p class="font-light ml-6">signed 16-bit int</p>
@@ -137,6 +144,8 @@
                             <td>[object]</td>
                     </tr>            </table>
         </div>
+
+
 
 
     <h2 id="i32" class="mt-8 border-t-2 border-gray-300">
@@ -153,6 +162,8 @@
         </div>
 
 
+
+
     <h2 id="i64" class="mt-8 border-t-2 border-gray-300">
         <a href="#i64">I64</a><span class="text-lg pl-4">(long)</span>
     </h2><p class="font-light ml-6">signed 64-bit int</p>
@@ -165,6 +176,8 @@
                             <td>[object]</td>
                     </tr>            </table>
         </div>
+
+
 
 
     <h2 id="identifier_list" class="mt-8 border-t-2 border-gray-300">
@@ -188,6 +201,8 @@
                                 </tbody>
                             </table>
                         </div>
+
+
 
 
 
@@ -244,6 +259,59 @@ during encoding and so will slightly increase the encoding size.</p>
                             <td>[object]</td>
                     </tr>            </table>
         </div>
+
+
+    <h2 id="rename" class="mt-8 border-t-2 border-gray-300">
+        <a href="#rename">rename</a><span class="text-lg pl-4">(list)</span>
+    </h2><p class="font-light ml-6">Rename item(s) in target language.
+Useful if the item name (operation, or field) conflicts with a keyword in the target language.
+example: @rename({lang:"python",name:"delete"})</p>
+    <div class="ml-12">
+        <table>
+            <thead>
+            <tr>
+                <th class="w-48"></th>
+                <th class="w-48"></th>
+                <th class=""></th>
+            </tr>
+            </thead>
+            <tbody>            </tbody>
+        </table>
+    </div>
+
+
+
+    <h2 id="rename_item" class="mt-8 border-t-2 border-gray-300">
+        <a href="#rename_item">renameItem</a><span class="text-lg pl-4">(structure)</span>
+    </h2><p class="font-light ml-6">list element of trait @rename. the item name in the target language
+see '@rename'</p>
+    <div class="ml-12">
+        <table>
+            <thead>
+            <tr>
+                <th class="w-48"></th>
+                <th class="w-48"></th>
+                <th class=""></th>
+            </tr>
+            </thead>
+            <tbody>                <tr>
+                    <td>lang:</td>
+                    <td>String</td>
+                    <td>&nbsp;</td>
+                    <!--
+                    <td><span class="font-light">[object] </span> </td>
+                    -->
+                </tr>                <tr>
+                    <td>name:</td>
+                    <td>String</td>
+                    <td>&nbsp;</td>
+                    <!--
+                    <td><span class="font-light">[object] </span> </td>
+                    -->
+                </tr>            </tbody>
+        </table>
+    </div>
+
 
 
     <h2 id="serialization" class="mt-8 border-t-2 border-gray-300">
@@ -305,6 +373,8 @@ the default validator that prints a notice for synonyms with no traits.</p>
         </div>
 
 
+
+
     <h2 id="u16" class="mt-8 border-t-2 border-gray-300">
         <a href="#u16">U16</a><span class="text-lg pl-4">(short)</span>
     </h2><p class="font-light ml-6">unsigned 16-bit int</p>
@@ -317,6 +387,8 @@ the default validator that prints a notice for synonyms with no traits.</p>
                             <td>[object]</td>
                     </tr>            </table>
         </div>
+
+
 
 
     <h2 id="u32" class="mt-8 border-t-2 border-gray-300">
@@ -333,6 +405,8 @@ the default validator that prints a notice for synonyms with no traits.</p>
         </div>
 
 
+
+
     <h2 id="u64" class="mt-8 border-t-2 border-gray-300">
         <a href="#u64">U64</a><span class="text-lg pl-4">(long)</span>
     </h2><p class="font-light ml-6">unsigned 64-bit int</p>
@@ -345,6 +419,8 @@ the default validator that prints a notice for synonyms with no traits.</p>
                             <td>[object]</td>
                     </tr>            </table>
         </div>
+
+
 
 
     <h2 id="unsigned_int" class="mt-8 border-t-2 border-gray-300">

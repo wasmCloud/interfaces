@@ -6,9 +6,11 @@
 // Version 0.1 of this interface has the following features:
 //    Execute       - Execute sql operations (insert, update, create table, etc.)
 //                    Returns number of rows affected
-//    Fetch         - Select 0 or more rows from database
+//    Query         - Select 0 or more rows from database
 //                    The returned result set is encoded in CBOR,
 //                    a language-neutral compact representation.
+//    Ping          - Ping verifies a connection to the database is still alive,
+//                    establishing a connection if necessary.
 //
 // CBOR is designed to be an extensible format that is language-neutral,
 // about 50-70% denser than JSON, and suitable for constrained
@@ -17,7 +19,7 @@
 //
 // Not currently supported:
 // - transactions
-// - batch operations (multiple execute or fetch queries in single rpc call)
+// - batch operations (multiple execute or queries in single rpc call)
 // - streaming results
 // - prepared statements
 // - results with NULL values, array column types, or custom column data types
@@ -45,19 +47,37 @@ use org.wasmcloud.model#I64
     providerReceive: true )
 service SqlDb {
     version: "0.1",
-    operations: [ Execute, Fetch ],
+    operations: [ Execute, Query ],
 }
 
 /// Execute an sql statement
 operation Execute {
-    input: Query,
+    input: Statement,
     output: ExecuteResult,
 }
 
-/// A query is a non-empty string containing an SQL query or statement,
-/// in the syntax of the back-end database.
-@length(min:1)
-string Query
+structure Statement {
+  parameters: Parameters
+
+  /// Optional database in which the statement must be executed.
+  /// The value in this field is case-sensitive.
+  database: String
+
+  /// A sql query or statement that is a non-empty string containing
+  /// in the syntax of the back-end database.
+  @required
+  @length(min:1)
+  sql: String
+}
+
+/// An optional list of arguments to be used in the SQL statement.
+/// When a statement uses question marks '?' for placeholders,
+/// the capability provider will replace the specified arguments during execution.
+/// The command must have exactly as many placeholders as arguments, or the request will fail.
+/// The members are CBOR encoded.
+list Parameters {
+  member: Blob
+}
 
 /// Result of an Execute operation
 structure ExecuteResult {
@@ -67,20 +87,20 @@ structure ExecuteResult {
     rowsAffected: U64,
 
     /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
+    /// If error is included in the QueryResult, other values should be ignored.
     @n(1)
     error: SqlDbError,
 }
 
 /// Perform select query on database, returning all result rows
-operation Fetch {
-    input: Query,
-    output: FetchResult
+operation Query {
+    input: Statement,
+    output: QueryResult
 }
 
 
-/// Result of a fetch query
-structure FetchResult {
+/// Result of a query
+structure QueryResult {
     /// number of rows returned
     @required
     @n(0)
@@ -98,8 +118,24 @@ structure FetchResult {
     rows: Blob,
 
     /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
+    /// If error is included in the QueryResult, other values should be ignored.
     @n(3)
+    error: SqlDbError,
+}
+
+/// Ping verifies a connection to the database is still alive,
+/// establishing a connection if necessary.
+///
+/// Ping may be used to establish that further queries are possible
+/// as well as if the provided DSN is valid.
+///
+/// Ping may also be used as part of a health checking system.
+operation Ping {
+    output: PingResult
+}
+
+structure PingResult {
+    /// Optional error information.
     error: SqlDbError,
 }
 
@@ -138,7 +174,7 @@ structure SqlDbError {
 }
 
 
-/// List of columns in the result set returned by a Fetch operation
+/// List of columns in the result set returned by a Query operation
 list Columns {
     member: Column
 }
@@ -160,5 +196,3 @@ structure Column {
     @n(2)
     dbType: String,
 }
-
-

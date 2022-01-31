@@ -13,7 +13,8 @@
     <div id="content">
         <div class="p-4 overflow-y-auto">
             <h1 id="org_wasmcloud_interface_numbergen" class="text-2xl font-serif">Namespace org.wasmcloud.interface.numbergen</h1>
-            <div class="table m-4 ml-12">            <div class="table-row">
+            <div class="table m-4 ml-12">
+            <div class="table-row">
                 <div class="table-cell align-top pr-6 w-28">
                     Services
                 </div>
@@ -21,7 +22,8 @@
                     <ul>
 <li class="font-light"><a href="#org_wasmcloud_interface_numbergen_number_gen"><a href="#number_gen">NumberGen</a></a></li>                    </ul>
                 </div>
-            </div>            <div class="table-row">
+            </div>
+            <div class="table-row">
                 <div class="table-cell align-top pr-6 w-28">
                     Operations
                 </div>
@@ -29,7 +31,8 @@
                     <ul>
 <li class="font-light"><a href="#org_wasmcloud_interface_numbergen_generate_guid"><a href="#generate_guid">GenerateGuid</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_numbergen_random_32"><a href="#random_32">Random32</a></a></li><li class="font-light"><a href="#org_wasmcloud_interface_numbergen_random_in_range"><a href="#random_in_range">RandomInRange</a></a></li>                    </ul>
                 </div>
-            </div>            <div class="table-row">
+            </div>
+            <div class="table-row">
                 <div class="table-cell align-top pr-6 w-28">
                     Structures
                 </div>
@@ -38,6 +41,7 @@
 <li class="font-light"><a href="#org_wasmcloud_interface_numbergen_range_limit"><a href="#range_limit">RangeLimit</a></a></li>                    </ul>
                 </div>
             </div>            </div>
+
 
 
     <h2 id="generate_guid" class="mt-8 border-t-2 border-gray-300">
@@ -62,6 +66,9 @@ These guids are known as "version 4", meaning all bits are random or pseudo-rand
                                     </tr>                                </tbody>
                             </table>
                         </div>
+
+
+
 
 
 
@@ -102,6 +109,7 @@ These guids are known as "version 4", meaning all bits are random or pseudo-rand
         </div>
 
 
+
     <h2 id="random_32" class="mt-8 border-t-2 border-gray-300">
         <a href="#random_32">Random32</a><span class="text-lg pl-4">(operation)</span>
     </h2><p class="font-light ml-6">Request a 32-bit random number</p>
@@ -121,6 +129,8 @@ These guids are known as "version 4", meaning all bits are random or pseudo-rand
                                     </tr>                                </tbody>
                             </table>
                         </div>
+
+
 
 
 
@@ -151,6 +161,8 @@ The result will will be in the range [min,max), i.e., >= min and < max.</p>
 
 
 
+
+
     <h2 id="range_limit" class="mt-8 border-t-2 border-gray-300">
         <a href="#range_limit">RangeLimit</a><span class="text-lg pl-4">(structure)</span>
     </h2><p class="font-light ml-6">Input range for RandomInRange, inclusive. Result will be >= min and <= max
@@ -176,6 +188,7 @@ random_in_range(RangeLimit{0,4}) returns one the values, 0, 1, 2, 3, or 4.</p>
                                     </tr>                                </tbody>
                             </table>
                         </div>
+
         </div>
     </div></body>
 </html>

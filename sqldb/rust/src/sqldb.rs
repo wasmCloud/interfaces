@@ -26,7 +26,7 @@ pub struct Column {
     pub db_type: String,
 }
 
-/// List of columns in the result set returned by a Fetch operation
+/// List of columns in the result set returned by a Query operation
 pub type Columns = Vec<Column>;
 
 /// Result of an Execute operation
@@ -36,14 +36,28 @@ pub struct ExecuteResult {
     #[serde(rename = "rowsAffected")]
     pub rows_affected: u64,
     /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
+    /// If error is included in the QueryResult, other values should be ignored.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<SqlDbError>,
 }
 
-/// Result of a fetch query
+/// An optional list of arguments to be used in the SQL statement.
+/// When a statement uses question marks '?' for placeholders,
+/// the capability provider will replace the specified arguments during execution.
+/// The command must have exactly as many placeholders as arguments, or the request will fail.
+/// The members are CBOR encoded.
+pub type Parameters = Vec<Vec<u8>>;
+
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct FetchResult {
+pub struct PingResult {
+    /// Optional error information.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<SqlDbError>,
+}
+
+/// Result of a query
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct QueryResult {
     /// number of rows returned
     #[serde(rename = "numRows")]
     pub num_rows: u64,
@@ -55,14 +69,10 @@ pub struct FetchResult {
     #[serde(default)]
     pub rows: Vec<u8>,
     /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
+    /// If error is included in the QueryResult, other values should be ignored.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<SqlDbError>,
 }
-
-/// A query is a non-empty string containing an SQL query or statement,
-/// in the syntax of the back-end database.
-pub type Query = String;
 
 /// Detailed error information from the previous operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -77,6 +87,20 @@ pub struct SqlDbError {
     pub message: String,
 }
 
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct Statement {
+    /// Optional database in which the statement must be executed.
+    /// The value in this field is case-sensitive.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub database: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parameters: Option<Parameters>,
+    /// A sql query or statement that is a non-empty string containing
+    /// in the syntax of the back-end database.
+    #[serde(default)]
+    pub sql: String,
+}
+
 /// SqlDb - SQL Database connections
 /// To use this capability, the actor must be linked
 /// with the capability contract "wasmcloud:sqldb"
@@ -89,9 +113,9 @@ pub trait SqlDb {
         "wasmcloud:sqldb"
     }
     /// Execute an sql statement
-    async fn execute(&self, ctx: &Context, arg: &Query) -> RpcResult<ExecuteResult>;
+    async fn execute(&self, ctx: &Context, arg: &Statement) -> RpcResult<ExecuteResult>;
     /// Perform select query on database, returning all result rows
-    async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<FetchResult>;
+    async fn query(&self, ctx: &Context, arg: &Statement) -> RpcResult<QueryResult>;
 }
 
 /// SqlDbReceiver receives messages defined in the SqlDb service trait
@@ -104,7 +128,7 @@ pub trait SqlDbReceiver: MessageDispatch + SqlDb {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "Execute" => {
-                let value: Query = deserialize(message.arg.as_ref())
+                let value: Statement = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = SqlDb::execute(self, ctx, &value).await?;
                 let buf = serialize(&resp)?;
@@ -113,13 +137,13 @@ pub trait SqlDbReceiver: MessageDispatch + SqlDb {
                     arg: Cow::Owned(buf),
                 })
             }
-            "Fetch" => {
-                let value: Query = deserialize(message.arg.as_ref())
+            "Query" => {
+                let value: Statement = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
-                let resp = SqlDb::fetch(self, ctx, &value).await?;
+                let resp = SqlDb::query(self, ctx, &value).await?;
                 let buf = serialize(&resp)?;
                 Ok(Message {
-                    method: "SqlDb.Fetch",
+                    method: "SqlDb.Query",
                     arg: Cow::Owned(buf),
                 })
             }
@@ -175,7 +199,7 @@ impl SqlDbSender<wasmbus_rpc::actor::prelude::WasmHost> {
 impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender<T> {
     #[allow(unused)]
     /// Execute an sql statement
-    async fn execute(&self, ctx: &Context, arg: &Query) -> RpcResult<ExecuteResult> {
+    async fn execute(&self, ctx: &Context, arg: &Statement) -> RpcResult<ExecuteResult> {
         let buf = serialize(arg)?;
         let resp = self
             .transport
@@ -194,21 +218,21 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender
     }
     #[allow(unused)]
     /// Perform select query on database, returning all result rows
-    async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<FetchResult> {
+    async fn query(&self, ctx: &Context, arg: &Statement) -> RpcResult<QueryResult> {
         let buf = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
-                    method: "SqlDb.Fetch",
+                    method: "SqlDb.Query",
                     arg: Cow::Borrowed(&buf),
                 },
                 None,
             )
             .await?;
         let value = deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Fetch", e)))?;
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Query", e)))?;
         Ok(value)
     }
 }
