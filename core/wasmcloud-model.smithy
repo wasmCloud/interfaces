@@ -113,6 +113,10 @@ structure wasmbus {
     actorReceive: Boolean,
     /// indicates this service's operations are handled by an provider (default false)
     providerReceive: Boolean,
+    /// Binary message protocol version. Defaults to "0" if unset.
+    /// Be aware that changing this value can break binary compatibility unless
+    /// all users of this interface recompile
+    protocol: String,
 }
 
 /// data sent via wasmbus
