@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-lattice-control"
-version = "0.5.0"
+version = "0.6.0"
 edition = "2021"
 homepage = "https://wasmcloud.dev"
 repository = "https://github.com/wasmCloud/interfaces"
@@ -22,7 +22,7 @@ log = "0.4.14"
 ring = "0.16.20"
 rmp-serde = "0.15.0"
 serde = { version = "1.0.118", features = ["derive"] }
-wasmbus-rpc = "0.6.0"
+wasmbus-rpc = { path = "../../../weld/rpc-rs" }
 
 [build-dependencies]
-weld-codegen = "0.2.3"
+weld-codegen = { path = "../../../weld/codegen" }

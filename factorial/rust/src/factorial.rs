@@ -1,13 +1,20 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
-//
+// This file is generated automatically using wasmcloud/weld-codegen 0.2.4
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Borrow, borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
-    deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
-    Timestamp, Transport,
+    cbor::*,
+    common::{
+        deserialize, message_format, serialize, Context, Message, MessageDispatch, MessageFormat,
+        SendOpts, Transport,
+    },
+    error::{RpcError, RpcResult},
+    Timestamp,
 };
 
 pub const SMITHY_VERSION: &str = "1.0";
@@ -36,10 +43,10 @@ pub trait FactorialReceiver: MessageDispatch + Factorial {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "Calculate" => {
-                let value: u32 = deserialize(message.arg.as_ref())
-                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
+                let value: u32 = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'U32': {}", e)))?;
                 let resp = Factorial::calculate(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
                 Ok(Message {
                     method: "Factorial.Calculate",
                     arg: Cow::Owned(buf),
@@ -122,7 +129,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Factorial for Factori
     #[allow(unused)]
     /// Calculates the factorial (n!) of the input parameter
     async fn calculate(&self, ctx: &Context, arg: &u32) -> RpcResult<u64> {
-        let buf = serialize(arg)?;
+        let buf = wasmbus_rpc::common::serialize(arg)?;
         let resp = self
             .transport
             .send(
@@ -134,8 +141,9 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Factorial for Factori
                 None,
             )
             .await?;
-        let value = deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Calculate", e)))?;
+
+        let value: u64 = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': U64", e)))?;
         Ok(value)
     }
 }

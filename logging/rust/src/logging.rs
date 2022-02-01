@@ -1,13 +1,20 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
-//
+// This file is generated automatically using wasmcloud/weld-codegen 0.2.4
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Borrow, borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
-    deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
-    Timestamp, Transport,
+    cbor::*,
+    common::{
+        deserialize, message_format, serialize, Context, Message, MessageDispatch, MessageFormat,
+        SendOpts, Transport,
+    },
+    error::{RpcError, RpcResult},
+    Timestamp,
 };
 
 pub const SMITHY_VERSION: &str = "1.0";
@@ -22,6 +29,81 @@ pub struct LogEntry {
     pub text: String,
 }
 
+// Encode LogEntry as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_log_entry<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &LogEntry) -> RpcResult<()>
+where
+    W: wasmbus_rpc::cbor::Write + 'static,
+{
+    e.array(2)?;
+    e.str(&val.level)?;
+    e.str(&val.text)?;
+    Ok(())
+}
+
+// Decode LogEntry from cbor input stream
+#[doc(hidden)]
+pub fn decode_log_entry(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<LogEntry, RpcError> {
+    let __result = {
+        let mut level: Option<String> = None;
+        let mut text: Option<String> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct LogEntry, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct LogEntry: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => level = Some(d.str()?.to_string()),
+                    1 => text = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct LogEntry: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "level" => level = Some(d.str()?.to_string()),
+                    "text" => text = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        LogEntry {
+            level: if let Some(__x) = level {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field LogEntry.level (#0)".to_string(),
+                ));
+            },
+
+            text: if let Some(__x) = text {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field LogEntry.text (#1)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// wasmbus.contractId: wasmcloud:builtin:logging
 /// wasmbus.providerReceive
 #[async_trait]
@@ -43,8 +125,8 @@ pub trait LoggingReceiver: MessageDispatch + Logging {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "WriteLog" => {
-                let value: LogEntry = deserialize(message.arg.as_ref())
-                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
+                let value: LogEntry = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'LogEntry': {}", e)))?;
                 let _resp = Logging::write_log(self, ctx, &value).await?;
                 let buf = Vec::new();
                 Ok(Message {
@@ -108,7 +190,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Logging for LoggingSe
     /// WriteLog - log a text message
     ///
     async fn write_log(&self, ctx: &Context, arg: &LogEntry) -> RpcResult<()> {
-        let buf = serialize(arg)?;
+        let buf = wasmbus_rpc::common::serialize(arg)?;
         let resp = self
             .transport
             .send(

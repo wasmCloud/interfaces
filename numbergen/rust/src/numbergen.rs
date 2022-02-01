@@ -1,13 +1,20 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
-//
+// This file is generated automatically using wasmcloud/weld-codegen 0.2.4
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Borrow, borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
-    deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
-    Timestamp, Transport,
+    cbor::*,
+    common::{
+        deserialize, message_format, serialize, Context, Message, MessageDispatch, MessageFormat,
+        SendOpts, Transport,
+    },
+    error::{RpcError, RpcResult},
+    Timestamp,
 };
 
 pub const SMITHY_VERSION: &str = "1.0";
@@ -17,10 +24,90 @@ pub const SMITHY_VERSION: &str = "1.0";
 /// random_in_range(RangeLimit{0,4}) returns one the values, 0, 1, 2, 3, or 4.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct RangeLimit {
+    #[serde(default)]
     pub min: u32,
+    #[serde(default)]
     pub max: u32,
 }
 
+// Encode RangeLimit as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_range_limit<W>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &RangeLimit,
+) -> RpcResult<()>
+where
+    W: wasmbus_rpc::cbor::Write + 'static,
+{
+    e.array(2)?;
+    e.u32(val.min)?;
+    e.u32(val.max)?;
+    Ok(())
+}
+
+// Decode RangeLimit from cbor input stream
+#[doc(hidden)]
+pub fn decode_range_limit(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<RangeLimit, RpcError> {
+    let __result = {
+        let mut min: Option<u32> = None;
+        let mut max: Option<u32> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct RangeLimit, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct RangeLimit: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => min = Some(d.u32()?),
+                    1 => max = Some(d.u32()?),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct RangeLimit: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "min" => min = Some(d.u32()?),
+                    "max" => max = Some(d.u32()?),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        RangeLimit {
+            min: if let Some(__x) = min {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field RangeLimit.min (#0)".to_string(),
+                ));
+            },
+
+            max: if let Some(__x) = max {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field RangeLimit.max (#1)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// wasmbus.contractId: wasmcloud:builtin:numbergen
 /// wasmbus.providerReceive
 #[async_trait]
@@ -49,17 +136,17 @@ pub trait NumberGenReceiver: MessageDispatch + NumberGen {
         match message.method {
             "GenerateGuid" => {
                 let resp = NumberGen::generate_guid(self, ctx).await?;
-                let buf = serialize(&resp)?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
                 Ok(Message {
                     method: "NumberGen.GenerateGuid",
                     arg: Cow::Owned(buf),
                 })
             }
             "RandomInRange" => {
-                let value: RangeLimit = deserialize(message.arg.as_ref())
-                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
+                let value: RangeLimit = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'RangeLimit': {}", e)))?;
                 let resp = NumberGen::random_in_range(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
                 Ok(Message {
                     method: "NumberGen.RandomInRange",
                     arg: Cow::Owned(buf),
@@ -67,7 +154,7 @@ pub trait NumberGenReceiver: MessageDispatch + NumberGen {
             }
             "Random32" => {
                 let resp = NumberGen::random_32(self, ctx).await?;
-                let buf = serialize(&resp)?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
                 Ok(Message {
                     method: "NumberGen.Random32",
                     arg: Cow::Owned(buf),
@@ -142,15 +229,17 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
                 None,
             )
             .await?;
-        let value = deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "GenerateGuid", e)))?;
+
+        let value: String = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': String", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Request a random integer within a range
     /// The result will will be in the range [min,max), i.e., >= min and < max.
     async fn random_in_range(&self, ctx: &Context, arg: &RangeLimit) -> RpcResult<u32> {
-        let buf = serialize(arg)?;
+        let buf = wasmbus_rpc::common::serialize(arg)?;
         let resp = self
             .transport
             .send(
@@ -162,10 +251,12 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
                 None,
             )
             .await?;
-        let value = deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "RandomInRange", e)))?;
+
+        let value: u32 = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Request a 32-bit random number
     async fn random_32(&self, ctx: &Context) -> RpcResult<u32> {
@@ -181,8 +272,9 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
                 None,
             )
             .await?;
-        let value = deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Random32", e)))?;
+
+        let value: u32 = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
 }

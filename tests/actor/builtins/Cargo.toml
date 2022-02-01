@@ -15,10 +15,10 @@ serde_json ="1.0"
 serde = {version = "1.0", features = ["derive"]}
 regex = "1"
 
-wasmbus-rpc = "0.4"
-wasmcloud-interface-numbergen = "0.1"
-wasmcloud-interface-logging = "0.1"
-wasmcloud-test-util = "0.1"
+wasmbus-rpc = { path = "../../../weld/rpc-rs" }
+wasmcloud-interface-numbergen = { path = "../../../interfaces/numbergen/rust" }
+wasmcloud-interface-logging = { path = "../../../interfaces/logging/rust" }
+wasmcloud-test-util = { path = "../../../wasmcloud-test/wasmcloud-test-util" }
 
 # comment out the following if this is inside a cargo workspace
 #[profile.release]
