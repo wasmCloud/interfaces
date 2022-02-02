@@ -32,13 +32,10 @@ pub struct RangeLimit {
 
 // Encode RangeLimit as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_range_limit<W>(
+pub fn encode_range_limit<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &RangeLimit,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(2)?;
     e.u32(val.min)?;
     e.u32(val.max)?;

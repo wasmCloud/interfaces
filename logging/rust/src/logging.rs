@@ -31,10 +31,10 @@ pub struct LogEntry {
 
 // Encode LogEntry as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_log_entry<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &LogEntry) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+pub fn encode_log_entry<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &LogEntry,
+) -> RpcResult<()> {
     e.array(2)?;
     e.str(&val.level)?;
     e.str(&val.text)?;

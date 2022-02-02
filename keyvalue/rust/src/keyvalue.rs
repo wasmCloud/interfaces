@@ -32,13 +32,10 @@ pub struct GetResponse {
 
 // Encode GetResponse as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_get_response<W>(
+pub fn encode_get_response<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetResponse,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(2)?;
     e.str(&val.value)?;
     e.bool(val.exists)?;
@@ -122,13 +119,10 @@ pub struct IncrementRequest {
 
 // Encode IncrementRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_increment_request<W>(
+pub fn encode_increment_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &IncrementRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(2)?;
     e.str(&val.key)?;
     e.i32(val.value)?;
@@ -214,13 +208,10 @@ pub struct ListAddRequest {
 
 // Encode ListAddRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_list_add_request<W>(
+pub fn encode_list_add_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ListAddRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(2)?;
     e.str(&val.list_name)?;
     e.str(&val.value)?;
@@ -307,13 +298,10 @@ pub struct ListDelRequest {
 
 // Encode ListDelRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_list_del_request<W>(
+pub fn encode_list_del_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ListDelRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(2)?;
     e.str(&val.list_name)?;
     e.str(&val.value)?;
@@ -401,13 +389,10 @@ pub struct ListRangeRequest {
 
 // Encode ListRangeRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_list_range_request<W>(
+pub fn encode_list_range_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ListRangeRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(3)?;
     e.str(&val.list_name)?;
     e.i32(val.start)?;
@@ -504,13 +489,10 @@ pub struct SetAddRequest {
 
 // Encode SetAddRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_set_add_request<W>(
+pub fn encode_set_add_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &SetAddRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(2)?;
     e.str(&val.set_name)?;
     e.str(&val.value)?;
@@ -593,13 +575,10 @@ pub struct SetDelRequest {
 
 // Encode SetDelRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_set_del_request<W>(
+pub fn encode_set_del_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &SetDelRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(2)?;
     e.str(&val.set_name)?;
     e.str(&val.value)?;
@@ -686,13 +665,10 @@ pub struct SetRequest {
 
 // Encode SetRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_set_request<W>(
+pub fn encode_set_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &SetRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(3)?;
     e.str(&val.key)?;
     e.str(&val.value)?;
@@ -779,13 +755,10 @@ pub type StringList = Vec<String>;
 
 // Encode StringList as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_string_list<W>(
+pub fn encode_string_list<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StringList,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         e.str(item)?;

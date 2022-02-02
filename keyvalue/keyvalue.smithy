@@ -19,8 +19,7 @@ use org.wasmcloud.model#I32
 
 @wasmbus(
     contractId: "wasmcloud:keyvalue",
-    providerReceive: true,
-)
+    providerReceive: true )
 service KeyValue {
   version: "0.1.1",
   operations: [

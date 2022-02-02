@@ -25,10 +25,10 @@ pub type HeaderMap = std::collections::HashMap<String, HeaderValues>;
 
 // Encode HeaderMap as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_header_map<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &HeaderMap) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+pub fn encode_header_map<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &HeaderMap,
+) -> RpcResult<()> {
     e.map(val.len() as u64)?;
     for (k, v) in val {
         e.str(k)?;
@@ -63,13 +63,10 @@ pub type HeaderValues = Vec<String>;
 
 // Encode HeaderValues as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_header_values<W>(
+pub fn encode_header_values<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &HeaderValues,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         e.str(item)?;
@@ -127,13 +124,10 @@ pub struct HttpRequest {
 
 // Encode HttpRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_http_request<W>(
+pub fn encode_http_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &HttpRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(5)?;
     e.str(&val.method)?;
     e.str(&val.path)?;
@@ -269,13 +263,10 @@ pub struct HttpResponse {
 
 // Encode HttpResponse as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_http_response<W>(
+pub fn encode_http_response<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &HttpResponse,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(3)?;
     e.u16(val.status_code)?;
     encode_header_map(e, &val.header)?;

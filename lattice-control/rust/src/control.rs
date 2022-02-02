@@ -32,13 +32,10 @@ pub struct ActorAuctionAck {
 
 // Encode ActorAuctionAck as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_actor_auction_ack<W>(
+pub fn encode_actor_auction_ack<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorAuctionAck,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(2)?;
     e.str("actorRef")?;
     e.str(&val.actor_ref)?;
@@ -116,13 +113,10 @@ pub type ActorAuctionAcks = Vec<ActorAuctionAck>;
 
 // Encode ActorAuctionAcks as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_actor_auction_acks<W>(
+pub fn encode_actor_auction_acks<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorAuctionAcks,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         encode_actor_auction_ack(e, item)?;
@@ -176,13 +170,10 @@ pub struct ActorAuctionRequest {
 
 // Encode ActorAuctionRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_actor_auction_request<W>(
+pub fn encode_actor_auction_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorAuctionRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(2)?;
     e.str("actorRef")?;
     e.str(&val.actor_ref)?;
@@ -285,13 +276,10 @@ pub struct ActorDescription {
 
 // Encode ActorDescription as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_actor_description<W>(
+pub fn encode_actor_description<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorDescription,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(4)?;
     e.str("id")?;
     e.str(&val.id)?;
@@ -428,13 +416,10 @@ pub type ActorDescriptions = Vec<ActorDescription>;
 
 // Encode ActorDescriptions as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_actor_descriptions<W>(
+pub fn encode_actor_descriptions<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorDescriptions,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         encode_actor_description(e, item)?;
@@ -491,13 +476,10 @@ pub struct ActorInstance {
 
 // Encode ActorInstance as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_actor_instance<W>(
+pub fn encode_actor_instance<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorInstance,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(3)?;
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
@@ -606,13 +588,10 @@ pub type ActorInstances = Vec<ActorInstance>;
 
 // Encode ActorInstances as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_actor_instances<W>(
+pub fn encode_actor_instances<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorInstances,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         encode_actor_instance(e, item)?;
@@ -657,13 +636,10 @@ pub type AnnotationMap = std::collections::HashMap<String, String>;
 
 // Encode AnnotationMap as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_annotation_map<W>(
+pub fn encode_annotation_map<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &AnnotationMap,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(val.len() as u64)?;
     for (k, v) in val {
         e.str(k)?;
@@ -699,13 +675,10 @@ pub type ClaimsList = Vec<ClaimsMap>;
 
 // Encode ClaimsList as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_claims_list<W>(
+pub fn encode_claims_list<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ClaimsList,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         encode_claims_map(e, item)?;
@@ -744,10 +717,10 @@ pub type ClaimsMap = std::collections::HashMap<String, String>;
 
 // Encode ClaimsMap as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_claims_map<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &ClaimsMap) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+pub fn encode_claims_map<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &ClaimsMap,
+) -> RpcResult<()> {
     e.map(val.len() as u64)?;
     for (k, v) in val {
         e.str(k)?;
@@ -781,13 +754,10 @@ pub type ConfigurationString = String;
 
 // Encode ConfigurationString as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_configuration_string<W>(
+pub fn encode_configuration_string<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ConfigurationString,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.str(val)?;
     Ok(())
 }
@@ -804,13 +774,10 @@ pub type ConstraintMap = std::collections::HashMap<String, String>;
 
 // Encode ConstraintMap as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_constraint_map<W>(
+pub fn encode_constraint_map<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ConstraintMap,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(val.len() as u64)?;
     for (k, v) in val {
         e.str(k)?;
@@ -853,13 +820,10 @@ pub struct CtlOperationAck {
 
 // Encode CtlOperationAck as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_ctl_operation_ack<W>(
+pub fn encode_ctl_operation_ack<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &CtlOperationAck,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(2)?;
     e.str("accepted")?;
     e.bool(val.accepted)?;
@@ -941,13 +905,10 @@ pub struct GetClaimsResponse {
 
 // Encode GetClaimsResponse as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_get_claims_response<W>(
+pub fn encode_get_claims_response<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetClaimsResponse,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(1)?;
     e.str("claims")?;
     encode_claims_list(e, &val.claims)?;
@@ -1030,10 +991,10 @@ pub struct Host {
 
 // Encode Host as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_host<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &Host) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+pub fn encode_host<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &Host,
+) -> RpcResult<()> {
     e.map(2)?;
     e.str("id")?;
     e.str(&val.id)?;
@@ -1116,13 +1077,10 @@ pub struct HostInventory {
 
 // Encode HostInventory as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_host_inventory<W>(
+pub fn encode_host_inventory<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &HostInventory,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(4)?;
     e.str("actors")?;
     encode_actor_descriptions(e, &val.actors)?;
@@ -1256,10 +1214,10 @@ pub type Hosts = Vec<Host>;
 
 // Encode Hosts as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_hosts<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &Hosts) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+pub fn encode_hosts<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &Hosts,
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         encode_host(e, item)?;
@@ -1298,10 +1256,10 @@ pub type LabelsMap = std::collections::HashMap<String, String>;
 
 // Encode LabelsMap as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_labels_map<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &LabelsMap) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+pub fn encode_labels_map<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &LabelsMap,
+) -> RpcResult<()> {
     e.map(val.len() as u64)?;
     for (k, v) in val {
         e.str(k)?;
@@ -1339,13 +1297,10 @@ pub struct LinkDefinitionList {
 
 // Encode LinkDefinitionList as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_link_definition_list<W>(
+pub fn encode_link_definition_list<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &LinkDefinitionList,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(1)?;
     e.str("links")?;
     wasmbus_rpc::core::encode_actor_links(e, &val.links)?;
@@ -1431,13 +1386,10 @@ pub struct ProviderAuctionAck {
 
 // Encode ProviderAuctionAck as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_provider_auction_ack<W>(
+pub fn encode_provider_auction_ack<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ProviderAuctionAck,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(3)?;
     e.str("hostId")?;
     e.str(&val.host_id)?;
@@ -1529,13 +1481,10 @@ pub type ProviderAuctionAcks = Vec<ProviderAuctionAck>;
 
 // Encode ProviderAuctionAcks as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_provider_auction_acks<W>(
+pub fn encode_provider_auction_acks<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ProviderAuctionAcks,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         encode_provider_auction_ack(e, item)?;
@@ -1594,13 +1543,10 @@ pub struct ProviderAuctionRequest {
 
 // Encode ProviderAuctionRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_provider_auction_request<W>(
+pub fn encode_provider_auction_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ProviderAuctionRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(3)?;
     e.str("constraints")?;
     encode_constraint_map(e, &val.constraints)?;
@@ -1721,13 +1667,10 @@ pub struct ProviderDescription {
 
 // Encode ProviderDescription as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_provider_description<W>(
+pub fn encode_provider_description<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ProviderDescription,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(5)?;
     e.str("id")?;
     e.str(&val.id)?;
@@ -1867,13 +1810,10 @@ pub type ProviderDescriptions = Vec<ProviderDescription>;
 
 // Encode ProviderDescriptions as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_provider_descriptions<W>(
+pub fn encode_provider_descriptions<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ProviderDescriptions,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         encode_provider_description(e, item)?;
@@ -1931,13 +1871,10 @@ pub struct RemoveLinkDefinitionRequest {
 
 // Encode RemoveLinkDefinitionRequest as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_remove_link_definition_request<W>(
+pub fn encode_remove_link_definition_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &RemoveLinkDefinitionRequest,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(3)?;
     e.str("actorId")?;
     e.str(&val.actor_id)?;
@@ -2049,13 +1986,10 @@ pub struct ScaleActorCommand {
 
 // Encode ScaleActorCommand as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_scale_actor_command<W>(
+pub fn encode_scale_actor_command<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ScaleActorCommand,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(5)?;
     e.str("actorId")?;
     e.str(&val.actor_id)?;
@@ -2207,13 +2141,10 @@ pub struct StartActorCommand {
 
 // Encode StartActorCommand as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_start_actor_command<W>(
+pub fn encode_start_actor_command<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StartActorCommand,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(4)?;
     e.str("actorRef")?;
     e.str(&val.actor_ref)?;
@@ -2356,13 +2287,10 @@ pub struct StartProviderCommand {
 
 // Encode StartProviderCommand as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_start_provider_command<W>(
+pub fn encode_start_provider_command<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StartProviderCommand,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(5)?;
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
@@ -2534,13 +2462,10 @@ pub struct StopActorCommand {
 
 // Encode StopActorCommand as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_stop_actor_command<W>(
+pub fn encode_stop_actor_command<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StopActorCommand,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(4)?;
     e.str("actorRef")?;
     e.str(&val.actor_ref)?;
@@ -2670,13 +2595,10 @@ pub struct StopHostCommand {
 
 // Encode StopHostCommand as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_stop_host_command<W>(
+pub fn encode_stop_host_command<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StopHostCommand,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(2)?;
     e.str("hostId")?;
     e.str(&val.host_id)?;
@@ -2786,13 +2708,10 @@ pub struct StopProviderCommand {
 
 // Encode StopProviderCommand as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_stop_provider_command<W>(
+pub fn encode_stop_provider_command<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StopProviderCommand,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(5)?;
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
@@ -2947,13 +2866,10 @@ pub struct UpdateActorCommand {
 
 // Encode UpdateActorCommand as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_update_actor_command<W>(
+pub fn encode_update_actor_command<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &UpdateActorCommand,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.map(4)?;
     e.str("actorId")?;
     e.str(&val.actor_id)?;

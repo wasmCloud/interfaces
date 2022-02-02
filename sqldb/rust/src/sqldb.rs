@@ -36,10 +36,10 @@ pub struct Column {
 
 // Encode Column as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_column<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &Column) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+pub fn encode_column<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &Column,
+) -> RpcResult<()> {
     e.array(3)?;
     e.u32(val.ordinal)?;
     e.str(&val.name)?;
@@ -124,10 +124,10 @@ pub type Columns = Vec<Column>;
 
 // Encode Columns as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_columns<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &Columns) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+pub fn encode_columns<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &Columns,
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         encode_column(e, item)?;
@@ -177,13 +177,10 @@ pub struct ExecuteResult {
 
 // Encode ExecuteResult as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_execute_result<W>(
+pub fn encode_execute_result<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ExecuteResult,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(2)?;
     e.u64(val.rows_affected)?;
     if let Some(val) = val.error.as_ref() {
@@ -295,13 +292,10 @@ pub struct FetchResult {
 
 // Encode FetchResult as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_fetch_result<W>(
+pub fn encode_fetch_result<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &FetchResult,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(4)?;
     e.u64(val.num_rows)?;
     encode_columns(e, &val.columns)?;
@@ -429,10 +423,10 @@ pub type Query = String;
 
 // Encode Query as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_query<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &Query) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+pub fn encode_query<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &Query,
+) -> RpcResult<()> {
     e.str(val)?;
     Ok(())
 }
@@ -458,13 +452,10 @@ pub struct SqlDbError {
 
 // Encode SqlDbError as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_sql_db_error<W>(
+pub fn encode_sql_db_error<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &SqlDbError,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(2)?;
     e.str(&val.code)?;
     e.str(&val.message)?;

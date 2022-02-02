@@ -37,13 +37,10 @@ pub struct PubMessage {
 
 // Encode PubMessage as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_pub_message<W>(
+pub fn encode_pub_message<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PubMessage,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(3)?;
     e.str(&val.subject)?;
     if let Some(val) = val.reply_to.as_ref() {
@@ -154,13 +151,10 @@ pub struct ReplyMessage {
 
 // Encode ReplyMessage as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_reply_message<W>(
+pub fn encode_reply_message<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ReplyMessage,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(3)?;
     e.str(&val.subject)?;
     if let Some(val) = val.reply_to.as_ref() {
@@ -273,13 +267,10 @@ pub struct RequestMessage {
 
 // Encode RequestMessage as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_request_message<W>(
+pub fn encode_request_message<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &RequestMessage,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(3)?;
     e.str(&val.subject)?;
     e.bytes(&val.body)?;
@@ -381,13 +372,10 @@ pub struct SubMessage {
 
 // Encode SubMessage as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_sub_message<W>(
+pub fn encode_sub_message<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &SubMessage,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(3)?;
     e.str(&val.subject)?;
     if let Some(val) = val.reply_to.as_ref() {

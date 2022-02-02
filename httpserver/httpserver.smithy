@@ -18,8 +18,7 @@ use org.wasmcloud.model#wasmbus
 /// HttpServer is the contract to be implemented by actor
 @wasmbus(
     contractId: "wasmcloud:httpserver",
-    actorReceive: true,
-)
+    actorReceive: true )
 service HttpServer {
   version: "0.1",
   operations: [ HandleRequest ]
