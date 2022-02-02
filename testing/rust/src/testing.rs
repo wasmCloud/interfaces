@@ -26,10 +26,10 @@ pub type OptMap = std::collections::HashMap<String, String>;
 
 // Encode OptMap as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_opt_map<W>(e: &mut wasmbus_rpc::cbor::Encoder<W>, val: &OptMap) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+pub fn encode_opt_map<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &OptMap,
+) -> RpcResult<()> {
     e.map(val.len() as u64)?;
     for (k, v) in val {
         e.str(k)?;
@@ -64,13 +64,10 @@ pub type PatternList = Vec<String>;
 
 // Encode PatternList as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_pattern_list<W>(
+pub fn encode_pattern_list<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PatternList,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         e.str(item)?;
@@ -119,13 +116,10 @@ pub struct TestOptions {
 
 // Encode TestOptions as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_test_options<W>(
+pub fn encode_test_options<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &TestOptions,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(2)?;
     encode_pattern_list(e, &val.patterns)?;
     encode_opt_map(e, &val.options)?;
@@ -234,13 +228,10 @@ pub struct TestResult {
 
 // Encode TestResult as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_test_result<W>(
+pub fn encode_test_result<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &TestResult,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(3)?;
     e.str(&val.name)?;
     e.bool(val.passed)?;
@@ -338,13 +329,10 @@ pub type TestResults = Vec<TestResult>;
 
 // Encode TestResults as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_test_results<W>(
+pub fn encode_test_results<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &TestResults,
-) -> RpcResult<()>
-where
-    W: wasmbus_rpc::cbor::Write + 'static,
-{
+) -> RpcResult<()> {
     e.array(val.len() as u64)?;
     for item in val.iter() {
         encode_test_result(e, item)?;
