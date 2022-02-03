@@ -1,13 +1,20 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
-//
+// This file is generated automatically using wasmcloud/weld-codegen 0.3.0
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Borrow, borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
-    deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
-    Timestamp, Transport,
+    cbor::*,
+    common::{
+        deserialize, message_format, serialize, Context, Message, MessageDispatch, MessageFormat,
+        SendOpts, Transport,
+    },
+    error::{RpcError, RpcResult},
+    Timestamp,
 };
 
 pub const SMITHY_VERSION: &str = "1.0";
@@ -16,8 +23,84 @@ pub const SMITHY_VERSION: &str = "1.0";
 ///
 pub type HeaderMap = std::collections::HashMap<String, HeaderValues>;
 
+// Encode HeaderMap as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_header_map<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &HeaderMap,
+) -> RpcResult<()> {
+    e.map(val.len() as u64)?;
+    for (k, v) in val {
+        e.str(k)?;
+        encode_header_values(e, v)?;
+    }
+    Ok(())
+}
+
+// Decode HeaderMap from cbor input stream
+#[doc(hidden)]
+pub fn decode_header_map(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<HeaderMap, RpcError> {
+    let __result = {
+        {
+            let mut m: std::collections::HashMap<String, HeaderValues> =
+                std::collections::HashMap::default();
+            if let Some(n) = d.map()? {
+                for _ in 0..(n as usize) {
+                    let k = d.str()?.to_string();
+                    let v = decode_header_values(d)
+                        .map_err(|e| format!("decoding 'HeaderValues': {}", e))?;
+                    m.insert(k, v);
+                }
+            } else {
+                return Err(RpcError::Deser("indefinite maps not supported".to_string()));
+            }
+            m
+        }
+    };
+    Ok(__result)
+}
 pub type HeaderValues = Vec<String>;
 
+// Encode HeaderValues as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_header_values<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &HeaderValues,
+) -> RpcResult<()> {
+    e.array(val.len() as u64)?;
+    for item in val.iter() {
+        e.str(item)?;
+    }
+    Ok(())
+}
+
+// Decode HeaderValues from cbor input stream
+#[doc(hidden)]
+pub fn decode_header_values(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<HeaderValues, RpcError> {
+    let __result = {
+        if let Some(n) = d.array()? {
+            let mut arr: Vec<String> = Vec::with_capacity(n as usize);
+            for _ in 0..(n as usize) {
+                arr.push(d.str()?.to_string())
+            }
+            arr
+        } else {
+            // indefinite array
+            let mut arr: Vec<String> = Vec::new();
+            loop {
+                match d.datatype() {
+                    Err(_) => break,
+                    Ok(wasmbus_rpc::cbor::Type::Break) => break,
+                    Ok(_) => arr.push(d.str()?.to_string()),
+                }
+            }
+            arr
+        }
+    };
+    Ok(__result)
+}
 /// HttpRequest contains data sent to actor about the http request
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct HttpRequest {
@@ -39,12 +122,136 @@ pub struct HttpRequest {
     pub body: Vec<u8>,
 }
 
+// Encode HttpRequest as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_http_request<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &HttpRequest,
+) -> RpcResult<()> {
+    e.array(5)?;
+    e.str(&val.method)?;
+    e.str(&val.path)?;
+    e.str(&val.query_string)?;
+    encode_header_map(e, &val.header)?;
+    e.bytes(&val.body)?;
+    Ok(())
+}
+
+// Decode HttpRequest from cbor input stream
+#[doc(hidden)]
+pub fn decode_http_request(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<HttpRequest, RpcError> {
+    let __result = {
+        let mut method: Option<String> = None;
+        let mut path: Option<String> = None;
+        let mut query_string: Option<String> = None;
+        let mut header: Option<HeaderMap> = None;
+        let mut body: Option<Vec<u8>> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct HttpRequest, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct HttpRequest: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => method = Some(d.str()?.to_string()),
+                    1 => path = Some(d.str()?.to_string()),
+                    2 => query_string = Some(d.str()?.to_string()),
+                    3 => {
+                        header = Some(
+                            decode_header_map(d)
+                                .map_err(|e| format!("decoding 'HeaderMap': {}", e))?,
+                        )
+                    }
+                    4 => body = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct HttpRequest: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "method" => method = Some(d.str()?.to_string()),
+                    "path" => path = Some(d.str()?.to_string()),
+                    "queryString" => query_string = Some(d.str()?.to_string()),
+                    "header" => {
+                        header = Some(
+                            decode_header_map(d)
+                                .map_err(|e| format!("decoding 'HeaderMap': {}", e))?,
+                        )
+                    }
+                    "body" => body = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        HttpRequest {
+            method: if let Some(__x) = method {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field HttpRequest.method (#0)".to_string(),
+                ));
+            },
+
+            path: if let Some(__x) = path {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field HttpRequest.path (#1)".to_string(),
+                ));
+            },
+
+            query_string: if let Some(__x) = query_string {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field HttpRequest.query_string (#2)".to_string(),
+                ));
+            },
+
+            header: if let Some(__x) = header {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field HttpRequest.header (#3)".to_string(),
+                ));
+            },
+
+            body: if let Some(__x) = body {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field HttpRequest.body (#4)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// HttpResponse contains the actor's response to return to the http client
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct HttpResponse {
     /// statusCode is a three-digit number, usually in the range 100-599,
     /// A value of 200 indicates success.
     #[serde(rename = "statusCode")]
+    #[serde(default)]
     pub status_code: u16,
     /// Map of headers (string keys, list of values)
     pub header: HeaderMap,
@@ -54,6 +261,105 @@ pub struct HttpResponse {
     pub body: Vec<u8>,
 }
 
+// Encode HttpResponse as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_http_response<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &HttpResponse,
+) -> RpcResult<()> {
+    e.array(3)?;
+    e.u16(val.status_code)?;
+    encode_header_map(e, &val.header)?;
+    e.bytes(&val.body)?;
+    Ok(())
+}
+
+// Decode HttpResponse from cbor input stream
+#[doc(hidden)]
+pub fn decode_http_response(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<HttpResponse, RpcError> {
+    let __result = {
+        let mut status_code: Option<u16> = None;
+        let mut header: Option<HeaderMap> = None;
+        let mut body: Option<Vec<u8>> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct HttpResponse, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct HttpResponse: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => status_code = Some(d.u16()?),
+                    1 => {
+                        header = Some(
+                            decode_header_map(d)
+                                .map_err(|e| format!("decoding 'HeaderMap': {}", e))?,
+                        )
+                    }
+                    2 => body = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct HttpResponse: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "statusCode" => status_code = Some(d.u16()?),
+                    "header" => {
+                        header = Some(
+                            decode_header_map(d)
+                                .map_err(|e| format!("decoding 'HeaderMap': {}", e))?,
+                        )
+                    }
+                    "body" => body = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        HttpResponse {
+            status_code: if let Some(__x) = status_code {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field HttpResponse.status_code (#0)".to_string(),
+                ));
+            },
+
+            header: if let Some(__x) = header {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field HttpResponse.header (#1)".to_string(),
+                ));
+            },
+
+            body: if let Some(__x) = body {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field HttpResponse.body (#2)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// HttpServer is the contract to be implemented by actor
 /// wasmbus.contractId: wasmcloud:httpserver
 /// wasmbus.actorReceive
@@ -74,10 +380,10 @@ pub trait HttpServerReceiver: MessageDispatch + HttpServer {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "HandleRequest" => {
-                let value: HttpRequest = deserialize(message.arg.as_ref())
-                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
+                let value: HttpRequest = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'HttpRequest': {}", e)))?;
                 let resp = HttpServer::handle_request(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
                 Ok(Message {
                     method: "HttpServer.HandleRequest",
                     arg: Cow::Owned(buf),
@@ -134,7 +440,7 @@ impl HttpServerSender<wasmbus_rpc::actor::prelude::WasmHost> {
 impl<T: Transport + std::marker::Sync + std::marker::Send> HttpServer for HttpServerSender<T> {
     #[allow(unused)]
     async fn handle_request(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<HttpResponse> {
-        let buf = serialize(arg)?;
+        let buf = wasmbus_rpc::common::serialize(arg)?;
         let resp = self
             .transport
             .send(
@@ -146,8 +452,9 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> HttpServer for HttpSe
                 None,
             )
             .await?;
-        let value = deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "HandleRequest", e)))?;
+
+        let value: HttpResponse = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': HttpResponse", e)))?;
         Ok(value)
     }
 }

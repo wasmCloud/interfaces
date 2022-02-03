@@ -1,13 +1,20 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
-//
+// This file is generated automatically using wasmcloud/weld-codegen 0.3.0
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Borrow, borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
-    deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
-    Timestamp, Transport,
+    cbor::*,
+    common::{
+        deserialize, message_format, serialize, Context, Message, MessageDispatch, MessageFormat,
+        SendOpts, Transport,
+    },
+    error::{RpcError, RpcResult},
+    Timestamp,
 };
 
 pub const SMITHY_VERSION: &str = "1.0";
@@ -28,6 +35,104 @@ pub struct PubMessage {
     pub body: Vec<u8>,
 }
 
+// Encode PubMessage as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_pub_message<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &PubMessage,
+) -> RpcResult<()> {
+    e.array(3)?;
+    e.str(&val.subject)?;
+    if let Some(val) = val.reply_to.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    e.bytes(&val.body)?;
+    Ok(())
+}
+
+// Decode PubMessage from cbor input stream
+#[doc(hidden)]
+pub fn decode_pub_message(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<PubMessage, RpcError> {
+    let __result = {
+        let mut subject: Option<String> = None;
+        let mut reply_to: Option<Option<String>> = Some(None);
+        let mut body: Option<Vec<u8>> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct PubMessage, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct PubMessage: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => subject = Some(d.str()?.to_string()),
+                    1 => {
+                        reply_to = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    2 => body = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct PubMessage: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "subject" => subject = Some(d.str()?.to_string()),
+                    "replyTo" => {
+                        reply_to = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "body" => body = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        PubMessage {
+            subject: if let Some(__x) = subject {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field PubMessage.subject (#0)".to_string(),
+                ));
+            },
+            reply_to: reply_to.unwrap(),
+
+            body: if let Some(__x) = body {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field PubMessage.body (#2)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// Reply received from a Request operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ReplyMessage {
@@ -44,6 +149,106 @@ pub struct ReplyMessage {
     pub body: Vec<u8>,
 }
 
+// Encode ReplyMessage as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_reply_message<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &ReplyMessage,
+) -> RpcResult<()> {
+    e.array(3)?;
+    e.str(&val.subject)?;
+    if let Some(val) = val.reply_to.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    e.bytes(&val.body)?;
+    Ok(())
+}
+
+// Decode ReplyMessage from cbor input stream
+#[doc(hidden)]
+pub fn decode_reply_message(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<ReplyMessage, RpcError> {
+    let __result = {
+        let mut subject: Option<String> = None;
+        let mut reply_to: Option<Option<String>> = Some(None);
+        let mut body: Option<Vec<u8>> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct ReplyMessage, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct ReplyMessage: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => subject = Some(d.str()?.to_string()),
+                    1 => {
+                        reply_to = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    2 => body = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct ReplyMessage: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "subject" => subject = Some(d.str()?.to_string()),
+                    "replyTo" => {
+                        reply_to = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "body" => body = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        ReplyMessage {
+            subject: if let Some(__x) = subject {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ReplyMessage.subject (#0)".to_string(),
+                ));
+            },
+            reply_to: reply_to.unwrap(),
+
+            body: if let Some(__x) = body {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ReplyMessage.body (#2)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// Message sent as part of a request, with timeout
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct RequestMessage {
@@ -56,9 +261,99 @@ pub struct RequestMessage {
     pub body: Vec<u8>,
     /// A timeout, in milliseconds
     #[serde(rename = "timeoutMs")]
+    #[serde(default)]
     pub timeout_ms: u32,
 }
 
+// Encode RequestMessage as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_request_message<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &RequestMessage,
+) -> RpcResult<()> {
+    e.array(3)?;
+    e.str(&val.subject)?;
+    e.bytes(&val.body)?;
+    e.u32(val.timeout_ms)?;
+    Ok(())
+}
+
+// Decode RequestMessage from cbor input stream
+#[doc(hidden)]
+pub fn decode_request_message(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<RequestMessage, RpcError> {
+    let __result = {
+        let mut subject: Option<String> = None;
+        let mut body: Option<Vec<u8>> = None;
+        let mut timeout_ms: Option<u32> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct RequestMessage, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct RequestMessage: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => subject = Some(d.str()?.to_string()),
+                    1 => body = Some(d.bytes()?.to_vec()),
+                    2 => timeout_ms = Some(d.u32()?),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct RequestMessage: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "subject" => subject = Some(d.str()?.to_string()),
+                    "body" => body = Some(d.bytes()?.to_vec()),
+                    "timeoutMs" => timeout_ms = Some(d.u32()?),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        RequestMessage {
+            subject: if let Some(__x) = subject {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field RequestMessage.subject (#0)".to_string(),
+                ));
+            },
+
+            body: if let Some(__x) = body {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field RequestMessage.body (#1)".to_string(),
+                ));
+            },
+
+            timeout_ms: if let Some(__x) = timeout_ms {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field RequestMessage.timeout_ms (#2)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// Message received as part of a subscription
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SubMessage {
@@ -75,6 +370,104 @@ pub struct SubMessage {
     pub body: Vec<u8>,
 }
 
+// Encode SubMessage as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_sub_message<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &SubMessage,
+) -> RpcResult<()> {
+    e.array(3)?;
+    e.str(&val.subject)?;
+    if let Some(val) = val.reply_to.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    e.bytes(&val.body)?;
+    Ok(())
+}
+
+// Decode SubMessage from cbor input stream
+#[doc(hidden)]
+pub fn decode_sub_message(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<SubMessage, RpcError> {
+    let __result = {
+        let mut subject: Option<String> = None;
+        let mut reply_to: Option<Option<String>> = Some(None);
+        let mut body: Option<Vec<u8>> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct SubMessage, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct SubMessage: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => subject = Some(d.str()?.to_string()),
+                    1 => {
+                        reply_to = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    2 => body = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct SubMessage: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "subject" => subject = Some(d.str()?.to_string()),
+                    "replyTo" => {
+                        reply_to = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "body" => body = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        SubMessage {
+            subject: if let Some(__x) = subject {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field SubMessage.subject (#0)".to_string(),
+                ));
+            },
+            reply_to: reply_to.unwrap(),
+
+            body: if let Some(__x) = body {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field SubMessage.body (#2)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// The MessageSubscriber interface describes
 /// an actor interface that receives messages
 /// sent by the Messaging provider
@@ -100,8 +493,8 @@ pub trait MessageSubscriberReceiver: MessageDispatch + MessageSubscriber {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "HandleMessage" => {
-                let value: SubMessage = deserialize(message.arg.as_ref())
-                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
+                let value: SubMessage = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'SubMessage': {}", e)))?;
                 let _resp = MessageSubscriber::handle_message(self, ctx, &value).await?;
                 let buf = Vec::new();
                 Ok(Message {
@@ -165,7 +558,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> MessageSubscriber
     #[allow(unused)]
     /// subscription handler
     async fn handle_message(&self, ctx: &Context, arg: &SubMessage) -> RpcResult<()> {
-        let buf = serialize(arg)?;
+        let buf = wasmbus_rpc::common::serialize(arg)?;
         let resp = self
             .transport
             .send(
@@ -211,8 +604,8 @@ pub trait MessagingReceiver: MessageDispatch + Messaging {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "Publish" => {
-                let value: PubMessage = deserialize(message.arg.as_ref())
-                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
+                let value: PubMessage = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'PubMessage': {}", e)))?;
                 let _resp = Messaging::publish(self, ctx, &value).await?;
                 let buf = Vec::new();
                 Ok(Message {
@@ -221,10 +614,10 @@ pub trait MessagingReceiver: MessageDispatch + Messaging {
                 })
             }
             "Request" => {
-                let value: RequestMessage = deserialize(message.arg.as_ref())
-                    .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
+                let value: RequestMessage = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'RequestMessage': {}", e)))?;
                 let resp = Messaging::request(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
                 Ok(Message {
                     method: "Messaging.Request",
                     arg: Cow::Owned(buf),
@@ -286,7 +679,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Messaging for Messagi
     /// the replyTo field should be filled with the
     /// subject for the response.
     async fn publish(&self, ctx: &Context, arg: &PubMessage) -> RpcResult<()> {
-        let buf = serialize(arg)?;
+        let buf = wasmbus_rpc::common::serialize(arg)?;
         let resp = self
             .transport
             .send(
@@ -304,7 +697,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Messaging for Messagi
     /// Request - send a message in a request/reply pattern,
     /// waiting for a response.
     async fn request(&self, ctx: &Context, arg: &RequestMessage) -> RpcResult<ReplyMessage> {
-        let buf = serialize(arg)?;
+        let buf = wasmbus_rpc::common::serialize(arg)?;
         let resp = self
             .transport
             .send(
@@ -316,8 +709,9 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Messaging for Messagi
                 None,
             )
             .await?;
-        let value = deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Request", e)))?;
+
+        let value: ReplyMessage = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': ReplyMessage", e)))?;
         Ok(value)
     }
 }

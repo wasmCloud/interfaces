@@ -12,8 +12,7 @@
 path = "numbergen.smithy"
 
 [[models]]
-url = "https://wasmcloud.github.io/interfaces/idl/org.wasmcloud"
-#path = "../core"
+url = "https://cdn.jsdelivr.net/gh/wasmcloud/interfaces/core"
 files = [ "wasmcloud-core.smithy", "wasmcloud-model.smithy" ]
 
 

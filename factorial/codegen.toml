@@ -17,7 +17,7 @@ files = [ "factorial.smithy" ]
 # Location of dependencies may be either a path to a directory, or a url prefix
 # If a relative path is used, it is relative to the location of this codegen.toml
 #path = "../core"
-url = "https://wasmcloud.github.io/interfaces/idl/org.wasmcloud"
+url = "https://cdn.jsdelivr.net/gh/wasmcloud/interfaces/core"
 files = [ "wasmcloud-core.smithy", "wasmcloud-model.smithy" ]
 
 
