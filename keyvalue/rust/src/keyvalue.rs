@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.2.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.3.0
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -1095,7 +1095,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': I32", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// returns whether the store contains the key
     async fn contains<TS: ToString + ?Sized + std::marker::Sync>(
@@ -1120,7 +1119,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Deletes a key, returning true if the key was deleted
     async fn del<TS: ToString + ?Sized + std::marker::Sync>(
@@ -1145,7 +1143,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Gets a value for a specified key. If the key exists,
     /// the return structure contains exists: true and the value,
@@ -1172,7 +1169,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': GetResponse", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Append a value onto the end of a list. Returns the new list size
     async fn list_add(&self, ctx: &Context, arg: &ListAddRequest) -> RpcResult<u32> {
@@ -1193,7 +1189,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Deletes a list and its contents
     /// input: list name
@@ -1220,7 +1215,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Deletes a value from a list. Returns true if the item was removed.
     async fn list_del(&self, ctx: &Context, arg: &ListDelRequest) -> RpcResult<bool> {
@@ -1241,7 +1235,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Retrieves a range of values from a list using 0-based indices.
     /// Start and end values are inclusive, for example, (0,10) returns
@@ -1265,7 +1258,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': StringList", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Sets the value of a key.
     /// expires is an optional number of seconds before the value should be automatically deleted,
@@ -1285,7 +1277,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .await?;
         Ok(())
     }
-
     #[allow(unused)]
     /// Add an item into a set. Returns number of items added (1 or 0)
     async fn set_add(&self, ctx: &Context, arg: &SetAddRequest) -> RpcResult<u32> {
@@ -1306,7 +1297,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Deletes an item from the set. Returns number of items removed from the set (1 or 0)
     async fn set_del(&self, ctx: &Context, arg: &SetDelRequest) -> RpcResult<u32> {
@@ -1327,7 +1317,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// perform intersection of sets and returns values from the intersection.
     /// input: list of sets for performing intersection (at least two)
@@ -1350,7 +1339,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': StringList", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Retrieves all items from a set
     /// input: String
@@ -1377,7 +1365,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': StringList", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// perform union of sets and returns values from the union
     /// input: list of sets for performing union (at least two)
@@ -1400,7 +1387,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': StringList", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// clears all values from the set and removes it
     /// input: set name

@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.2.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.3.0
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -693,7 +693,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Messaging for Messagi
             .await?;
         Ok(())
     }
-
     #[allow(unused)]
     /// Request - send a message in a request/reply pattern,
     /// waiting for a response.

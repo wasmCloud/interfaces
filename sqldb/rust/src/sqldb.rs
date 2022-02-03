@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.2.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.3.0
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -641,7 +641,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender
             .map_err(|e| RpcError::Deser(format!("'{}': ExecuteResult", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Perform select query on database, returning all result rows
     async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<FetchResult> {

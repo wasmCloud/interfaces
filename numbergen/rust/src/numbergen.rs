@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.2.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.3.0
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -231,7 +231,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .map_err(|e| RpcError::Deser(format!("'{}': String", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Request a random integer within a range
     /// The result will will be in the range [min,max), i.e., >= min and < max.
@@ -253,7 +252,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Request a 32-bit random number
     async fn random_32(&self, ctx: &Context) -> RpcResult<u32> {
