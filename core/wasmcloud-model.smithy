@@ -81,6 +81,14 @@ byte I8
 @unsignedInt
 byte U8
 
+/// 32-bit float
+@synonym
+float F32
+
+/// 64-bit float aka double
+@synonym
+double F64
+
 /// Rust codegen traits
 @trait(selector: "structure")
 structure codegenRust {
