@@ -107,7 +107,7 @@ operation StartDownload{
 /// It is recommended to keep chunks under 1MB to not exceed wasm memory allocation
 operation ReceiveChunk {
     input: ObjectMetadata,
-    output: Chunk,
+    output: DownloadResult,
 }
 
 
