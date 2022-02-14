@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.3.2
+// This file is generated automatically using wasmcloud/weld-codegen 0.3.3
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -2554,7 +2554,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Creates a container by name, returning success if it worked
     /// Note that container names may not be globally unique - just unique within the
@@ -2576,7 +2575,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .await?;
         Ok(())
     }
-
     #[allow(unused)]
     /// Retrieves information about the container.
     /// Returns error if the container id is invalid or not found.
@@ -2605,7 +2603,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': ContainerMetadata", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Returns list of container ids
     async fn list_containers(&self, ctx: &Context) -> RpcResult<ContainersInfo> {
@@ -2626,7 +2623,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': ContainersInfo", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Empty and remove the container(s)
     /// The MultiResult list contains one entry for each container
@@ -2652,7 +2648,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': MultiResult", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Returns whether the object exists
     async fn object_exists(&self, ctx: &Context, arg: &ContainerObject) -> RpcResult<bool> {
@@ -2675,7 +2670,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Lists the objects in the container.
     /// If the container exists and is empty, the returned `objects` list is empty.
@@ -2709,7 +2703,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': ListObjectsResponse", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Removes the objects. In the event any of the objects cannot be removed,
     /// the operation continues until all requested deletions have been attempted.
@@ -2739,7 +2732,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': MultiResult", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests to start upload of a file/blob to the Blobstore.
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
@@ -2768,7 +2760,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': PutObjectResponse", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests to retrieve an object. If the object is large, the provider
     /// may split the response into multiple parts
@@ -2798,7 +2789,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': GetObjectResponse", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Uploads a file chunk to a blobstore. This must be called AFTER PutObject
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
