@@ -20,105 +20,6 @@ use wasmbus_rpc::{
 pub const SMITHY_VERSION: &str = "1.0";
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct BlobstoreResult {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub error: Option<String>,
-    #[serde(default)]
-    pub success: bool,
-}
-
-// Encode BlobstoreResult as CBOR and append to output stream
-#[doc(hidden)]
-pub fn encode_blobstore_result<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
-    val: &BlobstoreResult,
-) -> RpcResult<()> {
-    e.map(2)?;
-    if let Some(val) = val.error.as_ref() {
-        e.str("error")?;
-        e.str(val)?;
-    } else {
-        e.null()?;
-    }
-    e.str("success")?;
-    e.bool(val.success)?;
-    Ok(())
-}
-
-// Decode BlobstoreResult from cbor input stream
-#[doc(hidden)]
-pub fn decode_blobstore_result(
-    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
-) -> Result<BlobstoreResult, RpcError> {
-    let __result = {
-        let mut error: Option<Option<String>> = Some(None);
-        let mut success: Option<bool> = None;
-
-        let is_array = match d.datatype()? {
-            wasmbus_rpc::cbor::Type::Array => true,
-            wasmbus_rpc::cbor::Type::Map => false,
-            _ => {
-                return Err(RpcError::Deser(
-                    "decoding struct BlobstoreResult, expected array or map".to_string(),
-                ))
-            }
-        };
-        if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct BlobstoreResult: indefinite array not supported".to_string(),
-                )
-            })?;
-            for __i in 0..(len as usize) {
-                match __i {
-                    0 => {
-                        error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
-                        }
-                    }
-                    1 => success = Some(d.bool()?),
-                    _ => d.skip()?,
-                }
-            }
-        } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct BlobstoreResult: indefinite map not supported".to_string(),
-                )
-            })?;
-            for __i in 0..(len as usize) {
-                match d.str()? {
-                    "error" => {
-                        error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
-                        }
-                    }
-                    "success" => success = Some(d.bool()?),
-                    _ => d.skip()?,
-                }
-            }
-        }
-        BlobstoreResult {
-            error: error.unwrap(),
-
-            success: if let Some(__x) = success {
-                __x
-            } else {
-                return Err(RpcError::Deser(
-                    "missing field BlobstoreResult.success (#1)".to_string(),
-                ));
-            },
-        }
-    };
-    Ok(__result)
-}
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Chunk {
     /// bytes in this chunk
     #[serde(with = "serde_bytes")]
@@ -418,10 +319,10 @@ pub fn decode_container_ids(
 pub struct ContainerMetadata {
     #[serde(rename = "containerId")]
     pub container_id: ContainerId,
-    /// creation date (rfc3339)
+    /// creation date
     #[serde(rename = "createdAt")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub created_at: Option<String>,
+    pub created_at: Option<Timestamp>,
 }
 
 // Encode ContainerMetadata as CBOR and append to output stream
@@ -435,7 +336,8 @@ pub fn encode_container_metadata<W: wasmbus_rpc::cbor::Write>(
     encode_container_id(e, &val.container_id)?;
     if let Some(val) = val.created_at.as_ref() {
         e.str("createdAt")?;
-        e.str(val)?;
+        e.i64(val.sec)?;
+        e.u32(val.nsec)?;
     } else {
         e.null()?;
     }
@@ -449,7 +351,7 @@ pub fn decode_container_metadata(
 ) -> Result<ContainerMetadata, RpcError> {
     let __result = {
         let mut container_id: Option<ContainerId> = None;
-        let mut created_at: Option<Option<String>> = Some(None);
+        let mut created_at: Option<Option<Timestamp>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -479,7 +381,10 @@ pub fn decode_container_metadata(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(d.str()?.to_string()))
+                            Some(Some(wasmbus_rpc::Timestamp {
+                                sec: d.i64()?,
+                                nsec: d.u32()?,
+                            }))
                         }
                     }
 
@@ -505,7 +410,10 @@ pub fn decode_container_metadata(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(d.str()?.to_string()))
+                            Some(Some(wasmbus_rpc::Timestamp {
+                                sec: d.i64()?,
+                                nsec: d.u32()?,
+                            }))
                         }
                     }
                     _ => d.skip()?,
@@ -885,6 +793,20 @@ pub fn decode_get_object_request(
 /// Response to GetObject
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetObjectResponse {
+    /// Specifies what content encodings have been applied to the object
+    /// and thus what decoding mechanisms must be applied to obtain the media-type
+    #[serde(rename = "contentEncoding")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_encoding: Option<String>,
+    /// Length of the content. (for multi-part downloads, this may not
+    /// be the same as the length of the initial chunk)
+    #[serde(rename = "contentLength")]
+    #[serde(default)]
+    pub content_length: u64,
+    /// A standard MIME type describing the format of the object data.
+    #[serde(rename = "contentType")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_type: Option<String>,
     /// If success is false, this may contain an error
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
@@ -903,7 +825,21 @@ pub fn encode_get_object_response<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetObjectResponse,
 ) -> RpcResult<()> {
-    e.map(3)?;
+    e.map(6)?;
+    if let Some(val) = val.content_encoding.as_ref() {
+        e.str("contentEncoding")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    e.str("contentLength")?;
+    e.u64(val.content_length)?;
+    if let Some(val) = val.content_type.as_ref() {
+        e.str("contentType")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
     if let Some(val) = val.error.as_ref() {
         e.str("error")?;
         e.str(val)?;
@@ -927,6 +863,9 @@ pub fn decode_get_object_response(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
 ) -> Result<GetObjectResponse, RpcError> {
     let __result = {
+        let mut content_encoding: Option<Option<String>> = Some(None);
+        let mut content_length: Option<u64> = None;
+        let mut content_type: Option<Option<String>> = Some(None);
         let mut error: Option<Option<String>> = Some(None);
         let mut initial_chunk: Option<Option<Chunk>> = Some(None);
         let mut success: Option<bool> = None;
@@ -949,6 +888,23 @@ pub fn decode_get_object_response(
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    1 => content_length = Some(d.u64()?),
+                    2 => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    3 => {
                         error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -956,7 +912,7 @@ pub fn decode_get_object_response(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    1 => {
+                    4 => {
                         initial_chunk = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -966,7 +922,7 @@ pub fn decode_get_object_response(
                             ))
                         }
                     }
-                    2 => success = Some(d.bool()?),
+                    5 => success = Some(d.bool()?),
                     _ => d.skip()?,
                 }
             }
@@ -978,6 +934,23 @@ pub fn decode_get_object_response(
             })?;
             for __i in 0..(len as usize) {
                 match d.str()? {
+                    "contentEncoding" => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "contentLength" => content_length = Some(d.u64()?),
+                    "contentType" => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
                     "error" => {
                         error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
@@ -1002,6 +975,16 @@ pub fn decode_get_object_response(
             }
         }
         GetObjectResponse {
+            content_encoding: content_encoding.unwrap(),
+
+            content_length: if let Some(__x) = content_length {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field GetObjectResponse.content_length (#1)".to_string(),
+                ));
+            },
+            content_type: content_type.unwrap(),
             error: error.unwrap(),
             initial_chunk: initial_chunk.unwrap(),
 
@@ -1009,7 +992,122 @@ pub fn decode_get_object_response(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field GetObjectResponse.success (#2)".to_string(),
+                    "missing field GetObjectResponse.success (#5)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
+/// Result of input item
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct ItemResult {
+    /// optional error message for failures
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+    #[serde(default)]
+    pub key: String,
+    /// whether the item succeeded or failed
+    #[serde(default)]
+    pub success: bool,
+}
+
+// Encode ItemResult as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_item_result<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &ItemResult,
+) -> RpcResult<()> {
+    e.map(3)?;
+    if let Some(val) = val.error.as_ref() {
+        e.str("error")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    e.str("key")?;
+    e.str(&val.key)?;
+    e.str("success")?;
+    e.bool(val.success)?;
+    Ok(())
+}
+
+// Decode ItemResult from cbor input stream
+#[doc(hidden)]
+pub fn decode_item_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<ItemResult, RpcError> {
+    let __result = {
+        let mut error: Option<Option<String>> = Some(None);
+        let mut key: Option<String> = None;
+        let mut success: Option<bool> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct ItemResult, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct ItemResult: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => {
+                        error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    1 => key = Some(d.str()?.to_string()),
+                    2 => success = Some(d.bool()?),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct ItemResult: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "error" => {
+                        error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "key" => key = Some(d.str()?.to_string()),
+                    "success" => success = Some(d.bool()?),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        ItemResult {
+            error: error.unwrap(),
+
+            key: if let Some(__x) = key {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ItemResult.key (#1)".to_string(),
+                ));
+            },
+
+            success: if let Some(__x) = success {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ItemResult.success (#2)".to_string(),
                 ));
             },
         }
@@ -1082,7 +1180,7 @@ pub struct ListObjectsRequest {
     /// the provider implementation may return fewer items than requested.
     #[serde(rename = "maxItems")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub max_items: Option<u64>,
+    pub max_items: Option<u32>,
     /// Request object names starting with this value
     #[serde(rename = "startWith")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1118,7 +1216,7 @@ pub fn encode_list_objects_request<W: wasmbus_rpc::cbor::Write>(
     }
     if let Some(val) = val.max_items.as_ref() {
         e.str("maxItems")?;
-        e.u64(*val)?;
+        e.u32(*val)?;
     } else {
         e.null()?;
     }
@@ -1141,7 +1239,7 @@ pub fn decode_list_objects_request(
         let mut continuation: Option<Option<String>> = Some(None);
         let mut end_before: Option<Option<String>> = Some(None);
         let mut end_with: Option<Option<String>> = Some(None);
-        let mut max_items: Option<Option<u64>> = Some(None);
+        let mut max_items: Option<Option<u32>> = Some(None);
         let mut start_with: Option<Option<String>> = Some(None);
 
         let is_array = match d.datatype()? {
@@ -1192,7 +1290,7 @@ pub fn decode_list_objects_request(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(d.u64()?))
+                            Some(Some(d.u32()?))
                         }
                     }
                     5 => {
@@ -1245,7 +1343,7 @@ pub fn decode_list_objects_request(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(d.u64()?))
+                            Some(Some(d.u32()?))
                         }
                     }
                     "startWith" => {
@@ -1408,6 +1506,54 @@ pub fn decode_list_objects_response(
     };
     Ok(__result)
 }
+/// result for an operation on a list of inputs
+pub type MultiResult = Vec<ItemResult>;
+
+// Encode MultiResult as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_multi_result<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &MultiResult,
+) -> RpcResult<()> {
+    e.array(val.len() as u64)?;
+    for item in val.iter() {
+        encode_item_result(e, item)?;
+    }
+    Ok(())
+}
+
+// Decode MultiResult from cbor input stream
+#[doc(hidden)]
+pub fn decode_multi_result(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<MultiResult, RpcError> {
+    let __result = {
+        if let Some(n) = d.array()? {
+            let mut arr: Vec<ItemResult> = Vec::with_capacity(n as usize);
+            for _ in 0..(n as usize) {
+                arr.push(
+                    decode_item_result(d).map_err(|e| format!("decoding 'ItemResult': {}", e))?,
+                )
+            }
+            arr
+        } else {
+            // indefinite array
+            let mut arr: Vec<ItemResult> = Vec::new();
+            loop {
+                match d.datatype() {
+                    Err(_) => break,
+                    Ok(wasmbus_rpc::cbor::Type::Break) => break,
+                    Ok(_) => arr.push(
+                        decode_item_result(d)
+                            .map_err(|e| format!("decoding 'ItemResult': {}", e))?,
+                    ),
+                }
+            }
+            arr
+        }
+    };
+    Ok(__result)
+}
 /// Unique id of an object
 pub type ObjectId = String;
 
@@ -1474,10 +1620,10 @@ pub struct ObjectMetadata {
     /// container of the object
     #[serde(rename = "containerId")]
     pub container_id: ContainerId,
-    /// date object was last modified (rfc3339)
+    /// date object was last modified
     #[serde(rename = "lastModified")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub last_modified: Option<String>,
+    pub last_modified: Option<Timestamp>,
     /// Object identifier that is unique within its container.
     /// Naming of objects is determined by the capability provider.
     /// An object id could be a path, hash of object contents, or some other unique identifier.
@@ -1499,7 +1645,8 @@ pub fn encode_object_metadata<W: wasmbus_rpc::cbor::Write>(
     encode_container_id(e, &val.container_id)?;
     if let Some(val) = val.last_modified.as_ref() {
         e.str("lastModified")?;
-        e.str(val)?;
+        e.i64(val.sec)?;
+        e.u32(val.nsec)?;
     } else {
         e.null()?;
     }
@@ -1517,7 +1664,7 @@ pub fn decode_object_metadata(
 ) -> Result<ObjectMetadata, RpcError> {
     let __result = {
         let mut container_id: Option<ContainerId> = None;
-        let mut last_modified: Option<Option<String>> = Some(None);
+        let mut last_modified: Option<Option<Timestamp>> = Some(None);
         let mut object_id: Option<ObjectId> = None;
         let mut size: Option<u64> = None;
 
@@ -1549,7 +1696,10 @@ pub fn decode_object_metadata(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(d.str()?.to_string()))
+                            Some(Some(wasmbus_rpc::Timestamp {
+                                sec: d.i64()?,
+                                nsec: d.u32()?,
+                            }))
                         }
                     }
                     2 => {
@@ -1581,7 +1731,10 @@ pub fn decode_object_metadata(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(d.str()?.to_string()))
+                            Some(Some(wasmbus_rpc::Timestamp {
+                                sec: d.i64()?,
+                                nsec: d.u32()?,
+                            }))
                         }
                     }
                     "objectId" => {
@@ -1802,6 +1955,18 @@ pub fn decode_put_chunk_request(
 pub struct PutObjectRequest {
     /// File path and initial data
     pub chunk: Chunk,
+    /// Specifies what content encodings have been applied to the object
+    /// and thus what decoding mechanisms must be applied to obtain the media-type
+    /// referenced by the contentType field. For more information,
+    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11.
+    #[serde(rename = "contentEncoding")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_encoding: Option<String>,
+    /// A MIME type of the object
+    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
+    #[serde(rename = "contentType")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_type: Option<String>,
 }
 
 // Encode PutObjectRequest as CBOR and append to output stream
@@ -1810,9 +1975,21 @@ pub fn encode_put_object_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PutObjectRequest,
 ) -> RpcResult<()> {
-    e.map(1)?;
+    e.map(3)?;
     e.str("chunk")?;
     encode_chunk(e, &val.chunk)?;
+    if let Some(val) = val.content_encoding.as_ref() {
+        e.str("contentEncoding")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.content_type.as_ref() {
+        e.str("contentType")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
     Ok(())
 }
 
@@ -1823,6 +2000,8 @@ pub fn decode_put_object_request(
 ) -> Result<PutObjectRequest, RpcError> {
     let __result = {
         let mut chunk: Option<Chunk> = None;
+        let mut content_encoding: Option<Option<String>> = Some(None);
+        let mut content_type: Option<Option<String>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -1845,6 +2024,23 @@ pub fn decode_put_object_request(
                         chunk =
                             Some(decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?)
                     }
+                    1 => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    2 => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+
                     _ => d.skip()?,
                 }
             }
@@ -1860,6 +2056,22 @@ pub fn decode_put_object_request(
                         chunk =
                             Some(decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?)
                     }
+                    "contentEncoding" => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "contentType" => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
                     _ => d.skip()?,
                 }
             }
@@ -1872,6 +2084,8 @@ pub fn decode_put_object_request(
                     "missing field PutObjectRequest.chunk (#0)".to_string(),
                 ));
             },
+            content_encoding: content_encoding.unwrap(),
+            content_type: content_type.unwrap(),
         }
     };
     Ok(__result)
@@ -2082,19 +2296,11 @@ pub trait Blobstore {
         "wasmcloud:blobstore"
     }
     /// Returns whether the container exists
-    async fn container_exists(
-        &self,
-        ctx: &Context,
-        arg: &ContainerId,
-    ) -> RpcResult<BlobstoreResult>;
+    async fn container_exists(&self, ctx: &Context, arg: &ContainerId) -> RpcResult<bool>;
     /// Creates a container by name, returning success if it worked
     /// Note that container names may not be globally unique - just unique within the
     /// "namespace" of the connecting actor and linkdef
-    async fn create_container(
-        &self,
-        ctx: &Context,
-        arg: &ContainerId,
-    ) -> RpcResult<BlobstoreResult>;
+    async fn create_container(&self, ctx: &Context, arg: &ContainerId) -> RpcResult<()>;
     /// Retrieves information about the container,
     /// Returns no value if the container id is invalid
     async fn get_container_info(
@@ -2105,17 +2311,12 @@ pub trait Blobstore {
     /// Returns list of container ids
     async fn list_containers(&self, ctx: &Context) -> RpcResult<ContainersInfo>;
     /// Empty and remove the container(s)
-    async fn remove_containers(
-        &self,
-        ctx: &Context,
-        arg: &ContainerIds,
-    ) -> RpcResult<BlobstoreResult>;
+    /// The MultiResult list contains one entry for each container
+    /// that was not successfully removed, with the 'key' value representing the container name.
+    /// If the MultiResult list is empty, all container removals succeeded.
+    async fn remove_containers(&self, ctx: &Context, arg: &ContainerIds) -> RpcResult<MultiResult>;
     /// Returns whether the object exists
-    async fn object_exists(
-        &self,
-        ctx: &Context,
-        arg: &ContainerObject,
-    ) -> RpcResult<BlobstoreResult>;
+    async fn object_exists(&self, ctx: &Context, arg: &ContainerObject) -> RpcResult<bool>;
     /// List the objects in the container
     async fn list_objects(
         &self,
@@ -2123,12 +2324,14 @@ pub trait Blobstore {
         arg: &ListObjectsRequest,
     ) -> RpcResult<ListObjectsResponse>;
     /// Remove the objects.
-    /// The objects do not need to be in the same container
+    /// The MultiResult list contains one entry for each object that was not removed,
+    /// with the 'key' value representing the object name.
+    /// If the MultiResult list is empty, all objects were removed.
     async fn remove_objects(
         &self,
         ctx: &Context,
         arg: &RemoveObjectsRequest,
-    ) -> RpcResult<BlobstoreResult>;
+    ) -> RpcResult<MultiResult>;
     /// Requests to start upload of a file/blob to the Blobstore
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
     async fn put_object(
@@ -2146,7 +2349,7 @@ pub trait Blobstore {
     ) -> RpcResult<GetObjectResponse>;
     /// Uploads a file chunk to a blobstore. This must be called AFTER PutObject
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
-    async fn put_chunk(&self, ctx: &Context, arg: &PutChunkRequest) -> RpcResult<BlobstoreResult>;
+    async fn put_chunk(&self, ctx: &Context, arg: &PutChunkRequest) -> RpcResult<()>;
 }
 
 /// BlobstoreReceiver receives messages defined in the Blobstore service trait
@@ -2162,7 +2365,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                         .map_err(|e| RpcError::Deser(format!("'ContainerId': {}", e)))?;
                 let resp = Blobstore::container_exists(self, ctx, &value).await?;
                 let mut e = wasmbus_rpc::cbor::vec_encoder();
-                encode_blobstore_result(&mut e, &resp)?;
+                e.bool(resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
                     method: "Blobstore.ContainerExists",
@@ -2173,10 +2376,8 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                 let value: ContainerId =
                     wasmbus_rpc::common::decode(&message.arg, &decode_container_id)
                         .map_err(|e| RpcError::Deser(format!("'ContainerId': {}", e)))?;
-                let resp = Blobstore::create_container(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
-                encode_blobstore_result(&mut e, &resp)?;
-                let buf = e.into_inner();
+                let _resp = Blobstore::create_container(self, ctx, &value).await?;
+                let buf = Vec::new();
                 Ok(Message {
                     method: "Blobstore.CreateContainer",
                     arg: Cow::Owned(buf),
@@ -2211,7 +2412,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                         .map_err(|e| RpcError::Deser(format!("'ContainerIds': {}", e)))?;
                 let resp = Blobstore::remove_containers(self, ctx, &value).await?;
                 let mut e = wasmbus_rpc::cbor::vec_encoder();
-                encode_blobstore_result(&mut e, &resp)?;
+                encode_multi_result(&mut e, &resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
                     method: "Blobstore.RemoveContainers",
@@ -2224,7 +2425,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                         .map_err(|e| RpcError::Deser(format!("'ContainerObject': {}", e)))?;
                 let resp = Blobstore::object_exists(self, ctx, &value).await?;
                 let mut e = wasmbus_rpc::cbor::vec_encoder();
-                encode_blobstore_result(&mut e, &resp)?;
+                e.bool(resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
                     method: "Blobstore.ObjectExists",
@@ -2250,7 +2451,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                         .map_err(|e| RpcError::Deser(format!("'RemoveObjectsRequest': {}", e)))?;
                 let resp = Blobstore::remove_objects(self, ctx, &value).await?;
                 let mut e = wasmbus_rpc::cbor::vec_encoder();
-                encode_blobstore_result(&mut e, &resp)?;
+                encode_multi_result(&mut e, &resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
                     method: "Blobstore.RemoveObjects",
@@ -2287,10 +2488,8 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                 let value: PutChunkRequest =
                     wasmbus_rpc::common::decode(&message.arg, &decode_put_chunk_request)
                         .map_err(|e| RpcError::Deser(format!("'PutChunkRequest': {}", e)))?;
-                let resp = Blobstore::put_chunk(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
-                encode_blobstore_result(&mut e, &resp)?;
-                let buf = e.into_inner();
+                let _resp = Blobstore::put_chunk(self, ctx, &value).await?;
+                let buf = Vec::new();
                 Ok(Message {
                     method: "Blobstore.PutChunk",
                     arg: Cow::Owned(buf),
@@ -2346,11 +2545,7 @@ impl BlobstoreSender<wasmbus_rpc::actor::prelude::WasmHost> {
 impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for BlobstoreSender<T> {
     #[allow(unused)]
     /// Returns whether the container exists
-    async fn container_exists(
-        &self,
-        ctx: &Context,
-        arg: &ContainerId,
-    ) -> RpcResult<BlobstoreResult> {
+    async fn container_exists(&self, ctx: &Context, arg: &ContainerId) -> RpcResult<bool> {
         let mut e = wasmbus_rpc::cbor::vec_encoder();
         encode_container_id(&mut e, arg)?;
         let buf = e.into_inner();
@@ -2366,9 +2561,8 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             )
             .await?;
 
-        let value: BlobstoreResult =
-            wasmbus_rpc::common::decode(&resp, &decode_blobstore_result)
-                .map_err(|e| RpcError::Deser(format!("'{}': BlobstoreResult", e)))?;
+        let value: bool = wasmbus_rpc::common::decode(&resp, &decode_boolean)
+            .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
 
@@ -2376,11 +2570,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
     /// Creates a container by name, returning success if it worked
     /// Note that container names may not be globally unique - just unique within the
     /// "namespace" of the connecting actor and linkdef
-    async fn create_container(
-        &self,
-        ctx: &Context,
-        arg: &ContainerId,
-    ) -> RpcResult<BlobstoreResult> {
+    async fn create_container(&self, ctx: &Context, arg: &ContainerId) -> RpcResult<()> {
         let mut e = wasmbus_rpc::cbor::vec_encoder();
         encode_container_id(&mut e, arg)?;
         let buf = e.into_inner();
@@ -2395,11 +2585,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 None,
             )
             .await?;
-
-        let value: BlobstoreResult =
-            wasmbus_rpc::common::decode(&resp, &decode_blobstore_result)
-                .map_err(|e| RpcError::Deser(format!("'{}': BlobstoreResult", e)))?;
-        Ok(value)
+        Ok(())
     }
 
     #[allow(unused)]
@@ -2454,11 +2640,10 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
 
     #[allow(unused)]
     /// Empty and remove the container(s)
-    async fn remove_containers(
-        &self,
-        ctx: &Context,
-        arg: &ContainerIds,
-    ) -> RpcResult<BlobstoreResult> {
+    /// The MultiResult list contains one entry for each container
+    /// that was not successfully removed, with the 'key' value representing the container name.
+    /// If the MultiResult list is empty, all container removals succeeded.
+    async fn remove_containers(&self, ctx: &Context, arg: &ContainerIds) -> RpcResult<MultiResult> {
         let mut e = wasmbus_rpc::cbor::vec_encoder();
         encode_container_ids(&mut e, arg)?;
         let buf = e.into_inner();
@@ -2474,19 +2659,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             )
             .await?;
 
-        let value: BlobstoreResult =
-            wasmbus_rpc::common::decode(&resp, &decode_blobstore_result)
-                .map_err(|e| RpcError::Deser(format!("'{}': BlobstoreResult", e)))?;
+        let value: MultiResult = wasmbus_rpc::common::decode(&resp, &decode_multi_result)
+            .map_err(|e| RpcError::Deser(format!("'{}': MultiResult", e)))?;
         Ok(value)
     }
 
     #[allow(unused)]
     /// Returns whether the object exists
-    async fn object_exists(
-        &self,
-        ctx: &Context,
-        arg: &ContainerObject,
-    ) -> RpcResult<BlobstoreResult> {
+    async fn object_exists(&self, ctx: &Context, arg: &ContainerObject) -> RpcResult<bool> {
         let mut e = wasmbus_rpc::cbor::vec_encoder();
         encode_container_object(&mut e, arg)?;
         let buf = e.into_inner();
@@ -2502,9 +2682,8 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             )
             .await?;
 
-        let value: BlobstoreResult =
-            wasmbus_rpc::common::decode(&resp, &decode_blobstore_result)
-                .map_err(|e| RpcError::Deser(format!("'{}': BlobstoreResult", e)))?;
+        let value: bool = wasmbus_rpc::common::decode(&resp, &decode_boolean)
+            .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
 
@@ -2538,12 +2717,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
 
     #[allow(unused)]
     /// Remove the objects.
-    /// The objects do not need to be in the same container
+    /// The MultiResult list contains one entry for each object that was not removed,
+    /// with the 'key' value representing the object name.
+    /// If the MultiResult list is empty, all objects were removed.
     async fn remove_objects(
         &self,
         ctx: &Context,
         arg: &RemoveObjectsRequest,
-    ) -> RpcResult<BlobstoreResult> {
+    ) -> RpcResult<MultiResult> {
         let mut e = wasmbus_rpc::cbor::vec_encoder();
         encode_remove_objects_request(&mut e, arg)?;
         let buf = e.into_inner();
@@ -2559,9 +2740,8 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             )
             .await?;
 
-        let value: BlobstoreResult =
-            wasmbus_rpc::common::decode(&resp, &decode_blobstore_result)
-                .map_err(|e| RpcError::Deser(format!("'{}': BlobstoreResult", e)))?;
+        let value: MultiResult = wasmbus_rpc::common::decode(&resp, &decode_multi_result)
+            .map_err(|e| RpcError::Deser(format!("'{}': MultiResult", e)))?;
         Ok(value)
     }
 
@@ -2627,7 +2807,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
     #[allow(unused)]
     /// Uploads a file chunk to a blobstore. This must be called AFTER PutObject
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
-    async fn put_chunk(&self, ctx: &Context, arg: &PutChunkRequest) -> RpcResult<BlobstoreResult> {
+    async fn put_chunk(&self, ctx: &Context, arg: &PutChunkRequest) -> RpcResult<()> {
         let mut e = wasmbus_rpc::cbor::vec_encoder();
         encode_put_chunk_request(&mut e, arg)?;
         let buf = e.into_inner();
@@ -2642,11 +2822,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 None,
             )
             .await?;
-
-        let value: BlobstoreResult =
-            wasmbus_rpc::common::decode(&resp, &decode_blobstore_result)
-                .map_err(|e| RpcError::Deser(format!("'{}': BlobstoreResult", e)))?;
-        Ok(value)
+        Ok(())
     }
 }
 

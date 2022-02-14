@@ -54,23 +54,23 @@ service ChunkReceiver {
 /// Creates a container by name, returning success if it worked
 /// Note that container names may not be globally unique - just unique within the
 /// "namespace" of the connecting actor and linkdef
+@idempotent
 operation CreateContainer {
   input: ContainerId,
-  output: BlobstoreResult
 }
 
 /// Returns whether the container exists
 @readonly
 operation ContainerExists {
   input: ContainerId,
-  output: BlobstoreResult
+  output: Boolean,
 }
 
 /// Returns whether the object exists
 @readonly
 operation ObjectExists {
   input: ContainerObject,
-  output: BlobstoreResult
+  output: Boolean,
 }
 
 /// Returns list of container ids
@@ -80,10 +80,12 @@ operation ListContainers {
 }
 
 /// Empty and remove the container(s)
-@idempotent
+/// The MultiResult list contains one entry for each container
+/// that was not successfully removed, with the 'key' value representing the container name.
+/// If the MultiResult list is empty, all container removals succeeded.
 operation RemoveContainers {
-    input: ContainerIds
-    output: BlobstoreResult
+    input: ContainerIds,
+    output: MultiResult,
 }
 
 /// Retrieves information about the container,
@@ -102,10 +104,12 @@ operation ListObjects {
 }
 
 /// Remove the objects.
-/// The objects do not need to be in the same container
+/// The MultiResult list contains one entry for each object that was not removed,
+/// with the 'key' value representing the object name.
+/// If the MultiResult list is empty, all objects were removed.
 operation RemoveObjects {
     input: RemoveObjectsRequest,
-    output: BlobstoreResult,
+    output: MultiResult,
 }
 
 /// Requests to start upload of a file/blob to the Blobstore
@@ -119,12 +123,12 @@ operation PutObject {
 /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
 operation PutChunk {
     input: PutChunkRequest,
-    output: BlobstoreResult,
 }
 
 /// Requests to retrieve an object. If the object is large, the provider
 /// may split the response into multiple parts
 /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
+@readonly
 operation GetObject {
     input: GetObjectRequest,
     output: GetObjectResponse,
@@ -169,7 +173,7 @@ structure ListObjectsRequest {
     /// maximum number of items to return. If not specified, provider 
     /// will return an initial set of up to 1000 items. if maxItems > 1000,
     /// the provider implementation may return fewer items than requested.
-    maxItems: U64,
+    maxItems: U32,
 }
 
 structure ListObjectsResponse {
@@ -230,14 +234,24 @@ structure ContainerMetadata {
     @required
     containerId: ContainerId,
 
-    /// creation date (rfc3339)
-    createdAt: String,
+    /// creation date
+    createdAt: Timestamp,
 }
 
 structure PutObjectRequest {
     /// File path and initial data
     @required
     chunk: Chunk,
+
+    /// A MIME type of the object
+    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
+    contentType: String,
+
+    /// Specifies what content encodings have been applied to the object 
+    /// and thus what decoding mechanisms must be applied to obtain the media-type 
+    /// referenced by the contentType field. For more information, 
+    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11.
+    contentEncoding: String,
 }
 
 structure PutObjectResponse {
@@ -277,8 +291,8 @@ structure ObjectMetadata {
     @required
     size: U64,
 
-    /// date object was last modified (rfc3339)
-    lastModified: String,
+    /// date object was last modified
+    lastModified: Timestamp,
 }
 
 
@@ -320,6 +334,19 @@ structure GetObjectResponse {
 
     /// The provider may begin the download by returning a first chunk
     initialChunk: Chunk
+
+    /// Length of the content. (for multi-part downloads, this may not
+    /// be the same as the length of the initial chunk)
+    @required
+    contentLength: u64
+
+    /// A standard MIME type describing the format of the object data.
+    contentType: String
+
+    /// Specifies what content encodings have been applied to the object 
+    /// and thus what decoding mechanisms must be applied to obtain the media-type 
+    // referenced by the contenType field.
+    contentEncoding: String
 }
 
 /// Combination of container id and object id
@@ -352,11 +379,21 @@ structure Chunk {
     isLast: Boolean,
 }
 
-structure BlobstoreResult {
+/// Result of input item
+structure ItemResult {
     @required
-    success: Boolean,
+    key: String,
 
-    error: String,
+    /// whether the item succeeded or failed
+    @required
+    success: Boolean
+
+    /// optional error message for failures
+    error: String
 }
 
+/// result for an operation on a list of inputs
+list MultiResult {
+    member : ItemResult
+}
 
