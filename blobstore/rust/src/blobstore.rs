@@ -2269,6 +2269,113 @@ pub fn decode_remove_objects_request(
     };
     Ok(__result)
 }
+/// The BlobStore service, actor side
+/// wasmbus.contractId: wasmcloud:blobstore
+/// wasmbus.actorReceive
+#[async_trait]
+pub trait ChunkReceiver {
+    /// returns the capability contract id for this interface
+    fn contract_id() -> &'static str {
+        "wasmcloud:blobstore"
+    }
+    /// Receives a file chunk from a blobstore.
+    /// A blobstore provider invokes this operation on actors in response to the GetObject request.
+    /// If the response sets cancelDownload, the provider will stop downloading chunks
+    async fn receive_chunk(&self, ctx: &Context, arg: &Chunk) -> RpcResult<ChunkResponse>;
+}
+
+/// ChunkReceiverReceiver receives messages defined in the ChunkReceiver service trait
+/// The BlobStore service, actor side
+#[doc(hidden)]
+#[async_trait]
+pub trait ChunkReceiverReceiver: MessageDispatch + ChunkReceiver {
+    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+        match message.method {
+            "ReceiveChunk" => {
+                let value: Chunk = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'Chunk': {}", e)))?;
+                let resp = ChunkReceiver::receive_chunk(self, ctx, &value).await?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
+                Ok(Message {
+                    method: "ChunkReceiver.ReceiveChunk",
+                    arg: Cow::Owned(buf),
+                })
+            }
+            _ => Err(RpcError::MethodNotHandled(format!(
+                "ChunkReceiver::{}",
+                message.method
+            ))),
+        }
+    }
+}
+
+/// ChunkReceiverSender sends messages to a ChunkReceiver service
+/// The BlobStore service, actor side
+/// client for sending ChunkReceiver messages
+#[derive(Debug)]
+pub struct ChunkReceiverSender<T: Transport> {
+    transport: T,
+}
+
+impl<T: Transport> ChunkReceiverSender<T> {
+    /// Constructs a ChunkReceiverSender with the specified transport
+    pub fn via(transport: T) -> Self {
+        Self { transport }
+    }
+
+    pub fn set_timeout(&self, interval: std::time::Duration) {
+        self.transport.set_timeout(interval);
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl<'send> ChunkReceiverSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
+    /// Constructs a Sender using an actor's LinkDefinition,
+    /// Uses the provider's HostBridge for rpc
+    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
+        Self {
+            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
+        }
+    }
+}
+#[cfg(target_arch = "wasm32")]
+impl ChunkReceiverSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
+}
+#[async_trait]
+impl<T: Transport + std::marker::Sync + std::marker::Send> ChunkReceiver
+    for ChunkReceiverSender<T>
+{
+    #[allow(unused)]
+    /// Receives a file chunk from a blobstore.
+    /// A blobstore provider invokes this operation on actors in response to the GetObject request.
+    /// If the response sets cancelDownload, the provider will stop downloading chunks
+    async fn receive_chunk(&self, ctx: &Context, arg: &Chunk) -> RpcResult<ChunkResponse> {
+        let buf = wasmbus_rpc::common::serialize(arg)?;
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "ChunkReceiver.ReceiveChunk",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        let value: ChunkResponse = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': ChunkResponse", e)))?;
+        Ok(value)
+    }
+}
+
 /// The BlobStore service, provider side
 /// wasmbus.contractId: wasmcloud:blobstore
 /// wasmbus.providerReceive
@@ -2808,112 +2915,5 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             )
             .await?;
         Ok(())
-    }
-}
-
-/// The BlobStore service, actor side
-/// wasmbus.contractId: wasmcloud:blobstore
-/// wasmbus.actorReceive
-#[async_trait]
-pub trait ChunkReceiver {
-    /// returns the capability contract id for this interface
-    fn contract_id() -> &'static str {
-        "wasmcloud:blobstore"
-    }
-    /// Receives a file chunk from a blobstore.
-    /// A blobstore provider invokes this operation on actors in response to the GetObject request.
-    /// If the response sets cancelDownload, the provider will stop downloading chunks
-    async fn receive_chunk(&self, ctx: &Context, arg: &Chunk) -> RpcResult<ChunkResponse>;
-}
-
-/// ChunkReceiverReceiver receives messages defined in the ChunkReceiver service trait
-/// The BlobStore service, actor side
-#[doc(hidden)]
-#[async_trait]
-pub trait ChunkReceiverReceiver: MessageDispatch + ChunkReceiver {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
-        match message.method {
-            "ReceiveChunk" => {
-                let value: Chunk = wasmbus_rpc::common::deserialize(&message.arg)
-                    .map_err(|e| RpcError::Deser(format!("'Chunk': {}", e)))?;
-                let resp = ChunkReceiver::receive_chunk(self, ctx, &value).await?;
-                let buf = wasmbus_rpc::common::serialize(&resp)?;
-                Ok(Message {
-                    method: "ChunkReceiver.ReceiveChunk",
-                    arg: Cow::Owned(buf),
-                })
-            }
-            _ => Err(RpcError::MethodNotHandled(format!(
-                "ChunkReceiver::{}",
-                message.method
-            ))),
-        }
-    }
-}
-
-/// ChunkReceiverSender sends messages to a ChunkReceiver service
-/// The BlobStore service, actor side
-/// client for sending ChunkReceiver messages
-#[derive(Debug)]
-pub struct ChunkReceiverSender<T: Transport> {
-    transport: T,
-}
-
-impl<T: Transport> ChunkReceiverSender<T> {
-    /// Constructs a ChunkReceiverSender with the specified transport
-    pub fn via(transport: T) -> Self {
-        Self { transport }
-    }
-
-    pub fn set_timeout(&self, interval: std::time::Duration) {
-        self.transport.set_timeout(interval);
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-impl<'send> ChunkReceiverSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
-    /// Constructs a Sender using an actor's LinkDefinition,
-    /// Uses the provider's HostBridge for rpc
-    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
-        Self {
-            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
-        }
-    }
-}
-#[cfg(target_arch = "wasm32")]
-impl ChunkReceiverSender<wasmbus_rpc::actor::prelude::WasmHost> {
-    /// Constructs a client for actor-to-actor messaging
-    /// using the recipient actor's public key
-    pub fn to_actor(actor_id: &str) -> Self {
-        let transport =
-            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
-        Self { transport }
-    }
-}
-#[async_trait]
-impl<T: Transport + std::marker::Sync + std::marker::Send> ChunkReceiver
-    for ChunkReceiverSender<T>
-{
-    #[allow(unused)]
-    /// Receives a file chunk from a blobstore.
-    /// A blobstore provider invokes this operation on actors in response to the GetObject request.
-    /// If the response sets cancelDownload, the provider will stop downloading chunks
-    async fn receive_chunk(&self, ctx: &Context, arg: &Chunk) -> RpcResult<ChunkResponse> {
-        let buf = wasmbus_rpc::common::serialize(arg)?;
-        let resp = self
-            .transport
-            .send(
-                ctx,
-                Message {
-                    method: "ChunkReceiver.ReceiveChunk",
-                    arg: Cow::Borrowed(&buf),
-                },
-                None,
-            )
-            .await?;
-
-        let value: ChunkResponse = wasmbus_rpc::common::deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("'{}': ChunkResponse", e)))?;
-        Ok(value)
     }
 }
