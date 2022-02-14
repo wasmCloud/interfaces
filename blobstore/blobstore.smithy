@@ -88,31 +88,37 @@ operation RemoveContainers {
     output: MultiResult,
 }
 
-/// Retrieves information about the container,
-/// Returns no value if the container id is invalid
+/// Retrieves information about the container.
+/// Returns error if the container id is invalid or not found.
 @readonly
 operation GetContainerInfo {
     input: ContainerId,
     output: ContainerMetadata,
 }
 
-/// List the objects in the container
+/// Lists the objects in the container.
+/// If the container exists and is empty, the returned `objects` list is empty.
+/// Parameters of the request may be used to limit the object names returned
+/// with an optional start value, end value, and maximum number of items.
+/// The provider may limit the number of items returned. If the list is truncated, 
+/// the response contains a `continuation` token that may be submitted in
+/// a subsequent ListObjects request.
 @readonly
 operation ListObjects {
     input: ListObjectsRequest,
     output: ListObjectsResponse,
 }
 
-/// Remove the objects.
-/// The MultiResult list contains one entry for each object that was not removed,
-/// with the 'key' value representing the object name.
-/// If the MultiResult list is empty, all objects were removed.
+/// Removes the objects. In the event any of the objects cannot be removed,
+/// the operation continues until all requested deletions have been attempted.
+/// The MultiRequest includes a list of errors, one for each deletion request
+/// that did not succeed. If the list is empty, all removals succeeded.
 operation RemoveObjects {
     input: RemoveObjectsRequest,
     output: MultiResult,
 }
 
-/// Requests to start upload of a file/blob to the Blobstore
+/// Requests to start upload of a file/blob to the Blobstore.
 /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
 operation PutObject {
     input: PutObjectRequest,
@@ -143,39 +149,47 @@ operation ReceiveChunk {
 }
 
 /// Response from actor after receiving a download chunk.
-/// If cancelDownload is true, the sender will stop sending chunks
 structure ChunkResponse {
+
+    /// If set and `true`, the sender will stop sending chunks, 
     cancelDownload: Boolean
 }
 
+/// Parameter to list_objects. 
 structure ListObjectsRequest {
 
-    /// the container to search
+    /// Name of the container to search
     @required
     containerId: String,
 
-    /// Request object names starting with this value
+    /// Request object names starting with this value. (Optional)
     startWith: String,
 
-    /// Optional continuation token passed in ListObjectsResponse.
-    /// If set, `startWith` is ignored.
+    /// Continuation token passed in ListObjectsResponse.
+    /// If set, `startWith` is ignored. (Optional)
     continuation: String,
 
-    /// Optional last item to return (inclusive terminator)
+    /// Last item to return (inclusive terminator) (Optional)
     endWith: String,
 
     /// Optionally, stop returning items before returning this value.
     /// (exclusive terminator)
     /// If startFrom is "a" and endBefore is "b", and items are ordered
     /// alphabetically, then only items beginning with "a" would be returned.
+    /// (Optional)
     endBefore: String,
 
     /// maximum number of items to return. If not specified, provider 
     /// will return an initial set of up to 1000 items. if maxItems > 1000,
     /// the provider implementation may return fewer items than requested.
+    /// (Optional)
     maxItems: U32,
 }
 
+/// Respose to list_objects.
+/// If `isLast` is false, the list was truncated by the provider,
+/// and the remainder of the objects can be requested with another
+/// request using the `continuation` token.
 structure ListObjectsResponse {
 
     /// set of objects returned
@@ -189,56 +203,43 @@ structure ListObjectsResponse {
 
     /// If `isLast` is false, this value can be used in the `continuation` field
     /// of a `ListObjectsRequest`.
-    /// This field may be obfuscated and may not be a real key or object name.
+    /// Clients should not attempt to interpret this field: it may or may not
+    /// be a real key or object name, and may be obfuscated by the provider.
     continuation: String,
 }
 
-list Items {
-    member: String
-}
 
-list ObjectIds {
-    member: ObjectId
-}
-
-list ContainerIds {
-    member: ContainerId
-}
-
-list ContainersInfo {
-    member: ContainerMetadata
-}
-
-list ObjectsInfo {
-    member: ObjectMetadata
-}
-
+/// parameter to removeObjects
 structure RemoveObjectsRequest {
 
+    /// name of container
     @required
     containerId: ContainerId,
 
+    /// list of object names to be removed
     @required
     objects: ObjectIds,
 }
 
-/// Unique id of a container
+/// Name of a container
 string ContainerId
 
-/// Unique id of an object
+/// Name of an object within a container
 string ObjectId
 
-/// A container is a logical grouping of blobs, similar to a directory
-/// in a file system. The containerId is its name.
+/// Metadata for a container.
 structure ContainerMetadata {
+    /// Container name
     @required
     containerId: ContainerId,
 
-    /// creation date
+    /// Creation date, if available
     createdAt: Timestamp,
 }
 
+/// Parameter for PutObject operation
 structure PutObjectRequest {
+
     /// File path and initial data
     @required
     chunk: Chunk,
@@ -254,13 +255,15 @@ structure PutObjectRequest {
     contentEncoding: String,
 }
 
+/// Response to PutObject operation
 structure PutObjectResponse {
 
-    /// If this is a multipart upload, this streamId value must be returned
+    /// If this is a multipart upload, `streamId` must be returned
     /// with subsequent PutChunk requests
     streamId: String,
 }
 
+/// Parameter to PutChunk operation
 structure PutChunkRequest {
 
     /// upload chunk from the file.
@@ -268,7 +271,7 @@ structure PutChunkRequest {
     @required
     chunk: Chunk,
 
-    /// streamId returned from PutObject
+    /// This value should be set to the `streamId` returned from the initial PutObject.
     streamId: String,
 
     /// If set, the receiving provider should cancel the upload process 
@@ -294,7 +297,6 @@ structure ObjectMetadata {
     /// date object was last modified
     lastModified: Timestamp,
 }
-
 
 /// Parameter to GetObject
 structure GetObjectRequest {
@@ -360,7 +362,9 @@ structure ContainerObject {
     objectId: ObjectId,
 }
 
-
+/// A portion of a file. The `isLast` field indicates whether this chunk
+/// is the last in a stream. The `offset` field indicates the 0-based offset
+/// from the start of the file for this chunk.
 structure Chunk {
     @required
     objectId: ObjectId,
@@ -399,3 +403,22 @@ list MultiResult {
     member : ItemResult
 }
 
+/// list of object names
+list ObjectIds {
+    member: ObjectId
+}
+
+/// list of container names
+list ContainerIds {
+    member: ContainerId
+}
+
+/// list of container metadata objects
+list ContainersInfo {
+    member: ContainerMetadata
+}
+
+/// list of object metadata objects
+list ObjectsInfo {
+    member: ObjectMetadata
+}

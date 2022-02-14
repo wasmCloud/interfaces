@@ -19,6 +19,9 @@ use wasmbus_rpc::{
 
 pub const SMITHY_VERSION: &str = "1.0";
 
+/// A portion of a file. The `isLast` field indicates whether this chunk
+/// is the last in a stream. The `offset` field indicates the 0-based offset
+/// from the start of the file for this chunk.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Chunk {
     /// bytes in this chunk
@@ -171,9 +174,9 @@ pub fn decode_chunk(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Chunk, Rpc
     Ok(__result)
 }
 /// Response from actor after receiving a download chunk.
-/// If cancelDownload is true, the sender will stop sending chunks
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ChunkResponse {
+    /// If set and `true`, the sender will stop sending chunks,
     #[serde(rename = "cancelDownload")]
     #[serde(default)]
     pub cancel_download: bool,
@@ -245,7 +248,7 @@ pub fn decode_chunk_response(
     };
     Ok(__result)
 }
-/// Unique id of a container
+/// Name of a container
 pub type ContainerId = String;
 
 // Encode ContainerId as CBOR and append to output stream
@@ -266,6 +269,7 @@ pub fn decode_container_id(
     let __result = { d.str()?.to_string() };
     Ok(__result)
 }
+/// list of container names
 pub type ContainerIds = Vec<ContainerId>;
 
 // Encode ContainerIds as CBOR and append to output stream
@@ -313,13 +317,13 @@ pub fn decode_container_ids(
     };
     Ok(__result)
 }
-/// A container is a logical grouping of blobs, similar to a directory
-/// in a file system. The containerId is its name.
+/// Metadata for a container.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ContainerMetadata {
+    /// Container name
     #[serde(rename = "containerId")]
     pub container_id: ContainerId,
-    /// creation date
+    /// Creation date, if available
     #[serde(rename = "createdAt")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub created_at: Option<Timestamp>,
@@ -541,6 +545,7 @@ pub fn decode_container_object(
     };
     Ok(__result)
 }
+/// list of container metadata objects
 pub type ContainersInfo = Vec<ContainerMetadata>;
 
 // Encode ContainersInfo as CBOR and append to output stream
@@ -1116,74 +1121,37 @@ pub fn decode_item_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Item
     };
     Ok(__result)
 }
-pub type Items = Vec<String>;
-
-// Encode Items as CBOR and append to output stream
-#[doc(hidden)]
-pub fn encode_items<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
-    val: &Items,
-) -> RpcResult<()> {
-    e.array(val.len() as u64)?;
-    for item in val.iter() {
-        e.str(item)?;
-    }
-    Ok(())
-}
-
-// Decode Items from cbor input stream
-#[doc(hidden)]
-pub fn decode_items(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Items, RpcError> {
-    let __result = {
-        if let Some(n) = d.array()? {
-            let mut arr: Vec<String> = Vec::with_capacity(n as usize);
-            for _ in 0..(n as usize) {
-                arr.push(d.str()?.to_string())
-            }
-            arr
-        } else {
-            // indefinite array
-            let mut arr: Vec<String> = Vec::new();
-            loop {
-                match d.datatype() {
-                    Err(_) => break,
-                    Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(d.str()?.to_string()),
-                }
-            }
-            arr
-        }
-    };
-    Ok(__result)
-}
+/// Parameter to list_objects.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ListObjectsRequest {
-    /// the container to search
+    /// Name of the container to search
     #[serde(rename = "containerId")]
     #[serde(default)]
     pub container_id: String,
-    /// Optional continuation token passed in ListObjectsResponse.
-    /// If set, `startWith` is ignored.
+    /// Continuation token passed in ListObjectsResponse.
+    /// If set, `startWith` is ignored. (Optional)
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub continuation: Option<String>,
     /// Optionally, stop returning items before returning this value.
     /// (exclusive terminator)
     /// If startFrom is "a" and endBefore is "b", and items are ordered
     /// alphabetically, then only items beginning with "a" would be returned.
+    /// (Optional)
     #[serde(rename = "endBefore")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub end_before: Option<String>,
-    /// Optional last item to return (inclusive terminator)
+    /// Last item to return (inclusive terminator) (Optional)
     #[serde(rename = "endWith")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub end_with: Option<String>,
     /// maximum number of items to return. If not specified, provider
     /// will return an initial set of up to 1000 items. if maxItems > 1000,
     /// the provider implementation may return fewer items than requested.
+    /// (Optional)
     #[serde(rename = "maxItems")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_items: Option<u32>,
-    /// Request object names starting with this value
+    /// Request object names starting with this value. (Optional)
     #[serde(rename = "startWith")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start_with: Option<String>,
@@ -1377,11 +1345,16 @@ pub fn decode_list_objects_request(
     };
     Ok(__result)
 }
+/// Respose to list_objects.
+/// If `isLast` is false, the list was truncated by the provider,
+/// and the remainder of the objects can be requested with another
+/// request using the `continuation` token.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ListObjectsResponse {
     /// If `isLast` is false, this value can be used in the `continuation` field
     /// of a `ListObjectsRequest`.
-    /// This field may be obfuscated and may not be a real key or object name.
+    /// Clients should not attempt to interpret this field: it may or may not
+    /// be a real key or object name, and may be obfuscated by the provider.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub continuation: Option<String>,
     /// Indicates if the item list is complete, or the last item
@@ -1556,7 +1529,7 @@ pub fn decode_multi_result(
     };
     Ok(__result)
 }
-/// Unique id of an object
+/// Name of an object within a container
 pub type ObjectId = String;
 
 // Encode ObjectId as CBOR and append to output stream
@@ -1575,6 +1548,7 @@ pub fn decode_object_id(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Object
     let __result = { d.str()?.to_string() };
     Ok(__result)
 }
+/// list of object names
 pub type ObjectIds = Vec<ObjectId>;
 
 // Encode ObjectIds as CBOR and append to output stream
@@ -1779,6 +1753,7 @@ pub fn decode_object_metadata(
     };
     Ok(__result)
 }
+/// list of object metadata objects
 pub type ObjectsInfo = Vec<ObjectMetadata>;
 
 // Encode ObjectsInfo as CBOR and append to output stream
@@ -1827,6 +1802,7 @@ pub fn decode_objects_info(
     };
     Ok(__result)
 }
+/// Parameter to PutChunk operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct PutChunkRequest {
     /// If set, the receiving provider should cancel the upload process
@@ -1837,7 +1813,7 @@ pub struct PutChunkRequest {
     /// upload chunk from the file.
     /// if chunk.isLast is set, this will be the last chunk uploaded
     pub chunk: Chunk,
-    /// streamId returned from PutObject
+    /// This value should be set to the `streamId` returned from the initial PutObject.
     #[serde(rename = "streamId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub stream_id: Option<String>,
@@ -1953,6 +1929,7 @@ pub fn decode_put_chunk_request(
     };
     Ok(__result)
 }
+/// Parameter for PutObject operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct PutObjectRequest {
     /// File path and initial data
@@ -2092,9 +2069,10 @@ pub fn decode_put_object_request(
     };
     Ok(__result)
 }
+/// Response to PutObject operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct PutObjectResponse {
-    /// If this is a multipart upload, this streamId value must be returned
+    /// If this is a multipart upload, `streamId` must be returned
     /// with subsequent PutChunk requests
     #[serde(rename = "streamId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -2180,10 +2158,13 @@ pub fn decode_put_object_response(
     };
     Ok(__result)
 }
+/// parameter to removeObjects
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct RemoveObjectsRequest {
+    /// name of container
     #[serde(rename = "containerId")]
     pub container_id: ContainerId,
+    /// list of object names to be removed
     pub objects: ObjectIds,
 }
 
@@ -2303,8 +2284,8 @@ pub trait Blobstore {
     /// Note that container names may not be globally unique - just unique within the
     /// "namespace" of the connecting actor and linkdef
     async fn create_container(&self, ctx: &Context, arg: &ContainerId) -> RpcResult<()>;
-    /// Retrieves information about the container,
-    /// Returns no value if the container id is invalid
+    /// Retrieves information about the container.
+    /// Returns error if the container id is invalid or not found.
     async fn get_container_info(
         &self,
         ctx: &Context,
@@ -2319,22 +2300,28 @@ pub trait Blobstore {
     async fn remove_containers(&self, ctx: &Context, arg: &ContainerIds) -> RpcResult<MultiResult>;
     /// Returns whether the object exists
     async fn object_exists(&self, ctx: &Context, arg: &ContainerObject) -> RpcResult<bool>;
-    /// List the objects in the container
+    /// Lists the objects in the container.
+    /// If the container exists and is empty, the returned `objects` list is empty.
+    /// Parameters of the request may be used to limit the object names returned
+    /// with an optional start value, end value, and maximum number of items.
+    /// The provider may limit the number of items returned. If the list is truncated,
+    /// the response contains a `continuation` token that may be submitted in
+    /// a subsequent ListObjects request.
     async fn list_objects(
         &self,
         ctx: &Context,
         arg: &ListObjectsRequest,
     ) -> RpcResult<ListObjectsResponse>;
-    /// Remove the objects.
-    /// The MultiResult list contains one entry for each object that was not removed,
-    /// with the 'key' value representing the object name.
-    /// If the MultiResult list is empty, all objects were removed.
+    /// Removes the objects. In the event any of the objects cannot be removed,
+    /// the operation continues until all requested deletions have been attempted.
+    /// The MultiRequest includes a list of errors, one for each deletion request
+    /// that did not succeed. If the list is empty, all removals succeeded.
     async fn remove_objects(
         &self,
         ctx: &Context,
         arg: &RemoveObjectsRequest,
     ) -> RpcResult<MultiResult>;
-    /// Requests to start upload of a file/blob to the Blobstore
+    /// Requests to start upload of a file/blob to the Blobstore.
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
     async fn put_object(
         &self,
@@ -2591,8 +2578,8 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
     }
 
     #[allow(unused)]
-    /// Retrieves information about the container,
-    /// Returns no value if the container id is invalid
+    /// Retrieves information about the container.
+    /// Returns error if the container id is invalid or not found.
     async fn get_container_info(
         &self,
         ctx: &Context,
@@ -2690,7 +2677,13 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
     }
 
     #[allow(unused)]
-    /// List the objects in the container
+    /// Lists the objects in the container.
+    /// If the container exists and is empty, the returned `objects` list is empty.
+    /// Parameters of the request may be used to limit the object names returned
+    /// with an optional start value, end value, and maximum number of items.
+    /// The provider may limit the number of items returned. If the list is truncated,
+    /// the response contains a `continuation` token that may be submitted in
+    /// a subsequent ListObjects request.
     async fn list_objects(
         &self,
         ctx: &Context,
@@ -2718,10 +2711,10 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
     }
 
     #[allow(unused)]
-    /// Remove the objects.
-    /// The MultiResult list contains one entry for each object that was not removed,
-    /// with the 'key' value representing the object name.
-    /// If the MultiResult list is empty, all objects were removed.
+    /// Removes the objects. In the event any of the objects cannot be removed,
+    /// the operation continues until all requested deletions have been attempted.
+    /// The MultiRequest includes a list of errors, one for each deletion request
+    /// that did not succeed. If the list is empty, all removals succeeded.
     async fn remove_objects(
         &self,
         ctx: &Context,
@@ -2748,7 +2741,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
     }
 
     #[allow(unused)]
-    /// Requests to start upload of a file/blob to the Blobstore
+    /// Requests to start upload of a file/blob to the Blobstore.
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
     async fn put_object(
         &self,
