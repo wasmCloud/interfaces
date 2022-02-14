@@ -313,13 +313,13 @@ structure GetObjectRequest {
     chunkSize: U64,
 
     /// Requested start of object to retrieve. Defaults to 0
-    /// If regionStart is beyond the end of the file,
+    /// If rangeStart is beyond the end of the file,
     /// an empty chunk will be returned with isLast == true
-    regionStart: U64,
+    rangeStart: U64,
 
     /// Requested end of object to retrieve. Defaults to the object's size.
-    /// It is not an error for regionEnd to be greater than the object size.
-    regionEnd: U64,
+    /// It is not an error for rangeEnd to be greater than the object size.
+    rangeEnd: U64,
 }
 
 /// Response to GetObject
