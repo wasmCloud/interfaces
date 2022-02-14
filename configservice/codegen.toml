@@ -1,0 +1,46 @@
+# codegen.toml
+
+[[models]]
+path = "config-service.smithy"
+
+[[models]]
+url = "https://wasmcloud.github.io/interfaces/idl/org.wasmcloud"
+#path = "../core"
+files = [ "wasmcloud-core.smithy", "wasmcloud-model.smithy" ]
+
+
+##
+## HTML documentation output
+##
+[html]
+
+# (optional) template dir to scan (overrides compiled-in templates)
+#templates = "docgen/templates"
+# Top-level output directory for html generated files
+output_dir = "html"
+
+# Additional parameters for html generation
+[html.parameters]
+
+# name of template for page generation (default: 'namespace_doc')
+#doc_template = "namespace_doc"
+
+# whether to use minified tailwind.css (default false)
+minified = true
+
+
+##
+## Rust language output
+##
+[rust]
+
+# top-level output directory for rust files.
+output_dir = "rust"
+
+[rust.parameters]
+
+[[rust.files]]
+path = "src/configservice.rs"
+namespace = "org.wasmcloud.interface.configservice"
+
+
