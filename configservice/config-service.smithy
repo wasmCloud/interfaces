@@ -29,11 +29,18 @@ map LabelMap {
 /// that this configuration profile does NOT contain any connection information for NATS,
 /// as allowing that to change at runtime would be a security and reliability risk
 structure HostConfigurationProfile {
-    /// The list of capability providers a host should automatically start
+    /// The optional list of capability providers a host should automatically start
     autoStartProviders: ProviderReferenceList
+
+    /// The optional list of actors that a host should automatically start
+    autoStartActors: ActorReferenceList
 
     /// A set of credentials the host can use for fetching artifacts
     registryCredentials: RegistryCredentialMap
+}
+
+list ActorReferenceList {
+    member: String
 }
 
 list ProviderReferenceList {
