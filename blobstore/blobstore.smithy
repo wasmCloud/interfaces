@@ -32,6 +32,7 @@ service Blobstore {
         
         // object operations
         ObjectExists,
+        GetObjectInfo,
         ListObjects,
         RemoveObjects,
         PutObject,
@@ -103,10 +104,21 @@ operation GetContainerInfo {
 /// The provider may limit the number of items returned. If the list is truncated, 
 /// the response contains a `continuation` token that may be submitted in
 /// a subsequent ListObjects request.
+///
+/// Optional object metadata fields (i.e., `contentType` and `contentEncoding`) may not be
+/// filled in for ListObjects response. To get complete object metadata, use GetObjectInfo.
 @readonly
 operation ListObjects {
     input: ListObjectsRequest,
     output: ListObjectsResponse,
+}
+
+/// Retrieves information about the object.
+/// Returns error if the object id is invalid or not found.
+@readonly
+operation GetObjectInfo {
+    input: ContainerObject,
+    output: ObjectMetadata,
 }
 
 /// Removes the objects. In the event any of the objects cannot be removed,
@@ -292,11 +304,26 @@ structure ObjectMetadata {
 
     /// size of the object in bytes
     @required
-    size: U64,
+    contentLength: U64,
 
     /// date object was last modified
     lastModified: Timestamp,
+
+    /// A MIME type of the object
+    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
+    /// Provider implementations _may_ return None for this field for metadata
+    /// returned from ListObjects
+    contentType: String,
+
+    /// Specifies what content encodings have been applied to the object 
+    /// and thus what decoding mechanisms must be applied to obtain the media-type 
+    /// referenced by the contentType field. For more information, 
+    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11.
+    /// Provider implementations _may_ return None for this field for metadata
+    /// returned from ListObjects
+    contentEncoding: String,
 }
+
 
 /// Parameter to GetObject
 structure GetObjectRequest {
@@ -308,11 +335,6 @@ structure GetObjectRequest {
     /// object's container
     @required
     containerId: ContainerId,
-
-    /// optional size requested
-    /// The provider will not return a chunk larger than this amount,
-    /// but may return a smaller chunk.
-    chunkSize: U64,
 
     /// Requested start of object to retrieve.
     /// The first byte is at offset 0. Range values are inclusive.
