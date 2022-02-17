@@ -4,7 +4,7 @@ mod testing;
 use serde::Serialize;
 use serde_json::json;
 pub use testing::*;
-use wasmbus_rpc::RpcResult;
+use wasmbus_rpc::error::RpcResult;
 
 impl Default for TestOptions {
     fn default() -> TestOptions {

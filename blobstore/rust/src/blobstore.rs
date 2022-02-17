@@ -597,12 +597,6 @@ pub fn decode_containers_info(
 /// Parameter to GetObject
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetObjectRequest {
-    /// optional size requested
-    /// The provider will not return a chunk larger than this amount,
-    /// but may return a smaller chunk.
-    #[serde(rename = "chunkSize")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub chunk_size: Option<u64>,
     /// object's container
     #[serde(rename = "containerId")]
     pub container_id: ContainerId,
@@ -630,13 +624,7 @@ pub fn encode_get_object_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetObjectRequest,
 ) -> RpcResult<()> {
-    e.map(5)?;
-    if let Some(val) = val.chunk_size.as_ref() {
-        e.str("chunkSize")?;
-        e.u64(*val)?;
-    } else {
-        e.null()?;
-    }
+    e.map(4)?;
     e.str("containerId")?;
     encode_container_id(e, &val.container_id)?;
     e.str("objectId")?;
@@ -662,7 +650,6 @@ pub fn decode_get_object_request(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
 ) -> Result<GetObjectRequest, RpcError> {
     let __result = {
-        let mut chunk_size: Option<Option<u64>> = Some(None);
         let mut container_id: Option<ContainerId> = None;
         let mut object_id: Option<ObjectId> = None;
         let mut range_end: Option<Option<u64>> = Some(None);
@@ -686,26 +673,18 @@ pub fn decode_get_object_request(
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        chunk_size = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.u64()?))
-                        }
-                    }
-                    1 => {
                         container_id = Some(
                             decode_container_id(d)
                                 .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
                         )
                     }
-                    2 => {
+                    1 => {
                         object_id = Some(
                             decode_object_id(d)
                                 .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
                         )
                     }
-                    3 => {
+                    2 => {
                         range_end = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -713,7 +692,7 @@ pub fn decode_get_object_request(
                             Some(Some(d.u64()?))
                         }
                     }
-                    4 => {
+                    3 => {
                         range_start = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -733,14 +712,6 @@ pub fn decode_get_object_request(
             })?;
             for __i in 0..(len as usize) {
                 match d.str()? {
-                    "chunkSize" => {
-                        chunk_size = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.u64()?))
-                        }
-                    }
                     "containerId" => {
                         container_id = Some(
                             decode_container_id(d)
@@ -774,13 +745,11 @@ pub fn decode_get_object_request(
             }
         }
         GetObjectRequest {
-            chunk_size: chunk_size.unwrap(),
-
             container_id: if let Some(__x) = container_id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field GetObjectRequest.container_id (#1)".to_string(),
+                    "missing field GetObjectRequest.container_id (#0)".to_string(),
                 ));
             },
 
@@ -788,7 +757,7 @@ pub fn decode_get_object_request(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field GetObjectRequest.object_id (#2)".to_string(),
+                    "missing field GetObjectRequest.object_id (#1)".to_string(),
                 ));
             },
             range_end: range_end.unwrap(),
@@ -1596,6 +1565,26 @@ pub struct ObjectMetadata {
     /// container of the object
     #[serde(rename = "containerId")]
     pub container_id: ContainerId,
+    /// Specifies what content encodings have been applied to the object
+    /// and thus what decoding mechanisms must be applied to obtain the media-type
+    /// referenced by the contentType field. For more information,
+    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11.
+    /// Provider implementations _may_ return None for this field for metadata
+    /// returned from ListObjects
+    #[serde(rename = "contentEncoding")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_encoding: Option<String>,
+    /// size of the object in bytes
+    #[serde(rename = "contentLength")]
+    #[serde(default)]
+    pub content_length: u64,
+    /// A MIME type of the object
+    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
+    /// Provider implementations _may_ return None for this field for metadata
+    /// returned from ListObjects
+    #[serde(rename = "contentType")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_type: Option<String>,
     /// date object was last modified
     #[serde(rename = "lastModified")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1605,9 +1594,6 @@ pub struct ObjectMetadata {
     /// An object id could be a path, hash of object contents, or some other unique identifier.
     #[serde(rename = "objectId")]
     pub object_id: ObjectId,
-    /// size of the object in bytes
-    #[serde(default)]
-    pub size: u64,
 }
 
 // Encode ObjectMetadata as CBOR and append to output stream
@@ -1616,9 +1602,23 @@ pub fn encode_object_metadata<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ObjectMetadata,
 ) -> RpcResult<()> {
-    e.map(4)?;
+    e.map(6)?;
     e.str("containerId")?;
     encode_container_id(e, &val.container_id)?;
+    if let Some(val) = val.content_encoding.as_ref() {
+        e.str("contentEncoding")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    e.str("contentLength")?;
+    e.u64(val.content_length)?;
+    if let Some(val) = val.content_type.as_ref() {
+        e.str("contentType")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
     if let Some(val) = val.last_modified.as_ref() {
         e.str("lastModified")?;
         e.i64(val.sec)?;
@@ -1628,8 +1628,6 @@ pub fn encode_object_metadata<W: wasmbus_rpc::cbor::Write>(
     }
     e.str("objectId")?;
     encode_object_id(e, &val.object_id)?;
-    e.str("size")?;
-    e.u64(val.size)?;
     Ok(())
 }
 
@@ -1640,9 +1638,11 @@ pub fn decode_object_metadata(
 ) -> Result<ObjectMetadata, RpcError> {
     let __result = {
         let mut container_id: Option<ContainerId> = None;
+        let mut content_encoding: Option<Option<String>> = Some(None);
+        let mut content_length: Option<u64> = None;
+        let mut content_type: Option<Option<String>> = Some(None);
         let mut last_modified: Option<Option<Timestamp>> = Some(None);
         let mut object_id: Option<ObjectId> = None;
-        let mut size: Option<u64> = None;
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -1668,6 +1668,23 @@ pub fn decode_object_metadata(
                         )
                     }
                     1 => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    2 => content_length = Some(d.u64()?),
+                    3 => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    4 => {
                         last_modified = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -1678,13 +1695,12 @@ pub fn decode_object_metadata(
                             }))
                         }
                     }
-                    2 => {
+                    5 => {
                         object_id = Some(
                             decode_object_id(d)
                                 .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
                         )
                     }
-                    3 => size = Some(d.u64()?),
                     _ => d.skip()?,
                 }
             }
@@ -1701,6 +1717,23 @@ pub fn decode_object_metadata(
                             decode_container_id(d)
                                 .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
                         )
+                    }
+                    "contentEncoding" => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "contentLength" => content_length = Some(d.u64()?),
+                    "contentType" => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
                     }
                     "lastModified" => {
                         last_modified = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -1719,7 +1752,6 @@ pub fn decode_object_metadata(
                                 .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
                         )
                     }
-                    "size" => size = Some(d.u64()?),
                     _ => d.skip()?,
                 }
             }
@@ -1732,21 +1764,23 @@ pub fn decode_object_metadata(
                     "missing field ObjectMetadata.container_id (#0)".to_string(),
                 ));
             },
+            content_encoding: content_encoding.unwrap(),
+
+            content_length: if let Some(__x) = content_length {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ObjectMetadata.content_length (#2)".to_string(),
+                ));
+            },
+            content_type: content_type.unwrap(),
             last_modified: last_modified.unwrap(),
 
             object_id: if let Some(__x) = object_id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ObjectMetadata.object_id (#2)".to_string(),
-                ));
-            },
-
-            size: if let Some(__x) = size {
-                __x
-            } else {
-                return Err(RpcError::Deser(
-                    "missing field ObjectMetadata.size (#3)".to_string(),
+                    "missing field ObjectMetadata.object_id (#5)".to_string(),
                 ));
             },
         }
@@ -2269,113 +2303,6 @@ pub fn decode_remove_objects_request(
     };
     Ok(__result)
 }
-/// The BlobStore service, actor side
-/// wasmbus.contractId: wasmcloud:blobstore
-/// wasmbus.actorReceive
-#[async_trait]
-pub trait ChunkReceiver {
-    /// returns the capability contract id for this interface
-    fn contract_id() -> &'static str {
-        "wasmcloud:blobstore"
-    }
-    /// Receives a file chunk from a blobstore.
-    /// A blobstore provider invokes this operation on actors in response to the GetObject request.
-    /// If the response sets cancelDownload, the provider will stop downloading chunks
-    async fn receive_chunk(&self, ctx: &Context, arg: &Chunk) -> RpcResult<ChunkResponse>;
-}
-
-/// ChunkReceiverReceiver receives messages defined in the ChunkReceiver service trait
-/// The BlobStore service, actor side
-#[doc(hidden)]
-#[async_trait]
-pub trait ChunkReceiverReceiver: MessageDispatch + ChunkReceiver {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
-        match message.method {
-            "ReceiveChunk" => {
-                let value: Chunk = wasmbus_rpc::common::deserialize(&message.arg)
-                    .map_err(|e| RpcError::Deser(format!("'Chunk': {}", e)))?;
-                let resp = ChunkReceiver::receive_chunk(self, ctx, &value).await?;
-                let buf = wasmbus_rpc::common::serialize(&resp)?;
-                Ok(Message {
-                    method: "ChunkReceiver.ReceiveChunk",
-                    arg: Cow::Owned(buf),
-                })
-            }
-            _ => Err(RpcError::MethodNotHandled(format!(
-                "ChunkReceiver::{}",
-                message.method
-            ))),
-        }
-    }
-}
-
-/// ChunkReceiverSender sends messages to a ChunkReceiver service
-/// The BlobStore service, actor side
-/// client for sending ChunkReceiver messages
-#[derive(Debug)]
-pub struct ChunkReceiverSender<T: Transport> {
-    transport: T,
-}
-
-impl<T: Transport> ChunkReceiverSender<T> {
-    /// Constructs a ChunkReceiverSender with the specified transport
-    pub fn via(transport: T) -> Self {
-        Self { transport }
-    }
-
-    pub fn set_timeout(&self, interval: std::time::Duration) {
-        self.transport.set_timeout(interval);
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-impl<'send> ChunkReceiverSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
-    /// Constructs a Sender using an actor's LinkDefinition,
-    /// Uses the provider's HostBridge for rpc
-    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
-        Self {
-            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
-        }
-    }
-}
-#[cfg(target_arch = "wasm32")]
-impl ChunkReceiverSender<wasmbus_rpc::actor::prelude::WasmHost> {
-    /// Constructs a client for actor-to-actor messaging
-    /// using the recipient actor's public key
-    pub fn to_actor(actor_id: &str) -> Self {
-        let transport =
-            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
-        Self { transport }
-    }
-}
-#[async_trait]
-impl<T: Transport + std::marker::Sync + std::marker::Send> ChunkReceiver
-    for ChunkReceiverSender<T>
-{
-    #[allow(unused)]
-    /// Receives a file chunk from a blobstore.
-    /// A blobstore provider invokes this operation on actors in response to the GetObject request.
-    /// If the response sets cancelDownload, the provider will stop downloading chunks
-    async fn receive_chunk(&self, ctx: &Context, arg: &Chunk) -> RpcResult<ChunkResponse> {
-        let buf = wasmbus_rpc::common::serialize(arg)?;
-        let resp = self
-            .transport
-            .send(
-                ctx,
-                Message {
-                    method: "ChunkReceiver.ReceiveChunk",
-                    arg: Cow::Borrowed(&buf),
-                },
-                None,
-            )
-            .await?;
-
-        let value: ChunkResponse = wasmbus_rpc::common::deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("'{}': ChunkResponse", e)))?;
-        Ok(value)
-    }
-}
-
 /// The BlobStore service, provider side
 /// wasmbus.contractId: wasmcloud:blobstore
 /// wasmbus.providerReceive
@@ -2407,6 +2334,13 @@ pub trait Blobstore {
     async fn remove_containers(&self, ctx: &Context, arg: &ContainerIds) -> RpcResult<MultiResult>;
     /// Returns whether the object exists
     async fn object_exists(&self, ctx: &Context, arg: &ContainerObject) -> RpcResult<bool>;
+    /// Retrieves information about the object.
+    /// Returns error if the object id is invalid or not found.
+    async fn get_object_info(
+        &self,
+        ctx: &Context,
+        arg: &ContainerObject,
+    ) -> RpcResult<ObjectMetadata>;
     /// Lists the objects in the container.
     /// If the container exists and is empty, the returned `objects` list is empty.
     /// Parameters of the request may be used to limit the object names returned
@@ -2414,6 +2348,9 @@ pub trait Blobstore {
     /// The provider may limit the number of items returned. If the list is truncated,
     /// the response contains a `continuation` token that may be submitted in
     /// a subsequent ListObjects request.
+    ///
+    /// Optional object metadata fields (i.e., `contentType` and `contentEncoding`) may not be
+    /// filled in for ListObjects response. To get complete object metadata, use GetObjectInfo.
     async fn list_objects(
         &self,
         ctx: &Context,
@@ -2525,6 +2462,19 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                 let buf = e.into_inner();
                 Ok(Message {
                     method: "Blobstore.ObjectExists",
+                    arg: Cow::Owned(buf),
+                })
+            }
+            "GetObjectInfo" => {
+                let value: ContainerObject =
+                    wasmbus_rpc::common::decode(&message.arg, &decode_container_object)
+                        .map_err(|e| RpcError::Deser(format!("'ContainerObject': {}", e)))?;
+                let resp = Blobstore::get_object_info(self, ctx, &value).await?;
+                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                encode_object_metadata(&mut e, &resp)?;
+                let buf = e.into_inner();
+                Ok(Message {
+                    method: "Blobstore.GetObjectInfo",
                     arg: Cow::Owned(buf),
                 })
             }
@@ -2778,6 +2728,33 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
         Ok(value)
     }
     #[allow(unused)]
+    /// Retrieves information about the object.
+    /// Returns error if the object id is invalid or not found.
+    async fn get_object_info(
+        &self,
+        ctx: &Context,
+        arg: &ContainerObject,
+    ) -> RpcResult<ObjectMetadata> {
+        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        encode_container_object(&mut e, arg)?;
+        let buf = e.into_inner();
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "Blobstore.GetObjectInfo",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        let value: ObjectMetadata = wasmbus_rpc::common::decode(&resp, &decode_object_metadata)
+            .map_err(|e| RpcError::Deser(format!("'{}': ObjectMetadata", e)))?;
+        Ok(value)
+    }
+    #[allow(unused)]
     /// Lists the objects in the container.
     /// If the container exists and is empty, the returned `objects` list is empty.
     /// Parameters of the request may be used to limit the object names returned
@@ -2785,6 +2762,9 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
     /// The provider may limit the number of items returned. If the list is truncated,
     /// the response contains a `continuation` token that may be submitted in
     /// a subsequent ListObjects request.
+    ///
+    /// Optional object metadata fields (i.e., `contentType` and `contentEncoding`) may not be
+    /// filled in for ListObjects response. To get complete object metadata, use GetObjectInfo.
     async fn list_objects(
         &self,
         ctx: &Context,
@@ -2915,5 +2895,112 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             )
             .await?;
         Ok(())
+    }
+}
+
+/// The BlobStore service, actor side
+/// wasmbus.contractId: wasmcloud:blobstore
+/// wasmbus.actorReceive
+#[async_trait]
+pub trait ChunkReceiver {
+    /// returns the capability contract id for this interface
+    fn contract_id() -> &'static str {
+        "wasmcloud:blobstore"
+    }
+    /// Receives a file chunk from a blobstore.
+    /// A blobstore provider invokes this operation on actors in response to the GetObject request.
+    /// If the response sets cancelDownload, the provider will stop downloading chunks
+    async fn receive_chunk(&self, ctx: &Context, arg: &Chunk) -> RpcResult<ChunkResponse>;
+}
+
+/// ChunkReceiverReceiver receives messages defined in the ChunkReceiver service trait
+/// The BlobStore service, actor side
+#[doc(hidden)]
+#[async_trait]
+pub trait ChunkReceiverReceiver: MessageDispatch + ChunkReceiver {
+    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+        match message.method {
+            "ReceiveChunk" => {
+                let value: Chunk = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'Chunk': {}", e)))?;
+                let resp = ChunkReceiver::receive_chunk(self, ctx, &value).await?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
+                Ok(Message {
+                    method: "ChunkReceiver.ReceiveChunk",
+                    arg: Cow::Owned(buf),
+                })
+            }
+            _ => Err(RpcError::MethodNotHandled(format!(
+                "ChunkReceiver::{}",
+                message.method
+            ))),
+        }
+    }
+}
+
+/// ChunkReceiverSender sends messages to a ChunkReceiver service
+/// The BlobStore service, actor side
+/// client for sending ChunkReceiver messages
+#[derive(Debug)]
+pub struct ChunkReceiverSender<T: Transport> {
+    transport: T,
+}
+
+impl<T: Transport> ChunkReceiverSender<T> {
+    /// Constructs a ChunkReceiverSender with the specified transport
+    pub fn via(transport: T) -> Self {
+        Self { transport }
+    }
+
+    pub fn set_timeout(&self, interval: std::time::Duration) {
+        self.transport.set_timeout(interval);
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl<'send> ChunkReceiverSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
+    /// Constructs a Sender using an actor's LinkDefinition,
+    /// Uses the provider's HostBridge for rpc
+    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
+        Self {
+            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
+        }
+    }
+}
+#[cfg(target_arch = "wasm32")]
+impl ChunkReceiverSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
+}
+#[async_trait]
+impl<T: Transport + std::marker::Sync + std::marker::Send> ChunkReceiver
+    for ChunkReceiverSender<T>
+{
+    #[allow(unused)]
+    /// Receives a file chunk from a blobstore.
+    /// A blobstore provider invokes this operation on actors in response to the GetObject request.
+    /// If the response sets cancelDownload, the provider will stop downloading chunks
+    async fn receive_chunk(&self, ctx: &Context, arg: &Chunk) -> RpcResult<ChunkResponse> {
+        let buf = wasmbus_rpc::common::serialize(arg)?;
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "ChunkReceiver.ReceiveChunk",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        let value: ChunkResponse = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': ChunkResponse", e)))?;
+        Ok(value)
     }
 }
