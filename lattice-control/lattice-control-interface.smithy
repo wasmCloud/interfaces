@@ -140,6 +140,11 @@ operation StopHost {
     output: CtlOperationAck
 }
 
+/// Instructs all listening hosts to use the enclosed credential map for
+/// authentication to secure artifact (OCI/bindle) registries. Any host that
+/// receives this message will _delete_ its previous credential map and replace
+/// it with the enclosed. The credential map for a lattice can be purged by sending
+/// this message with an empty map
 operation SetRegistryCredentials {
     input: RegistryCredentialMap
 }
