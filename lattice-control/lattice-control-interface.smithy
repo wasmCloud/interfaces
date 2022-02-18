@@ -37,7 +37,7 @@ service LatticeController {
                  GetHostInventory, GetClaims, ScaleActor,
                  StartActor, AdvertiseLink, RemoveLink,
                  GetLinks, UpdateActor, StartProvider,
-                 StopProvider, StopActor, StopHost]
+                 StopProvider, StopActor, StopHost, SetRegistryCredentials]
 }
 
 /// Seek out a list of suitable hosts for a capability provider given
@@ -138,6 +138,10 @@ operation StopActor {
 operation StopHost {
     input: StopHostCommand
     output: CtlOperationAck
+}
+
+operation SetRegistryCredentials {
+    input: RegistryCredentialMap
 }
 
 list ProviderAuctionAcks {
@@ -561,3 +565,20 @@ structure RemoveLinkDefinitionRequest {
     @serialization(name: "link_name")
     linkName: String,
 }
+
+/// A set of credentials to be used for fetching from specific registries
+map RegistryCredentialMap {
+    /// The key of this map is the OCI/BINDLE URL without the artifact reference. Credentials
+    /// are matched via substring comparison on the URL of an artifact.
+    key: String
+    value: RegistryCredential
+}
+
+structure RegistryCredential {
+    /// If supplied, token authentication will be used for the registry
+    token: String,
+    /// If supplied, username and password will be used for HTTP Basic authentication
+    userName: String,
+    password: String
+}
+
