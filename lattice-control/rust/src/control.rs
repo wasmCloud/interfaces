@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.2.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.3.3
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -1854,6 +1854,188 @@ pub fn decode_provider_descriptions(
     };
     Ok(__result)
 }
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct RegistryCredential {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub password: Option<String>,
+    /// If supplied, token authentication will be used for the registry
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+    /// If supplied, username and password will be used for HTTP Basic authentication
+    #[serde(rename = "userName")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_name: Option<String>,
+}
+
+// Encode RegistryCredential as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_registry_credential<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &RegistryCredential,
+) -> RpcResult<()> {
+    e.map(3)?;
+    if let Some(val) = val.password.as_ref() {
+        e.str("password")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.token.as_ref() {
+        e.str("token")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.user_name.as_ref() {
+        e.str("userName")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    Ok(())
+}
+
+// Decode RegistryCredential from cbor input stream
+#[doc(hidden)]
+pub fn decode_registry_credential(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<RegistryCredential, RpcError> {
+    let __result = {
+        let mut password: Option<Option<String>> = Some(None);
+        let mut token: Option<Option<String>> = Some(None);
+        let mut user_name: Option<Option<String>> = Some(None);
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct RegistryCredential, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct RegistryCredential: indefinite array not supported"
+                        .to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => {
+                        password = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    1 => {
+                        token = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    2 => {
+                        user_name = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct RegistryCredential: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "password" => {
+                        password = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "token" => {
+                        token = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "userName" => {
+                        user_name = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    _ => d.skip()?,
+                }
+            }
+        }
+        RegistryCredential {
+            password: password.unwrap(),
+            token: token.unwrap(),
+            user_name: user_name.unwrap(),
+        }
+    };
+    Ok(__result)
+}
+/// A set of credentials to be used for fetching from specific registries
+pub type RegistryCredentialMap = std::collections::HashMap<String, RegistryCredential>;
+
+// Encode RegistryCredentialMap as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_registry_credential_map<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &RegistryCredentialMap,
+) -> RpcResult<()> {
+    e.map(val.len() as u64)?;
+    for (k, v) in val {
+        e.str(k)?;
+        encode_registry_credential(e, v)?;
+    }
+    Ok(())
+}
+
+// Decode RegistryCredentialMap from cbor input stream
+#[doc(hidden)]
+pub fn decode_registry_credential_map(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<RegistryCredentialMap, RpcError> {
+    let __result = {
+        {
+            let mut m: std::collections::HashMap<String, RegistryCredential> =
+                std::collections::HashMap::default();
+            if let Some(n) = d.map()? {
+                for _ in 0..(n as usize) {
+                    let k = d.str()?.to_string();
+                    let v = decode_registry_credential(d)
+                        .map_err(|e| format!("decoding 'RegistryCredential': {}", e))?;
+                    m.insert(k, v);
+                }
+            } else {
+                return Err(RpcError::Deser("indefinite maps not supported".to_string()));
+            }
+            m
+        }
+    };
+    Ok(__result)
+}
 /// A request to remove a link definition and detach the relevant actor
 /// from the given provider
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -3082,6 +3264,11 @@ pub trait LatticeController {
         -> RpcResult<CtlOperationAck>;
     /// Requests that the given host be stopped
     async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<CtlOperationAck>;
+    async fn set_registry_credentials(
+        &self,
+        ctx: &Context,
+        arg: &RegistryCredentialMap,
+    ) -> RpcResult<()>;
 }
 
 /// LatticeControllerReceiver receives messages defined in the LatticeController service trait
@@ -3241,6 +3428,17 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                     arg: Cow::Owned(buf),
                 })
             }
+            "SetRegistryCredentials" => {
+                let value: RegistryCredentialMap =
+                    wasmbus_rpc::common::deserialize(&message.arg)
+                        .map_err(|e| RpcError::Deser(format!("'RegistryCredentialMap': {}", e)))?;
+                let _resp = LatticeController::set_registry_credentials(self, ctx, &value).await?;
+                let buf = Vec::new();
+                Ok(Message {
+                    method: "LatticeController.SetRegistryCredentials",
+                    arg: Cow::Owned(buf),
+                })
+            }
             _ => Err(RpcError::MethodNotHandled(format!(
                 "LatticeController::{}",
                 message.method
@@ -3324,7 +3522,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': ProviderAuctionAcks", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Seek out a list of suitable hosts for an actor given a set of host
     /// label constraints.
@@ -3350,7 +3547,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': ActorAuctionAcks", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Queries the list of hosts currently visible to the lattice. This is
     /// a "gather" operation and so can be influenced by short timeouts,
@@ -3373,7 +3569,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': Hosts", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Queries for the contents of a host given the supplied 56-character unique ID
     async fn get_host_inventory<TS: ToString + ?Sized + std::marker::Sync>(
@@ -3398,7 +3593,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': HostInventory", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Queries the lattice for the list of known/cached claims by taking the response
     /// from the first host that answers the query.
@@ -3420,7 +3614,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': GetClaimsResponse", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Instructs a given host to scale the indicated actor
     async fn scale_actor(
@@ -3445,7 +3638,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Instructs a given host to start the indicated actor
     async fn start_actor(
@@ -3470,7 +3662,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Publish a link definition into the lattice, allowing it to be cached and
     /// delivered to the appropriate capability provider instances
@@ -3496,7 +3687,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests the removal of a link definition. The definition will be removed
     /// from the cache and the relevant capability providers will be given a chance
@@ -3523,7 +3713,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Queries all current link definitions in the lattice. The first host
     /// that receives this response will reply with the contents of the distributed
@@ -3546,7 +3735,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': LinkDefinitionList", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests that a specific host perform a live update on the indicated
     /// actor
@@ -3572,7 +3760,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests that the given host start the indicated capability provider
     async fn start_provider(
@@ -3597,7 +3784,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests that the given capability provider be stopped on the indicated host
     async fn stop_provider(
@@ -3622,7 +3808,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests that an actor be stopped on the given host
     async fn stop_actor(
@@ -3647,7 +3832,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests that the given host be stopped
     async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<CtlOperationAck> {
@@ -3667,5 +3851,25 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         let value: CtlOperationAck = wasmbus_rpc::common::deserialize(&resp)
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
+    }
+    #[allow(unused)]
+    async fn set_registry_credentials(
+        &self,
+        ctx: &Context,
+        arg: &RegistryCredentialMap,
+    ) -> RpcResult<()> {
+        let buf = wasmbus_rpc::common::serialize(arg)?;
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "LatticeController.SetRegistryCredentials",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+        Ok(())
     }
 }
