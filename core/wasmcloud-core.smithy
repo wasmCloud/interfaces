@@ -183,6 +183,7 @@ map HostEnvValues {
 
 /// RPC message to capability provider
 @wasmbusData
+@codegenRust( nonExhaustive: true )
 structure Invocation {
     @required
     @n(0)
@@ -215,8 +216,8 @@ structure Invocation {
     hostId: String,
 
     /// total message size (optional)
-    @serialization(name: "content_length")
     @n(7)
+    @serialization(name: "content_length")
     contentLength: U64,
 }
 
