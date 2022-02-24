@@ -18,6 +18,7 @@ use org.wasmcloud.model#CapabilityContractId
 use org.wasmcloud.model#wasmbusData
 use org.wasmcloud.model#wasmbus
 use org.wasmcloud.model#n
+use org.wasmcloud.model#U64
 
 /// Actor service
 @wasmbus(
@@ -212,6 +213,11 @@ structure Invocation {
     @serialization(name: "host_id")
     @n(6)
     hostId: String,
+
+    /// total message size (optional)
+    @serialization(name: "content_length")
+    @n(7)
+    contentLength: U64,
 }
 
 @wasmbusData
