@@ -242,6 +242,7 @@ structure WasmCloudEntity {
 
 /// Response to an invocation
 @wasmbusData
+@codegenRust( nonExhaustive: true )
 structure InvocationResponse {
 
     /// serialize response message
@@ -258,5 +259,10 @@ structure InvocationResponse {
     /// optional error message
     @n(2)
     error: String,
+
+    /// total message size (optional)
+    @n(3)
+    @serialization(name: "content_length")
+    contentLength: U64,
 }
 
