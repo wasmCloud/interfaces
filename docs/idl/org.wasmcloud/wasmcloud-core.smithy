@@ -18,6 +18,8 @@ use org.wasmcloud.model#CapabilityContractId
 use org.wasmcloud.model#wasmbusData
 use org.wasmcloud.model#wasmbus
 use org.wasmcloud.model#n
+use org.wasmcloud.model#U64
+use org.wasmcloud.model#U32
 
 /// Actor service
 @wasmbus(
@@ -97,6 +99,7 @@ list ActorLinks {
 
 /// initialization data for a capability provider
 @wasmbusData
+@codegenRust(nonExhaustive: true)
 structure HostData {
     @required
     @serialization(name: "host_id")
@@ -165,6 +168,11 @@ structure HostData {
     @serialization(name:"config_json")
     @n(12)
     configJson: String
+
+    /// Optional. Default RPC timeout in milliseconds. Default = 2000
+    @serialization(name:"default_rpc_timeout_ms")
+    @n(13)
+    defaultRpcTimeoutMs: U32,
 }
 
 list ClusterIssuers {
@@ -182,6 +190,7 @@ map HostEnvValues {
 
 /// RPC message to capability provider
 @wasmbusData
+@codegenRust( nonExhaustive: true )
 structure Invocation {
     @required
     @n(0)
@@ -212,6 +221,11 @@ structure Invocation {
     @serialization(name: "host_id")
     @n(6)
     hostId: String,
+
+    /// total message size (optional)
+    @n(7)
+    @serialization(name: "content_length")
+    contentLength: U64,
 }
 
 @wasmbusData
@@ -235,6 +249,7 @@ structure WasmCloudEntity {
 
 /// Response to an invocation
 @wasmbusData
+@codegenRust( nonExhaustive: true )
 structure InvocationResponse {
 
     /// serialize response message
@@ -251,5 +266,10 @@ structure InvocationResponse {
     /// optional error message
     @n(2)
     error: String,
+
+    /// total message size (optional)
+    @n(3)
+    @serialization(name: "content_length")
+    contentLength: U64,
 }
 

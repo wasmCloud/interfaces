@@ -81,13 +81,26 @@ byte I8
 @unsignedInt
 byte U8
 
+/// 32-bit float
+@synonym
+float F32
+
+/// 64-bit float aka double
+@synonym
+double F64
+
 /// Rust codegen traits
 @trait(selector: "structure")
 structure codegenRust {
+
     /// if true, disables deriving 'Default' trait
     noDeriveDefault: Boolean,
+
     /// if true, disables deriving 'Eq' trait
     noDeriveEq: Boolean,
+
+    /// adds `[#non_exhaustive]` attribute to a struct declaration
+    nonExhaustive: Boolean,
 }
 
 /// indicates that a trait or class extends one or more bases
@@ -121,7 +134,7 @@ structure wasmbus {
 
 /// data sent via wasmbus
 /// This trait is required for all messages sent via wasmbus
-@trait(selector: "simpleType,list,set,map,structure")
+@trait(selector: "simpleType,list,set,map,structure,union")
 structure wasmbusData {}
 
 /// Capability contract id, e.g. 'wasmcloud:httpserver'

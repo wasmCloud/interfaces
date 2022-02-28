@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.3.3
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.0
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -24,21 +24,21 @@ pub const SMITHY_VERSION: &str = "1.0";
 /// from the start of the file for this chunk.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Chunk {
+    #[serde(rename = "objectId")]
+    pub object_id: ObjectId,
+    #[serde(rename = "containerId")]
+    pub container_id: ContainerId,
     /// bytes in this chunk
     #[serde(with = "serde_bytes")]
     #[serde(default)]
     pub bytes: Vec<u8>,
-    #[serde(rename = "containerId")]
-    pub container_id: ContainerId,
+    /// The byte offset within the object for this chunk
+    #[serde(default)]
+    pub offset: u64,
     /// true if this is the last chunk
     #[serde(rename = "isLast")]
     #[serde(default)]
     pub is_last: bool,
-    #[serde(rename = "objectId")]
-    pub object_id: ObjectId,
-    /// The byte offset within the object for this chunk
-    #[serde(default)]
-    pub offset: u64,
 }
 
 // Encode Chunk as CBOR and append to output stream
@@ -47,17 +47,12 @@ pub fn encode_chunk<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &Chunk,
 ) -> RpcResult<()> {
-    e.map(5)?;
-    e.str("bytes")?;
-    e.bytes(&val.bytes)?;
-    e.str("containerId")?;
-    encode_container_id(e, &val.container_id)?;
-    e.str("isLast")?;
-    e.bool(val.is_last)?;
-    e.str("objectId")?;
+    e.array(5)?;
     encode_object_id(e, &val.object_id)?;
-    e.str("offset")?;
+    encode_container_id(e, &val.container_id)?;
+    e.bytes(&val.bytes)?;
     e.u64(val.offset)?;
+    e.bool(val.is_last)?;
     Ok(())
 }
 
@@ -65,11 +60,11 @@ pub fn encode_chunk<W: wasmbus_rpc::cbor::Write>(
 #[doc(hidden)]
 pub fn decode_chunk(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Chunk, RpcError> {
     let __result = {
-        let mut bytes: Option<Vec<u8>> = None;
-        let mut container_id: Option<ContainerId> = None;
-        let mut is_last: Option<bool> = None;
         let mut object_id: Option<ObjectId> = None;
+        let mut container_id: Option<ContainerId> = None;
+        let mut bytes: Option<Vec<u8>> = None;
         let mut offset: Option<u64> = None;
+        let mut is_last: Option<bool> = None;
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -86,21 +81,21 @@ pub fn decode_chunk(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Chunk, Rpc
             })?;
             for __i in 0..(len as usize) {
                 match __i {
-                    0 => bytes = Some(d.bytes()?.to_vec()),
+                    0 => {
+                        object_id = Some(
+                            decode_object_id(d)
+                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
+                        )
+                    }
                     1 => {
                         container_id = Some(
                             decode_container_id(d)
                                 .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
                         )
                     }
-                    2 => is_last = Some(d.bool()?),
-                    3 => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
-                    }
-                    4 => offset = Some(d.u64()?),
+                    2 => bytes = Some(d.bytes()?.to_vec()),
+                    3 => offset = Some(d.u64()?),
+                    4 => is_last = Some(d.bool()?),
                     _ => d.skip()?,
                 }
             }
@@ -110,31 +105,31 @@ pub fn decode_chunk(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Chunk, Rpc
             })?;
             for __i in 0..(len as usize) {
                 match d.str()? {
-                    "bytes" => bytes = Some(d.bytes()?.to_vec()),
-                    "containerId" => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
-                    }
-                    "isLast" => is_last = Some(d.bool()?),
                     "objectId" => {
                         object_id = Some(
                             decode_object_id(d)
                                 .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
                         )
                     }
+                    "containerId" => {
+                        container_id = Some(
+                            decode_container_id(d)
+                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
+                        )
+                    }
+                    "bytes" => bytes = Some(d.bytes()?.to_vec()),
                     "offset" => offset = Some(d.u64()?),
+                    "isLast" => is_last = Some(d.bool()?),
                     _ => d.skip()?,
                 }
             }
         }
         Chunk {
-            bytes: if let Some(__x) = bytes {
+            object_id: if let Some(__x) = object_id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field Chunk.bytes (#0)".to_string(),
+                    "missing field Chunk.object_id (#0)".to_string(),
                 ));
             },
 
@@ -146,19 +141,11 @@ pub fn decode_chunk(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Chunk, Rpc
                 ));
             },
 
-            is_last: if let Some(__x) = is_last {
+            bytes: if let Some(__x) = bytes {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field Chunk.is_last (#2)".to_string(),
-                ));
-            },
-
-            object_id: if let Some(__x) = object_id {
-                __x
-            } else {
-                return Err(RpcError::Deser(
-                    "missing field Chunk.object_id (#3)".to_string(),
+                    "missing field Chunk.bytes (#2)".to_string(),
                 ));
             },
 
@@ -166,7 +153,15 @@ pub fn decode_chunk(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Chunk, Rpc
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field Chunk.offset (#4)".to_string(),
+                    "missing field Chunk.offset (#3)".to_string(),
+                ));
+            },
+
+            is_last: if let Some(__x) = is_last {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field Chunk.is_last (#4)".to_string(),
                 ));
             },
         }
@@ -188,8 +183,7 @@ pub fn encode_chunk_response<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ChunkResponse,
 ) -> RpcResult<()> {
-    e.map(1)?;
-    e.str("cancelDownload")?;
+    e.array(1)?;
     e.bool(val.cancel_download)?;
     Ok(())
 }
@@ -335,11 +329,9 @@ pub fn encode_container_metadata<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ContainerMetadata,
 ) -> RpcResult<()> {
-    e.map(2)?;
-    e.str("containerId")?;
+    e.array(2)?;
     encode_container_id(e, &val.container_id)?;
     if let Some(val) = val.created_at.as_ref() {
-        e.str("createdAt")?;
         e.i64(val.sec)?;
         e.u32(val.nsec)?;
     } else {
@@ -452,10 +444,8 @@ pub fn encode_container_object<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ContainerObject,
 ) -> RpcResult<()> {
-    e.map(2)?;
-    e.str("containerId")?;
+    e.array(2)?;
     encode_container_id(e, &val.container_id)?;
-    e.str("objectId")?;
     encode_object_id(e, &val.object_id)?;
     Ok(())
 }
@@ -597,18 +587,12 @@ pub fn decode_containers_info(
 /// Parameter to GetObject
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetObjectRequest {
-    /// object's container
-    #[serde(rename = "containerId")]
-    pub container_id: ContainerId,
     /// object to download
     #[serde(rename = "objectId")]
     pub object_id: ObjectId,
-    /// Requested end of object to retrieve. Defaults to the object's size.
-    /// It is not an error for rangeEnd to be greater than the object size.
-    /// Range values are inclusive.
-    #[serde(rename = "rangeEnd")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub range_end: Option<u64>,
+    /// object's container
+    #[serde(rename = "containerId")]
+    pub container_id: ContainerId,
     /// Requested start of object to retrieve.
     /// The first byte is at offset 0. Range values are inclusive.
     /// If rangeStart is beyond the end of the file,
@@ -616,6 +600,12 @@ pub struct GetObjectRequest {
     #[serde(rename = "rangeStart")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub range_start: Option<u64>,
+    /// Requested end of object to retrieve. Defaults to the object's size.
+    /// It is not an error for rangeEnd to be greater than the object size.
+    /// Range values are inclusive.
+    #[serde(rename = "rangeEnd")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub range_end: Option<u64>,
 }
 
 // Encode GetObjectRequest as CBOR and append to output stream
@@ -624,19 +614,15 @@ pub fn encode_get_object_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetObjectRequest,
 ) -> RpcResult<()> {
-    e.map(4)?;
-    e.str("containerId")?;
-    encode_container_id(e, &val.container_id)?;
-    e.str("objectId")?;
+    e.array(4)?;
     encode_object_id(e, &val.object_id)?;
-    if let Some(val) = val.range_end.as_ref() {
-        e.str("rangeEnd")?;
+    encode_container_id(e, &val.container_id)?;
+    if let Some(val) = val.range_start.as_ref() {
         e.u64(*val)?;
     } else {
         e.null()?;
     }
-    if let Some(val) = val.range_start.as_ref() {
-        e.str("rangeStart")?;
+    if let Some(val) = val.range_end.as_ref() {
         e.u64(*val)?;
     } else {
         e.null()?;
@@ -650,10 +636,10 @@ pub fn decode_get_object_request(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
 ) -> Result<GetObjectRequest, RpcError> {
     let __result = {
-        let mut container_id: Option<ContainerId> = None;
         let mut object_id: Option<ObjectId> = None;
-        let mut range_end: Option<Option<u64>> = Some(None);
+        let mut container_id: Option<ContainerId> = None;
         let mut range_start: Option<Option<u64>> = Some(None);
+        let mut range_end: Option<Option<u64>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -673,19 +659,19 @@ pub fn decode_get_object_request(
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
-                    }
-                    1 => {
                         object_id = Some(
                             decode_object_id(d)
                                 .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
                         )
                     }
+                    1 => {
+                        container_id = Some(
+                            decode_container_id(d)
+                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
+                        )
+                    }
                     2 => {
-                        range_end = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                        range_start = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -693,7 +679,7 @@ pub fn decode_get_object_request(
                         }
                     }
                     3 => {
-                        range_start = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                        range_end = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -712,28 +698,28 @@ pub fn decode_get_object_request(
             })?;
             for __i in 0..(len as usize) {
                 match d.str()? {
-                    "containerId" => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
-                    }
                     "objectId" => {
                         object_id = Some(
                             decode_object_id(d)
                                 .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
                         )
                     }
-                    "rangeEnd" => {
-                        range_end = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                    "containerId" => {
+                        container_id = Some(
+                            decode_container_id(d)
+                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
+                        )
+                    }
+                    "rangeStart" => {
+                        range_start = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
                             Some(Some(d.u64()?))
                         }
                     }
-                    "rangeStart" => {
-                        range_start = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                    "rangeEnd" => {
+                        range_end = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -745,23 +731,23 @@ pub fn decode_get_object_request(
             }
         }
         GetObjectRequest {
-            container_id: if let Some(__x) = container_id {
-                __x
-            } else {
-                return Err(RpcError::Deser(
-                    "missing field GetObjectRequest.container_id (#0)".to_string(),
-                ));
-            },
-
             object_id: if let Some(__x) = object_id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field GetObjectRequest.object_id (#1)".to_string(),
+                    "missing field GetObjectRequest.object_id (#0)".to_string(),
                 ));
             },
-            range_end: range_end.unwrap(),
+
+            container_id: if let Some(__x) = container_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field GetObjectRequest.container_id (#1)".to_string(),
+                ));
+            },
             range_start: range_start.unwrap(),
+            range_end: range_end.unwrap(),
         }
     };
     Ok(__result)
@@ -769,11 +755,16 @@ pub fn decode_get_object_request(
 /// Response to GetObject
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetObjectResponse {
-    /// Specifies what content encodings have been applied to the object
-    /// and thus what decoding mechanisms must be applied to obtain the media-type
-    #[serde(rename = "contentEncoding")]
+    /// indication whether the request was successful
+    #[serde(default)]
+    pub success: bool,
+    /// If success is false, this may contain an error
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content_encoding: Option<String>,
+    pub error: Option<String>,
+    /// The provider may begin the download by returning a first chunk
+    #[serde(rename = "initialChunk")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initial_chunk: Option<Chunk>,
     /// Length of the content. (for multi-part downloads, this may not
     /// be the same as the length of the initial chunk)
     #[serde(rename = "contentLength")]
@@ -783,16 +774,11 @@ pub struct GetObjectResponse {
     #[serde(rename = "contentType")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content_type: Option<String>,
-    /// If success is false, this may contain an error
+    /// Specifies what content encodings have been applied to the object
+    /// and thus what decoding mechanisms must be applied to obtain the media-type
+    #[serde(rename = "contentEncoding")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub error: Option<String>,
-    /// The provider may begin the download by returning a first chunk
-    #[serde(rename = "initialChunk")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub initial_chunk: Option<Chunk>,
-    /// indication whether the request was successful
-    #[serde(default)]
-    pub success: bool,
+    pub content_encoding: Option<String>,
 }
 
 // Encode GetObjectResponse as CBOR and append to output stream
@@ -801,35 +787,29 @@ pub fn encode_get_object_response<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetObjectResponse,
 ) -> RpcResult<()> {
-    e.map(6)?;
-    if let Some(val) = val.content_encoding.as_ref() {
-        e.str("contentEncoding")?;
-        e.str(val)?;
-    } else {
-        e.null()?;
-    }
-    e.str("contentLength")?;
-    e.u64(val.content_length)?;
-    if let Some(val) = val.content_type.as_ref() {
-        e.str("contentType")?;
-        e.str(val)?;
-    } else {
-        e.null()?;
-    }
+    e.array(6)?;
+    e.bool(val.success)?;
     if let Some(val) = val.error.as_ref() {
-        e.str("error")?;
         e.str(val)?;
     } else {
         e.null()?;
     }
     if let Some(val) = val.initial_chunk.as_ref() {
-        e.str("initialChunk")?;
         encode_chunk(e, val)?;
     } else {
         e.null()?;
     }
-    e.str("success")?;
-    e.bool(val.success)?;
+    e.u64(val.content_length)?;
+    if let Some(val) = val.content_type.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.content_encoding.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
     Ok(())
 }
 
@@ -839,12 +819,12 @@ pub fn decode_get_object_response(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
 ) -> Result<GetObjectResponse, RpcError> {
     let __result = {
-        let mut content_encoding: Option<Option<String>> = Some(None);
-        let mut content_length: Option<u64> = None;
-        let mut content_type: Option<Option<String>> = Some(None);
+        let mut success: Option<bool> = None;
         let mut error: Option<Option<String>> = Some(None);
         let mut initial_chunk: Option<Option<Chunk>> = Some(None);
-        let mut success: Option<bool> = None;
+        let mut content_length: Option<u64> = None;
+        let mut content_type: Option<Option<String>> = Some(None);
+        let mut content_encoding: Option<Option<String>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -863,24 +843,8 @@ pub fn decode_get_object_response(
             })?;
             for __i in 0..(len as usize) {
                 match __i {
-                    0 => {
-                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
-                        }
-                    }
-                    1 => content_length = Some(d.u64()?),
-                    2 => {
-                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
-                        }
-                    }
-                    3 => {
+                    0 => success = Some(d.bool()?),
+                    1 => {
                         error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -888,7 +852,7 @@ pub fn decode_get_object_response(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    4 => {
+                    2 => {
                         initial_chunk = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -898,7 +862,24 @@ pub fn decode_get_object_response(
                             ))
                         }
                     }
-                    5 => success = Some(d.bool()?),
+                    3 => content_length = Some(d.u64()?),
+                    4 => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    5 => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+
                     _ => d.skip()?,
                 }
             }
@@ -910,23 +891,7 @@ pub fn decode_get_object_response(
             })?;
             for __i in 0..(len as usize) {
                 match d.str()? {
-                    "contentEncoding" => {
-                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
-                        }
-                    }
-                    "contentLength" => content_length = Some(d.u64()?),
-                    "contentType" => {
-                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
-                        }
-                    }
+                    "success" => success = Some(d.bool()?),
                     "error" => {
                         error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
@@ -945,32 +910,47 @@ pub fn decode_get_object_response(
                             ))
                         }
                     }
-                    "success" => success = Some(d.bool()?),
+                    "contentLength" => content_length = Some(d.u64()?),
+                    "contentType" => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "contentEncoding" => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
                     _ => d.skip()?,
                 }
             }
         }
         GetObjectResponse {
-            content_encoding: content_encoding.unwrap(),
+            success: if let Some(__x) = success {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field GetObjectResponse.success (#0)".to_string(),
+                ));
+            },
+            error: error.unwrap(),
+            initial_chunk: initial_chunk.unwrap(),
 
             content_length: if let Some(__x) = content_length {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field GetObjectResponse.content_length (#1)".to_string(),
+                    "missing field GetObjectResponse.content_length (#3)".to_string(),
                 ));
             },
             content_type: content_type.unwrap(),
-            error: error.unwrap(),
-            initial_chunk: initial_chunk.unwrap(),
-
-            success: if let Some(__x) = success {
-                __x
-            } else {
-                return Err(RpcError::Deser(
-                    "missing field GetObjectResponse.success (#5)".to_string(),
-                ));
-            },
+            content_encoding: content_encoding.unwrap(),
         }
     };
     Ok(__result)
@@ -978,14 +958,14 @@ pub fn decode_get_object_response(
 /// Result of input item
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ItemResult {
-    /// optional error message for failures
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub error: Option<String>,
     #[serde(default)]
     pub key: String,
     /// whether the item succeeded or failed
     #[serde(default)]
     pub success: bool,
+    /// optional error message for failures
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
 }
 
 // Encode ItemResult as CBOR and append to output stream
@@ -994,17 +974,14 @@ pub fn encode_item_result<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ItemResult,
 ) -> RpcResult<()> {
-    e.map(3)?;
+    e.array(3)?;
+    e.str(&val.key)?;
+    e.bool(val.success)?;
     if let Some(val) = val.error.as_ref() {
-        e.str("error")?;
         e.str(val)?;
     } else {
         e.null()?;
     }
-    e.str("key")?;
-    e.str(&val.key)?;
-    e.str("success")?;
-    e.bool(val.success)?;
     Ok(())
 }
 
@@ -1012,9 +989,9 @@ pub fn encode_item_result<W: wasmbus_rpc::cbor::Write>(
 #[doc(hidden)]
 pub fn decode_item_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<ItemResult, RpcError> {
     let __result = {
-        let mut error: Option<Option<String>> = Some(None);
         let mut key: Option<String> = None;
         let mut success: Option<bool> = None;
+        let mut error: Option<Option<String>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -1033,7 +1010,9 @@ pub fn decode_item_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Item
             })?;
             for __i in 0..(len as usize) {
                 match __i {
-                    0 => {
+                    0 => key = Some(d.str()?.to_string()),
+                    1 => success = Some(d.bool()?),
+                    2 => {
                         error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -1041,8 +1020,7 @@ pub fn decode_item_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Item
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    1 => key = Some(d.str()?.to_string()),
-                    2 => success = Some(d.bool()?),
+
                     _ => d.skip()?,
                 }
             }
@@ -1054,6 +1032,8 @@ pub fn decode_item_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Item
             })?;
             for __i in 0..(len as usize) {
                 match d.str()? {
+                    "key" => key = Some(d.str()?.to_string()),
+                    "success" => success = Some(d.bool()?),
                     "error" => {
                         error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
@@ -1062,20 +1042,16 @@ pub fn decode_item_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Item
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    "key" => key = Some(d.str()?.to_string()),
-                    "success" => success = Some(d.bool()?),
                     _ => d.skip()?,
                 }
             }
         }
         ItemResult {
-            error: error.unwrap(),
-
             key: if let Some(__x) = key {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ItemResult.key (#1)".to_string(),
+                    "missing field ItemResult.key (#0)".to_string(),
                 ));
             },
 
@@ -1083,9 +1059,10 @@ pub fn decode_item_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Item
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ItemResult.success (#2)".to_string(),
+                    "missing field ItemResult.success (#1)".to_string(),
                 ));
             },
+            error: error.unwrap(),
         }
     };
     Ok(__result)
@@ -1097,10 +1074,18 @@ pub struct ListObjectsRequest {
     #[serde(rename = "containerId")]
     #[serde(default)]
     pub container_id: String,
+    /// Request object names starting with this value. (Optional)
+    #[serde(rename = "startWith")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_with: Option<String>,
     /// Continuation token passed in ListObjectsResponse.
     /// If set, `startWith` is ignored. (Optional)
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub continuation: Option<String>,
+    /// Last item to return (inclusive terminator) (Optional)
+    #[serde(rename = "endWith")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_with: Option<String>,
     /// Optionally, stop returning items before returning this value.
     /// (exclusive terminator)
     /// If startFrom is "a" and endBefore is "b", and items are ordered
@@ -1109,10 +1094,6 @@ pub struct ListObjectsRequest {
     #[serde(rename = "endBefore")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub end_before: Option<String>,
-    /// Last item to return (inclusive terminator) (Optional)
-    #[serde(rename = "endWith")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub end_with: Option<String>,
     /// maximum number of items to return. If not specified, provider
     /// will return an initial set of up to 1000 items. if maxItems > 1000,
     /// the provider implementation may return fewer items than requested.
@@ -1120,10 +1101,6 @@ pub struct ListObjectsRequest {
     #[serde(rename = "maxItems")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub max_items: Option<u32>,
-    /// Request object names starting with this value. (Optional)
-    #[serde(rename = "startWith")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub start_with: Option<String>,
 }
 
 // Encode ListObjectsRequest as CBOR and append to output stream
@@ -1132,36 +1109,30 @@ pub fn encode_list_objects_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ListObjectsRequest,
 ) -> RpcResult<()> {
-    e.map(6)?;
-    e.str("containerId")?;
+    e.array(6)?;
     e.str(&val.container_id)?;
-    if let Some(val) = val.continuation.as_ref() {
-        e.str("continuation")?;
+    if let Some(val) = val.start_with.as_ref() {
         e.str(val)?;
     } else {
         e.null()?;
     }
-    if let Some(val) = val.end_before.as_ref() {
-        e.str("endBefore")?;
+    if let Some(val) = val.continuation.as_ref() {
         e.str(val)?;
     } else {
         e.null()?;
     }
     if let Some(val) = val.end_with.as_ref() {
-        e.str("endWith")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.end_before.as_ref() {
         e.str(val)?;
     } else {
         e.null()?;
     }
     if let Some(val) = val.max_items.as_ref() {
-        e.str("maxItems")?;
         e.u32(*val)?;
-    } else {
-        e.null()?;
-    }
-    if let Some(val) = val.start_with.as_ref() {
-        e.str("startWith")?;
-        e.str(val)?;
     } else {
         e.null()?;
     }
@@ -1175,11 +1146,11 @@ pub fn decode_list_objects_request(
 ) -> Result<ListObjectsRequest, RpcError> {
     let __result = {
         let mut container_id: Option<String> = None;
-        let mut continuation: Option<Option<String>> = Some(None);
-        let mut end_before: Option<Option<String>> = Some(None);
-        let mut end_with: Option<Option<String>> = Some(None);
-        let mut max_items: Option<Option<u32>> = Some(None);
         let mut start_with: Option<Option<String>> = Some(None);
+        let mut continuation: Option<Option<String>> = Some(None);
+        let mut end_with: Option<Option<String>> = Some(None);
+        let mut end_before: Option<Option<String>> = Some(None);
+        let mut max_items: Option<Option<u32>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -1201,7 +1172,7 @@ pub fn decode_list_objects_request(
                 match __i {
                     0 => container_id = Some(d.str()?.to_string()),
                     1 => {
-                        continuation = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                        start_with = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -1209,7 +1180,7 @@ pub fn decode_list_objects_request(
                         }
                     }
                     2 => {
-                        end_before = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                        continuation = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -1225,19 +1196,19 @@ pub fn decode_list_objects_request(
                         }
                     }
                     4 => {
+                        end_before = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    5 => {
                         max_items = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
                             Some(Some(d.u32()?))
-                        }
-                    }
-                    5 => {
-                        start_with = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
                         }
                     }
 
@@ -1253,16 +1224,16 @@ pub fn decode_list_objects_request(
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "containerId" => container_id = Some(d.str()?.to_string()),
-                    "continuation" => {
-                        continuation = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                    "startWith" => {
+                        start_with = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    "endBefore" => {
-                        end_before = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                    "continuation" => {
+                        continuation = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -1277,20 +1248,20 @@ pub fn decode_list_objects_request(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
+                    "endBefore" => {
+                        end_before = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
                     "maxItems" => {
                         max_items = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
                             Some(Some(d.u32()?))
-                        }
-                    }
-                    "startWith" => {
-                        start_with = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
                         }
                     }
                     _ => d.skip()?,
@@ -1305,11 +1276,11 @@ pub fn decode_list_objects_request(
                     "missing field ListObjectsRequest.container_id (#0)".to_string(),
                 ));
             },
-            continuation: continuation.unwrap(),
-            end_before: end_before.unwrap(),
-            end_with: end_with.unwrap(),
-            max_items: max_items.unwrap(),
             start_with: start_with.unwrap(),
+            continuation: continuation.unwrap(),
+            end_with: end_with.unwrap(),
+            end_before: end_before.unwrap(),
+            max_items: max_items.unwrap(),
         }
     };
     Ok(__result)
@@ -1320,19 +1291,19 @@ pub fn decode_list_objects_request(
 /// request using the `continuation` token.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ListObjectsResponse {
+    /// set of objects returned
+    pub objects: ObjectsInfo,
+    /// Indicates if the item list is complete, or the last item
+    /// in a multi-part response.
+    #[serde(rename = "isLast")]
+    #[serde(default)]
+    pub is_last: bool,
     /// If `isLast` is false, this value can be used in the `continuation` field
     /// of a `ListObjectsRequest`.
     /// Clients should not attempt to interpret this field: it may or may not
     /// be a real key or object name, and may be obfuscated by the provider.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub continuation: Option<String>,
-    /// Indicates if the item list is complete, or the last item
-    /// in a multi-part response.
-    #[serde(rename = "isLast")]
-    #[serde(default)]
-    pub is_last: bool,
-    /// set of objects returned
-    pub objects: ObjectsInfo,
 }
 
 // Encode ListObjectsResponse as CBOR and append to output stream
@@ -1341,17 +1312,14 @@ pub fn encode_list_objects_response<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ListObjectsResponse,
 ) -> RpcResult<()> {
-    e.map(3)?;
+    e.array(3)?;
+    encode_objects_info(e, &val.objects)?;
+    e.bool(val.is_last)?;
     if let Some(val) = val.continuation.as_ref() {
-        e.str("continuation")?;
         e.str(val)?;
     } else {
         e.null()?;
     }
-    e.str("isLast")?;
-    e.bool(val.is_last)?;
-    e.str("objects")?;
-    encode_objects_info(e, &val.objects)?;
     Ok(())
 }
 
@@ -1361,9 +1329,9 @@ pub fn decode_list_objects_response(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
 ) -> Result<ListObjectsResponse, RpcError> {
     let __result = {
-        let mut continuation: Option<Option<String>> = Some(None);
-        let mut is_last: Option<bool> = None;
         let mut objects: Option<ObjectsInfo> = None;
+        let mut is_last: Option<bool> = None;
+        let mut continuation: Option<Option<String>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -1384,6 +1352,13 @@ pub fn decode_list_objects_response(
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
+                        objects = Some(
+                            decode_objects_info(d)
+                                .map_err(|e| format!("decoding 'ObjectsInfo': {}", e))?,
+                        )
+                    }
+                    1 => is_last = Some(d.bool()?),
+                    2 => {
                         continuation = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -1391,13 +1366,7 @@ pub fn decode_list_objects_response(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    1 => is_last = Some(d.bool()?),
-                    2 => {
-                        objects = Some(
-                            decode_objects_info(d)
-                                .map_err(|e| format!("decoding 'ObjectsInfo': {}", e))?,
-                        )
-                    }
+
                     _ => d.skip()?,
                 }
             }
@@ -1409,6 +1378,13 @@ pub fn decode_list_objects_response(
             })?;
             for __i in 0..(len as usize) {
                 match d.str()? {
+                    "objects" => {
+                        objects = Some(
+                            decode_objects_info(d)
+                                .map_err(|e| format!("decoding 'ObjectsInfo': {}", e))?,
+                        )
+                    }
+                    "isLast" => is_last = Some(d.bool()?),
                     "continuation" => {
                         continuation = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
@@ -1417,19 +1393,18 @@ pub fn decode_list_objects_response(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    "isLast" => is_last = Some(d.bool()?),
-                    "objects" => {
-                        objects = Some(
-                            decode_objects_info(d)
-                                .map_err(|e| format!("decoding 'ObjectsInfo': {}", e))?,
-                        )
-                    }
                     _ => d.skip()?,
                 }
             }
         }
         ListObjectsResponse {
-            continuation: continuation.unwrap(),
+            objects: if let Some(__x) = objects {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ListObjectsResponse.objects (#0)".to_string(),
+                ));
+            },
 
             is_last: if let Some(__x) = is_last {
                 __x
@@ -1438,14 +1413,7 @@ pub fn decode_list_objects_response(
                     "missing field ListObjectsResponse.is_last (#1)".to_string(),
                 ));
             },
-
-            objects: if let Some(__x) = objects {
-                __x
-            } else {
-                return Err(RpcError::Deser(
-                    "missing field ListObjectsResponse.objects (#2)".to_string(),
-                ));
-            },
+            continuation: continuation.unwrap(),
         }
     };
     Ok(__result)
@@ -1562,9 +1530,29 @@ pub fn decode_object_ids(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Objec
 }
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ObjectMetadata {
+    /// Object identifier that is unique within its container.
+    /// Naming of objects is determined by the capability provider.
+    /// An object id could be a path, hash of object contents, or some other unique identifier.
+    #[serde(rename = "objectId")]
+    pub object_id: ObjectId,
     /// container of the object
     #[serde(rename = "containerId")]
     pub container_id: ContainerId,
+    /// size of the object in bytes
+    #[serde(rename = "contentLength")]
+    #[serde(default)]
+    pub content_length: u64,
+    /// date object was last modified
+    #[serde(rename = "lastModified")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub last_modified: Option<Timestamp>,
+    /// A MIME type of the object
+    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
+    /// Provider implementations _may_ return None for this field for metadata
+    /// returned from ListObjects
+    #[serde(rename = "contentType")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_type: Option<String>,
     /// Specifies what content encodings have been applied to the object
     /// and thus what decoding mechanisms must be applied to obtain the media-type
     /// referenced by the contentType field. For more information,
@@ -1574,26 +1562,6 @@ pub struct ObjectMetadata {
     #[serde(rename = "contentEncoding")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content_encoding: Option<String>,
-    /// size of the object in bytes
-    #[serde(rename = "contentLength")]
-    #[serde(default)]
-    pub content_length: u64,
-    /// A MIME type of the object
-    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
-    /// Provider implementations _may_ return None for this field for metadata
-    /// returned from ListObjects
-    #[serde(rename = "contentType")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content_type: Option<String>,
-    /// date object was last modified
-    #[serde(rename = "lastModified")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub last_modified: Option<Timestamp>,
-    /// Object identifier that is unique within its container.
-    /// Naming of objects is determined by the capability provider.
-    /// An object id could be a path, hash of object contents, or some other unique identifier.
-    #[serde(rename = "objectId")]
-    pub object_id: ObjectId,
 }
 
 // Encode ObjectMetadata as CBOR and append to output stream
@@ -1602,32 +1570,26 @@ pub fn encode_object_metadata<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ObjectMetadata,
 ) -> RpcResult<()> {
-    e.map(6)?;
-    e.str("containerId")?;
+    e.array(6)?;
+    encode_object_id(e, &val.object_id)?;
     encode_container_id(e, &val.container_id)?;
-    if let Some(val) = val.content_encoding.as_ref() {
-        e.str("contentEncoding")?;
-        e.str(val)?;
-    } else {
-        e.null()?;
-    }
-    e.str("contentLength")?;
     e.u64(val.content_length)?;
-    if let Some(val) = val.content_type.as_ref() {
-        e.str("contentType")?;
-        e.str(val)?;
-    } else {
-        e.null()?;
-    }
     if let Some(val) = val.last_modified.as_ref() {
-        e.str("lastModified")?;
         e.i64(val.sec)?;
         e.u32(val.nsec)?;
     } else {
         e.null()?;
     }
-    e.str("objectId")?;
-    encode_object_id(e, &val.object_id)?;
+    if let Some(val) = val.content_type.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.content_encoding.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
     Ok(())
 }
 
@@ -1637,12 +1599,12 @@ pub fn decode_object_metadata(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
 ) -> Result<ObjectMetadata, RpcError> {
     let __result = {
-        let mut container_id: Option<ContainerId> = None;
-        let mut content_encoding: Option<Option<String>> = Some(None);
-        let mut content_length: Option<u64> = None;
-        let mut content_type: Option<Option<String>> = Some(None);
-        let mut last_modified: Option<Option<Timestamp>> = Some(None);
         let mut object_id: Option<ObjectId> = None;
+        let mut container_id: Option<ContainerId> = None;
+        let mut content_length: Option<u64> = None;
+        let mut last_modified: Option<Option<Timestamp>> = Some(None);
+        let mut content_type: Option<Option<String>> = Some(None);
+        let mut content_encoding: Option<Option<String>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -1662,29 +1624,19 @@ pub fn decode_object_metadata(
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
+                        object_id = Some(
+                            decode_object_id(d)
+                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
+                        )
+                    }
+                    1 => {
                         container_id = Some(
                             decode_container_id(d)
                                 .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
                         )
                     }
-                    1 => {
-                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
-                        }
-                    }
                     2 => content_length = Some(d.u64()?),
                     3 => {
-                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
-                        }
-                    }
-                    4 => {
                         last_modified = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -1695,12 +1647,23 @@ pub fn decode_object_metadata(
                             }))
                         }
                     }
-                    5 => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
+                    4 => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
                     }
+                    5 => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+
                     _ => d.skip()?,
                 }
             }
@@ -1712,29 +1675,19 @@ pub fn decode_object_metadata(
             })?;
             for __i in 0..(len as usize) {
                 match d.str()? {
+                    "objectId" => {
+                        object_id = Some(
+                            decode_object_id(d)
+                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
+                        )
+                    }
                     "containerId" => {
                         container_id = Some(
                             decode_container_id(d)
                                 .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
                         )
                     }
-                    "contentEncoding" => {
-                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
-                        }
-                    }
                     "contentLength" => content_length = Some(d.u64()?),
-                    "contentType" => {
-                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
-                            d.skip()?;
-                            Some(None)
-                        } else {
-                            Some(Some(d.str()?.to_string()))
-                        }
-                    }
                     "lastModified" => {
                         last_modified = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
@@ -1746,25 +1699,42 @@ pub fn decode_object_metadata(
                             }))
                         }
                     }
-                    "objectId" => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
+                    "contentType" => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "contentEncoding" => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
                     }
                     _ => d.skip()?,
                 }
             }
         }
         ObjectMetadata {
+            object_id: if let Some(__x) = object_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ObjectMetadata.object_id (#0)".to_string(),
+                ));
+            },
+
             container_id: if let Some(__x) = container_id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ObjectMetadata.container_id (#0)".to_string(),
+                    "missing field ObjectMetadata.container_id (#1)".to_string(),
                 ));
             },
-            content_encoding: content_encoding.unwrap(),
 
             content_length: if let Some(__x) = content_length {
                 __x
@@ -1773,16 +1743,9 @@ pub fn decode_object_metadata(
                     "missing field ObjectMetadata.content_length (#2)".to_string(),
                 ));
             },
-            content_type: content_type.unwrap(),
             last_modified: last_modified.unwrap(),
-
-            object_id: if let Some(__x) = object_id {
-                __x
-            } else {
-                return Err(RpcError::Deser(
-                    "missing field ObjectMetadata.object_id (#5)".to_string(),
-                ));
-            },
+            content_type: content_type.unwrap(),
+            content_encoding: content_encoding.unwrap(),
         }
     };
     Ok(__result)
@@ -1839,11 +1802,6 @@ pub fn decode_objects_info(
 /// Parameter to PutChunk operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct PutChunkRequest {
-    /// If set, the receiving provider should cancel the upload process
-    /// and remove the file.
-    #[serde(rename = "cancelAndRemove")]
-    #[serde(default)]
-    pub cancel_and_remove: bool,
     /// upload chunk from the file.
     /// if chunk.isLast is set, this will be the last chunk uploaded
     pub chunk: Chunk,
@@ -1851,6 +1809,11 @@ pub struct PutChunkRequest {
     #[serde(rename = "streamId")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub stream_id: Option<String>,
+    /// If set, the receiving provider should cancel the upload process
+    /// and remove the file.
+    #[serde(rename = "cancelAndRemove")]
+    #[serde(default)]
+    pub cancel_and_remove: bool,
 }
 
 // Encode PutChunkRequest as CBOR and append to output stream
@@ -1859,17 +1822,14 @@ pub fn encode_put_chunk_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PutChunkRequest,
 ) -> RpcResult<()> {
-    e.map(3)?;
-    e.str("cancelAndRemove")?;
-    e.bool(val.cancel_and_remove)?;
-    e.str("chunk")?;
+    e.array(3)?;
     encode_chunk(e, &val.chunk)?;
     if let Some(val) = val.stream_id.as_ref() {
-        e.str("streamId")?;
         e.str(val)?;
     } else {
         e.null()?;
     }
+    e.bool(val.cancel_and_remove)?;
     Ok(())
 }
 
@@ -1879,9 +1839,9 @@ pub fn decode_put_chunk_request(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
 ) -> Result<PutChunkRequest, RpcError> {
     let __result = {
-        let mut cancel_and_remove: Option<bool> = None;
         let mut chunk: Option<Chunk> = None;
         let mut stream_id: Option<Option<String>> = Some(None);
+        let mut cancel_and_remove: Option<bool> = None;
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -1900,12 +1860,11 @@ pub fn decode_put_chunk_request(
             })?;
             for __i in 0..(len as usize) {
                 match __i {
-                    0 => cancel_and_remove = Some(d.bool()?),
-                    1 => {
+                    0 => {
                         chunk =
                             Some(decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?)
                     }
-                    2 => {
+                    1 => {
                         stream_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -1913,7 +1872,7 @@ pub fn decode_put_chunk_request(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-
+                    2 => cancel_and_remove = Some(d.bool()?),
                     _ => d.skip()?,
                 }
             }
@@ -1925,7 +1884,6 @@ pub fn decode_put_chunk_request(
             })?;
             for __i in 0..(len as usize) {
                 match d.str()? {
-                    "cancelAndRemove" => cancel_and_remove = Some(d.bool()?),
                     "chunk" => {
                         chunk =
                             Some(decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?)
@@ -1938,27 +1896,28 @@ pub fn decode_put_chunk_request(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
+                    "cancelAndRemove" => cancel_and_remove = Some(d.bool()?),
                     _ => d.skip()?,
                 }
             }
         }
         PutChunkRequest {
-            cancel_and_remove: if let Some(__x) = cancel_and_remove {
-                __x
-            } else {
-                return Err(RpcError::Deser(
-                    "missing field PutChunkRequest.cancel_and_remove (#0)".to_string(),
-                ));
-            },
-
             chunk: if let Some(__x) = chunk {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field PutChunkRequest.chunk (#1)".to_string(),
+                    "missing field PutChunkRequest.chunk (#0)".to_string(),
                 ));
             },
             stream_id: stream_id.unwrap(),
+
+            cancel_and_remove: if let Some(__x) = cancel_and_remove {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field PutChunkRequest.cancel_and_remove (#2)".to_string(),
+                ));
+            },
         }
     };
     Ok(__result)
@@ -1968,6 +1927,11 @@ pub fn decode_put_chunk_request(
 pub struct PutObjectRequest {
     /// File path and initial data
     pub chunk: Chunk,
+    /// A MIME type of the object
+    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
+    #[serde(rename = "contentType")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_type: Option<String>,
     /// Specifies what content encodings have been applied to the object
     /// and thus what decoding mechanisms must be applied to obtain the media-type
     /// referenced by the contentType field. For more information,
@@ -1975,11 +1939,6 @@ pub struct PutObjectRequest {
     #[serde(rename = "contentEncoding")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub content_encoding: Option<String>,
-    /// A MIME type of the object
-    /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
-    #[serde(rename = "contentType")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content_type: Option<String>,
 }
 
 // Encode PutObjectRequest as CBOR and append to output stream
@@ -1988,17 +1947,14 @@ pub fn encode_put_object_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PutObjectRequest,
 ) -> RpcResult<()> {
-    e.map(3)?;
-    e.str("chunk")?;
+    e.array(3)?;
     encode_chunk(e, &val.chunk)?;
-    if let Some(val) = val.content_encoding.as_ref() {
-        e.str("contentEncoding")?;
+    if let Some(val) = val.content_type.as_ref() {
         e.str(val)?;
     } else {
         e.null()?;
     }
-    if let Some(val) = val.content_type.as_ref() {
-        e.str("contentType")?;
+    if let Some(val) = val.content_encoding.as_ref() {
         e.str(val)?;
     } else {
         e.null()?;
@@ -2013,8 +1969,8 @@ pub fn decode_put_object_request(
 ) -> Result<PutObjectRequest, RpcError> {
     let __result = {
         let mut chunk: Option<Chunk> = None;
-        let mut content_encoding: Option<Option<String>> = Some(None);
         let mut content_type: Option<Option<String>> = Some(None);
+        let mut content_encoding: Option<Option<String>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -2038,7 +1994,7 @@ pub fn decode_put_object_request(
                             Some(decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?)
                     }
                     1 => {
-                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -2046,7 +2002,7 @@ pub fn decode_put_object_request(
                         }
                     }
                     2 => {
-                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -2069,16 +2025,16 @@ pub fn decode_put_object_request(
                         chunk =
                             Some(decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?)
                     }
-                    "contentEncoding" => {
-                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                    "contentType" => {
+                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    "contentType" => {
-                        content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                    "contentEncoding" => {
+                        content_encoding = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -2097,8 +2053,8 @@ pub fn decode_put_object_request(
                     "missing field PutObjectRequest.chunk (#0)".to_string(),
                 ));
             },
-            content_encoding: content_encoding.unwrap(),
             content_type: content_type.unwrap(),
+            content_encoding: content_encoding.unwrap(),
         }
     };
     Ok(__result)
@@ -2119,9 +2075,8 @@ pub fn encode_put_object_response<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PutObjectResponse,
 ) -> RpcResult<()> {
-    e.map(1)?;
+    e.array(1)?;
     if let Some(val) = val.stream_id.as_ref() {
-        e.str("streamId")?;
         e.str(val)?;
     } else {
         e.null()?;
@@ -2208,10 +2163,8 @@ pub fn encode_remove_objects_request<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &RemoveObjectsRequest,
 ) -> RpcResult<()> {
-    e.map(2)?;
-    e.str("containerId")?;
+    e.array(2)?;
     encode_container_id(e, &val.container_id)?;
-    e.str("objects")?;
     encode_object_ids(e, &val.objects)?;
     Ok(())
 }
@@ -2390,14 +2343,18 @@ pub trait Blobstore {
 #[doc(hidden)]
 #[async_trait]
 pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+    async fn dispatch<'disp__, 'ctx__, 'msg__>(
+        &'disp__ self,
+        ctx: &'ctx__ Context,
+        message: &Message<'msg__>,
+    ) -> Result<Message<'msg__>, RpcError> {
         match message.method {
             "ContainerExists" => {
                 let value: ContainerId =
                     wasmbus_rpc::common::decode(&message.arg, &decode_container_id)
                         .map_err(|e| RpcError::Deser(format!("'ContainerId': {}", e)))?;
                 let resp = Blobstore::container_exists(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
                 e.bool(resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
@@ -2421,7 +2378,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                     wasmbus_rpc::common::decode(&message.arg, &decode_container_id)
                         .map_err(|e| RpcError::Deser(format!("'ContainerId': {}", e)))?;
                 let resp = Blobstore::get_container_info(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
                 encode_container_metadata(&mut e, &resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
@@ -2431,7 +2388,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
             }
             "ListContainers" => {
                 let resp = Blobstore::list_containers(self, ctx).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
                 encode_containers_info(&mut e, &resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
@@ -2444,7 +2401,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                     wasmbus_rpc::common::decode(&message.arg, &decode_container_ids)
                         .map_err(|e| RpcError::Deser(format!("'ContainerIds': {}", e)))?;
                 let resp = Blobstore::remove_containers(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
                 encode_multi_result(&mut e, &resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
@@ -2457,7 +2414,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                     wasmbus_rpc::common::decode(&message.arg, &decode_container_object)
                         .map_err(|e| RpcError::Deser(format!("'ContainerObject': {}", e)))?;
                 let resp = Blobstore::object_exists(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
                 e.bool(resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
@@ -2470,7 +2427,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                     wasmbus_rpc::common::decode(&message.arg, &decode_container_object)
                         .map_err(|e| RpcError::Deser(format!("'ContainerObject': {}", e)))?;
                 let resp = Blobstore::get_object_info(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
                 encode_object_metadata(&mut e, &resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
@@ -2483,7 +2440,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                     wasmbus_rpc::common::decode(&message.arg, &decode_list_objects_request)
                         .map_err(|e| RpcError::Deser(format!("'ListObjectsRequest': {}", e)))?;
                 let resp = Blobstore::list_objects(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
                 encode_list_objects_response(&mut e, &resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
@@ -2496,7 +2453,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                     wasmbus_rpc::common::decode(&message.arg, &decode_remove_objects_request)
                         .map_err(|e| RpcError::Deser(format!("'RemoveObjectsRequest': {}", e)))?;
                 let resp = Blobstore::remove_objects(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
                 encode_multi_result(&mut e, &resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
@@ -2509,7 +2466,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                     wasmbus_rpc::common::decode(&message.arg, &decode_put_object_request)
                         .map_err(|e| RpcError::Deser(format!("'PutObjectRequest': {}", e)))?;
                 let resp = Blobstore::put_object(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
                 encode_put_object_response(&mut e, &resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
@@ -2522,7 +2479,7 @@ pub trait BlobstoreReceiver: MessageDispatch + Blobstore {
                     wasmbus_rpc::common::decode(&message.arg, &decode_get_object_request)
                         .map_err(|e| RpcError::Deser(format!("'GetObjectRequest': {}", e)))?;
                 let resp = Blobstore::get_object(self, ctx, &value).await?;
-                let mut e = wasmbus_rpc::cbor::vec_encoder();
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
                 encode_get_object_response(&mut e, &resp)?;
                 let buf = e.into_inner();
                 Ok(Message {
@@ -2592,7 +2549,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
     #[allow(unused)]
     /// Returns whether the container exists
     async fn container_exists(&self, ctx: &Context, arg: &ContainerId) -> RpcResult<bool> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_container_id(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2611,12 +2568,13 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Creates a container by name, returning success if it worked
     /// Note that container names may not be globally unique - just unique within the
     /// "namespace" of the connecting actor and linkdef
     async fn create_container(&self, ctx: &Context, arg: &ContainerId) -> RpcResult<()> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_container_id(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2632,6 +2590,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .await?;
         Ok(())
     }
+
     #[allow(unused)]
     /// Retrieves information about the container.
     /// Returns error if the container id is invalid or not found.
@@ -2640,7 +2599,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
         ctx: &Context,
         arg: &ContainerId,
     ) -> RpcResult<ContainerMetadata> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_container_id(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2660,6 +2619,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': ContainerMetadata", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Returns list of container ids
     async fn list_containers(&self, ctx: &Context) -> RpcResult<ContainersInfo> {
@@ -2680,13 +2640,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': ContainersInfo", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Empty and remove the container(s)
     /// The MultiResult list contains one entry for each container
     /// that was not successfully removed, with the 'key' value representing the container name.
     /// If the MultiResult list is empty, all container removals succeeded.
     async fn remove_containers(&self, ctx: &Context, arg: &ContainerIds) -> RpcResult<MultiResult> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_container_ids(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2705,10 +2666,11 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': MultiResult", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Returns whether the object exists
     async fn object_exists(&self, ctx: &Context, arg: &ContainerObject) -> RpcResult<bool> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_container_object(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2727,6 +2689,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Retrieves information about the object.
     /// Returns error if the object id is invalid or not found.
@@ -2735,7 +2698,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
         ctx: &Context,
         arg: &ContainerObject,
     ) -> RpcResult<ObjectMetadata> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_container_object(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2754,6 +2717,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': ObjectMetadata", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Lists the objects in the container.
     /// If the container exists and is empty, the returned `objects` list is empty.
@@ -2770,7 +2734,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
         ctx: &Context,
         arg: &ListObjectsRequest,
     ) -> RpcResult<ListObjectsResponse> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_list_objects_request(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2790,6 +2754,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': ListObjectsResponse", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Removes the objects. In the event any of the objects cannot be removed,
     /// the operation continues until all requested deletions have been attempted.
@@ -2800,7 +2765,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
         ctx: &Context,
         arg: &RemoveObjectsRequest,
     ) -> RpcResult<MultiResult> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_remove_objects_request(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2819,6 +2784,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': MultiResult", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests to start upload of a file/blob to the Blobstore.
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
@@ -2827,7 +2793,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
         ctx: &Context,
         arg: &PutObjectRequest,
     ) -> RpcResult<PutObjectResponse> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_put_object_request(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2847,6 +2813,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': PutObjectResponse", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests to retrieve an object. If the object is large, the provider
     /// may split the response into multiple parts
@@ -2856,7 +2823,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
         ctx: &Context,
         arg: &GetObjectRequest,
     ) -> RpcResult<GetObjectResponse> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_get_object_request(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2876,11 +2843,12 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': GetObjectResponse", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Uploads a file chunk to a blobstore. This must be called AFTER PutObject
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
     async fn put_chunk(&self, ctx: &Context, arg: &PutChunkRequest) -> RpcResult<()> {
-        let mut e = wasmbus_rpc::cbor::vec_encoder();
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
         encode_put_chunk_request(&mut e, arg)?;
         let buf = e.into_inner();
         let resp = self
@@ -2918,13 +2886,19 @@ pub trait ChunkReceiver {
 #[doc(hidden)]
 #[async_trait]
 pub trait ChunkReceiverReceiver: MessageDispatch + ChunkReceiver {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+    async fn dispatch<'disp__, 'ctx__, 'msg__>(
+        &'disp__ self,
+        ctx: &'ctx__ Context,
+        message: &Message<'msg__>,
+    ) -> Result<Message<'msg__>, RpcError> {
         match message.method {
             "ReceiveChunk" => {
-                let value: Chunk = wasmbus_rpc::common::deserialize(&message.arg)
+                let value: Chunk = wasmbus_rpc::common::decode(&message.arg, &decode_chunk)
                     .map_err(|e| RpcError::Deser(format!("'Chunk': {}", e)))?;
                 let resp = ChunkReceiver::receive_chunk(self, ctx, &value).await?;
-                let buf = wasmbus_rpc::common::serialize(&resp)?;
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
+                encode_chunk_response(&mut e, &resp)?;
+                let buf = e.into_inner();
                 Ok(Message {
                     method: "ChunkReceiver.ReceiveChunk",
                     arg: Cow::Owned(buf),
@@ -2986,7 +2960,9 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> ChunkReceiver
     /// A blobstore provider invokes this operation on actors in response to the GetObject request.
     /// If the response sets cancelDownload, the provider will stop downloading chunks
     async fn receive_chunk(&self, ctx: &Context, arg: &Chunk) -> RpcResult<ChunkResponse> {
-        let buf = wasmbus_rpc::common::serialize(arg)?;
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
+        encode_chunk(&mut e, arg)?;
+        let buf = e.into_inner();
         let resp = self
             .transport
             .send(
@@ -2999,7 +2975,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> ChunkReceiver
             )
             .await?;
 
-        let value: ChunkResponse = wasmbus_rpc::common::deserialize(&resp)
+        let value: ChunkResponse = wasmbus_rpc::common::decode(&resp, &decode_chunk_response)
             .map_err(|e| RpcError::Deser(format!("'{}': ChunkResponse", e)))?;
         Ok(value)
     }

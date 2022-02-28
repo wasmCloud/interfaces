@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.3.3
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.0
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -391,7 +391,11 @@ pub trait Testing {
 #[doc(hidden)]
 #[async_trait]
 pub trait TestingReceiver: MessageDispatch + Testing {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+    async fn dispatch<'disp__, 'ctx__, 'msg__>(
+        &'disp__ self,
+        ctx: &'ctx__ Context,
+        message: &Message<'msg__>,
+    ) -> Result<Message<'msg__>, RpcError> {
         match message.method {
             "Start" => {
                 let value: TestOptions = wasmbus_rpc::common::deserialize(&message.arg)
