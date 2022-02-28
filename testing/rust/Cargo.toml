@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-testing"
-version = "0.3.1"
+version = "0.4.0"
 description = "Testing interface (wasmcloud:testing)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
@@ -23,11 +23,11 @@ regex = "1"
 serde = { version = "1.0" , features = ["derive"] }
 serde_json = "1.0"
 serde_bytes = "0.11"
-wasmbus-rpc = "0.7.5"
+wasmbus-rpc = { version = "0.8.0", path = "../../../weld/rpc-rs" }
 
 [dev-dependencies]
 base64 = "0.13"
 
 # build-dependencies needed for build.rs
 [build-dependencies]
-weld-codegen = "0.3.3"
+weld-codegen = { version = "0.4.0", path = "../../../weld/codegen" }
