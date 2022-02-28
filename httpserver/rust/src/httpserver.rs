@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.3.0
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.1
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -377,7 +377,11 @@ pub trait HttpServer {
 #[doc(hidden)]
 #[async_trait]
 pub trait HttpServerReceiver: MessageDispatch + HttpServer {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+    async fn dispatch<'disp__, 'ctx__, 'msg__>(
+        &'disp__ self,
+        ctx: &'ctx__ Context,
+        message: &Message<'msg__>,
+    ) -> Result<Message<'msg__>, RpcError> {
         match message.method {
             "HandleRequest" => {
                 let value: HttpRequest = wasmbus_rpc::common::deserialize(&message.arg)

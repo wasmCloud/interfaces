@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.0
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.1
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -468,7 +468,7 @@ impl TestingSender<wasmbus_rpc::actor::prelude::WasmHost> {
 
     /// Constructs a client for sending to a Testing provider
     /// implementing the 'wasmcloud:testing' capability contract, with the specified link name
-    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::RpcResult<Self> {
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::error::RpcResult<Self> {
         let transport =
             wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:testing", link_name)?;
         Ok(Self { transport })

@@ -23,6 +23,7 @@
 
 mod sqldb;
 pub use sqldb::*;
+use wasmbus_rpc::error::RpcError;
 // re-export minicbor
 pub use minicbor;
 
@@ -50,7 +51,6 @@ impl From<minicbor::decode::Error> for SqlDbError {
     }
 }
 
-use wasmbus_rpc::RpcError;
 impl From<SqlDbError> for RpcError {
     fn from(e: SqlDbError) -> RpcError {
         RpcError::Other(format!("SqlDb error {}: {}", e.code, e.message))

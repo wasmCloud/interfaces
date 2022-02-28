@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.3.0
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.1
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -119,7 +119,7 @@ pub fn decode_column(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Column, R
     };
     Ok(__result)
 }
-/// List of columns in the result set returned by a Fetch operation
+/// List of columns in the result set returned by a Query operation
 pub type Columns = Vec<Column>;
 
 // Encode Columns as CBOR and append to output stream
@@ -170,7 +170,7 @@ pub struct ExecuteResult {
     #[serde(default)]
     pub rows_affected: u64,
     /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
+    /// If error is included in the QueryResult, other values should be ignored.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<SqlDbError>,
 }
@@ -270,9 +270,144 @@ pub fn decode_execute_result(
     };
     Ok(__result)
 }
-/// Result of a fetch query
+/// An optional list of arguments to be used in the SQL statement.
+/// When a statement uses question marks '?' for placeholders,
+/// the capability provider will replace the specified arguments during execution.
+/// The command must have exactly as many placeholders as arguments, or the request will fail.
+/// The members are CBOR encoded.
+pub type Parameters = Vec<Vec<u8>>;
+
+// Encode Parameters as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_parameters<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &Parameters,
+) -> RpcResult<()> {
+    e.array(val.len() as u64)?;
+    for item in val.iter() {
+        e.bytes(item)?;
+    }
+    Ok(())
+}
+
+// Decode Parameters from cbor input stream
+#[doc(hidden)]
+pub fn decode_parameters(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Parameters, RpcError> {
+    let __result = {
+        if let Some(n) = d.array()? {
+            let mut arr: Vec<Vec<u8>> = Vec::with_capacity(n as usize);
+            for _ in 0..(n as usize) {
+                arr.push(d.bytes()?.to_vec())
+            }
+            arr
+        } else {
+            // indefinite array
+            let mut arr: Vec<Vec<u8>> = Vec::new();
+            loop {
+                match d.datatype() {
+                    Err(_) => break,
+                    Ok(wasmbus_rpc::cbor::Type::Break) => break,
+                    Ok(_) => arr.push(d.bytes()?.to_vec()),
+                }
+            }
+            arr
+        }
+    };
+    Ok(__result)
+}
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct FetchResult {
+pub struct PingResult {
+    /// Optional error information.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<SqlDbError>,
+}
+
+// Encode PingResult as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_ping_result<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &PingResult,
+) -> RpcResult<()> {
+    e.map(1)?;
+    if let Some(val) = val.error.as_ref() {
+        e.str("error")?;
+        encode_sql_db_error(e, val)?;
+    } else {
+        e.null()?;
+    }
+    Ok(())
+}
+
+// Decode PingResult from cbor input stream
+#[doc(hidden)]
+pub fn decode_ping_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<PingResult, RpcError> {
+    let __result = {
+        let mut error: Option<Option<SqlDbError>> = Some(None);
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct PingResult, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct PingResult: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => {
+                        error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(
+                                decode_sql_db_error(d)
+                                    .map_err(|e| format!("decoding 'SqlDbError': {}", e))?,
+                            ))
+                        }
+                    }
+
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct PingResult: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "error" => {
+                        error = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(
+                                decode_sql_db_error(d)
+                                    .map_err(|e| format!("decoding 'SqlDbError': {}", e))?,
+                            ))
+                        }
+                    }
+                    _ => d.skip()?,
+                }
+            }
+        }
+        PingResult {
+            error: error.unwrap(),
+        }
+    };
+    Ok(__result)
+}
+/// Result of a query
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct QueryResult {
     /// number of rows returned
     #[serde(rename = "numRows")]
     #[serde(default)]
@@ -285,16 +420,16 @@ pub struct FetchResult {
     #[serde(default)]
     pub rows: Vec<u8>,
     /// optional error information.
-    /// If error is included in the FetchResult, other values should be ignored.
+    /// If error is included in the QueryResult, other values should be ignored.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<SqlDbError>,
 }
 
-// Encode FetchResult as CBOR and append to output stream
+// Encode QueryResult as CBOR and append to output stream
 #[doc(hidden)]
-pub fn encode_fetch_result<W: wasmbus_rpc::cbor::Write>(
+pub fn encode_query_result<W: wasmbus_rpc::cbor::Write>(
     e: &mut wasmbus_rpc::cbor::Encoder<W>,
-    val: &FetchResult,
+    val: &QueryResult,
 ) -> RpcResult<()> {
     e.array(4)?;
     e.u64(val.num_rows)?;
@@ -308,11 +443,11 @@ pub fn encode_fetch_result<W: wasmbus_rpc::cbor::Write>(
     Ok(())
 }
 
-// Decode FetchResult from cbor input stream
+// Decode QueryResult from cbor input stream
 #[doc(hidden)]
-pub fn decode_fetch_result(
+pub fn decode_query_result(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
-) -> Result<FetchResult, RpcError> {
+) -> Result<QueryResult, RpcError> {
     let __result = {
         let mut num_rows: Option<u64> = None;
         let mut columns: Option<Columns> = None;
@@ -324,14 +459,14 @@ pub fn decode_fetch_result(
             wasmbus_rpc::cbor::Type::Map => false,
             _ => {
                 return Err(RpcError::Deser(
-                    "decoding struct FetchResult, expected array or map".to_string(),
+                    "decoding struct QueryResult, expected array or map".to_string(),
                 ))
             }
         };
         if is_array {
             let len = d.array()?.ok_or_else(|| {
                 RpcError::Deser(
-                    "decoding struct FetchResult: indefinite array not supported".to_string(),
+                    "decoding struct QueryResult: indefinite array not supported".to_string(),
                 )
             })?;
             for __i in 0..(len as usize) {
@@ -361,7 +496,7 @@ pub fn decode_fetch_result(
         } else {
             let len = d.map()?.ok_or_else(|| {
                 RpcError::Deser(
-                    "decoding struct FetchResult: indefinite map not supported".to_string(),
+                    "decoding struct QueryResult: indefinite map not supported".to_string(),
                 )
             })?;
             for __i in 0..(len as usize) {
@@ -388,12 +523,12 @@ pub fn decode_fetch_result(
                 }
             }
         }
-        FetchResult {
+        QueryResult {
             num_rows: if let Some(__x) = num_rows {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field FetchResult.num_rows (#0)".to_string(),
+                    "missing field QueryResult.num_rows (#0)".to_string(),
                 ));
             },
 
@@ -401,7 +536,7 @@ pub fn decode_fetch_result(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field FetchResult.columns (#1)".to_string(),
+                    "missing field QueryResult.columns (#1)".to_string(),
                 ));
             },
 
@@ -409,32 +544,12 @@ pub fn decode_fetch_result(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field FetchResult.rows (#2)".to_string(),
+                    "missing field QueryResult.rows (#2)".to_string(),
                 ));
             },
             error: error.unwrap(),
         }
     };
-    Ok(__result)
-}
-/// A query is a non-empty string containing an SQL query or statement,
-/// in the syntax of the back-end database.
-pub type Query = String;
-
-// Encode Query as CBOR and append to output stream
-#[doc(hidden)]
-pub fn encode_query<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
-    val: &Query,
-) -> RpcResult<()> {
-    e.str(val)?;
-    Ok(())
-}
-
-// Decode Query from cbor input stream
-#[doc(hidden)]
-pub fn decode_query(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Query, RpcError> {
-    let __result = { d.str()?.to_string() };
     Ok(__result)
 }
 /// Detailed error information from the previous operation
@@ -525,6 +640,139 @@ pub fn decode_sql_db_error(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Sql
     };
     Ok(__result)
 }
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct Statement {
+    /// Optional database in which the statement must be executed.
+    /// The value in this field is case-sensitive.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub database: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parameters: Option<Parameters>,
+    /// A sql query or statement that is a non-empty string containing
+    /// in the syntax of the back-end database.
+    #[serde(default)]
+    pub sql: String,
+}
+
+// Encode Statement as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_statement<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &Statement,
+) -> RpcResult<()> {
+    e.map(3)?;
+    if let Some(val) = val.database.as_ref() {
+        e.str("database")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.parameters.as_ref() {
+        e.str("parameters")?;
+        encode_parameters(e, val)?;
+    } else {
+        e.null()?;
+    }
+    e.str("sql")?;
+    e.str(&val.sql)?;
+    Ok(())
+}
+
+// Decode Statement from cbor input stream
+#[doc(hidden)]
+pub fn decode_statement(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Statement, RpcError> {
+    let __result = {
+        let mut database: Option<Option<String>> = Some(None);
+        let mut parameters: Option<Option<Parameters>> = Some(None);
+        let mut sql: Option<String> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct Statement, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct Statement: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => {
+                        database = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    1 => {
+                        parameters = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(
+                                decode_parameters(d)
+                                    .map_err(|e| format!("decoding 'Parameters': {}", e))?,
+                            ))
+                        }
+                    }
+                    2 => sql = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct Statement: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "database" => {
+                        database = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "parameters" => {
+                        parameters = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(
+                                decode_parameters(d)
+                                    .map_err(|e| format!("decoding 'Parameters': {}", e))?,
+                            ))
+                        }
+                    }
+                    "sql" => sql = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        Statement {
+            database: database.unwrap(),
+            parameters: parameters.unwrap(),
+
+            sql: if let Some(__x) = sql {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field Statement.sql (#2)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// SqlDb - SQL Database connections
 /// To use this capability, the actor must be linked
 /// with the capability contract "wasmcloud:sqldb"
@@ -537,9 +785,9 @@ pub trait SqlDb {
         "wasmcloud:sqldb"
     }
     /// Execute an sql statement
-    async fn execute(&self, ctx: &Context, arg: &Query) -> RpcResult<ExecuteResult>;
+    async fn execute(&self, ctx: &Context, arg: &Statement) -> RpcResult<ExecuteResult>;
     /// Perform select query on database, returning all result rows
-    async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<FetchResult>;
+    async fn query(&self, ctx: &Context, arg: &Statement) -> RpcResult<QueryResult>;
 }
 
 /// SqlDbReceiver receives messages defined in the SqlDb service trait
@@ -549,11 +797,15 @@ pub trait SqlDb {
 #[doc(hidden)]
 #[async_trait]
 pub trait SqlDbReceiver: MessageDispatch + SqlDb {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+    async fn dispatch<'disp__, 'ctx__, 'msg__>(
+        &'disp__ self,
+        ctx: &'ctx__ Context,
+        message: &Message<'msg__>,
+    ) -> Result<Message<'msg__>, RpcError> {
         match message.method {
             "Execute" => {
-                let value: Query = wasmbus_rpc::common::deserialize(&message.arg)
-                    .map_err(|e| RpcError::Deser(format!("'Query': {}", e)))?;
+                let value: Statement = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'Statement': {}", e)))?;
                 let resp = SqlDb::execute(self, ctx, &value).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
                 Ok(Message {
@@ -561,13 +813,13 @@ pub trait SqlDbReceiver: MessageDispatch + SqlDb {
                     arg: Cow::Owned(buf),
                 })
             }
-            "Fetch" => {
-                let value: Query = wasmbus_rpc::common::deserialize(&message.arg)
-                    .map_err(|e| RpcError::Deser(format!("'Query': {}", e)))?;
-                let resp = SqlDb::fetch(self, ctx, &value).await?;
+            "Query" => {
+                let value: Statement = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'Statement': {}", e)))?;
+                let resp = SqlDb::query(self, ctx, &value).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
                 Ok(Message {
-                    method: "SqlDb.Fetch",
+                    method: "SqlDb.Query",
                     arg: Cow::Owned(buf),
                 })
             }
@@ -613,7 +865,7 @@ impl SqlDbSender<wasmbus_rpc::actor::prelude::WasmHost> {
 
     /// Constructs a client for sending to a SqlDb provider
     /// implementing the 'wasmcloud:sqldb' capability contract, with the specified link name
-    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::RpcResult<Self> {
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::error::RpcResult<Self> {
         let transport =
             wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:sqldb", link_name)?;
         Ok(Self { transport })
@@ -623,7 +875,7 @@ impl SqlDbSender<wasmbus_rpc::actor::prelude::WasmHost> {
 impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender<T> {
     #[allow(unused)]
     /// Execute an sql statement
-    async fn execute(&self, ctx: &Context, arg: &Query) -> RpcResult<ExecuteResult> {
+    async fn execute(&self, ctx: &Context, arg: &Statement) -> RpcResult<ExecuteResult> {
         let buf = wasmbus_rpc::common::serialize(arg)?;
         let resp = self
             .transport
@@ -641,24 +893,25 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender
             .map_err(|e| RpcError::Deser(format!("'{}': ExecuteResult", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Perform select query on database, returning all result rows
-    async fn fetch(&self, ctx: &Context, arg: &Query) -> RpcResult<FetchResult> {
+    async fn query(&self, ctx: &Context, arg: &Statement) -> RpcResult<QueryResult> {
         let buf = wasmbus_rpc::common::serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
-                    method: "SqlDb.Fetch",
+                    method: "SqlDb.Query",
                     arg: Cow::Borrowed(&buf),
                 },
                 None,
             )
             .await?;
 
-        let value: FetchResult = wasmbus_rpc::common::deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("'{}': FetchResult", e)))?;
+        let value: QueryResult = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': QueryResult", e)))?;
         Ok(value)
     }
 }

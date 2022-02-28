@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.3.0
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.1
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -129,7 +129,11 @@ pub trait NumberGen {
 #[doc(hidden)]
 #[async_trait]
 pub trait NumberGenReceiver: MessageDispatch + NumberGen {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+    async fn dispatch<'disp__, 'ctx__, 'msg__>(
+        &'disp__ self,
+        ctx: &'ctx__ Context,
+        message: &Message<'msg__>,
+    ) -> Result<Message<'msg__>, RpcError> {
         match message.method {
             "GenerateGuid" => {
                 let resp = NumberGen::generate_guid(self, ctx).await?;
@@ -198,7 +202,7 @@ impl NumberGenSender<wasmbus_rpc::actor::prelude::WasmHost> {
 
     /// Constructs a client for sending to a NumberGen provider
     /// implementing the 'wasmcloud:builtin:numbergen' capability contract, with the specified link name
-    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::RpcResult<Self> {
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::error::RpcResult<Self> {
         let transport = wasmbus_rpc::actor::prelude::WasmHost::to_provider(
             "wasmcloud:builtin:numbergen",
             link_name,
@@ -231,6 +235,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .map_err(|e| RpcError::Deser(format!("'{}': String", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Request a random integer within a range
     /// The result will will be in the range [min,max), i.e., >= min and < max.
@@ -252,6 +257,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Request a 32-bit random number
     async fn random_32(&self, ctx: &Context) -> RpcResult<u32> {

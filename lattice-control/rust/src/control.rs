@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.3.3
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.1
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -3264,6 +3264,11 @@ pub trait LatticeController {
         -> RpcResult<CtlOperationAck>;
     /// Requests that the given host be stopped
     async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<CtlOperationAck>;
+    /// Instructs all listening hosts to use the enclosed credential map for
+    /// authentication to secure artifact (OCI/bindle) registries. Any host that
+    /// receives this message will _delete_ its previous credential map and replace
+    /// it with the enclosed. The credential map for a lattice can be purged by sending
+    /// this message with an empty map
     async fn set_registry_credentials(
         &self,
         ctx: &Context,
@@ -3279,7 +3284,11 @@ pub trait LatticeController {
 #[doc(hidden)]
 #[async_trait]
 pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+    async fn dispatch<'disp__, 'ctx__, 'msg__>(
+        &'disp__ self,
+        ctx: &'ctx__ Context,
+        message: &Message<'msg__>,
+    ) -> Result<Message<'msg__>, RpcError> {
         match message.method {
             "AuctionProvider" => {
                 let value: ProviderAuctionRequest = wasmbus_rpc::common::deserialize(&message.arg)
@@ -3484,7 +3493,7 @@ impl LatticeControllerSender<wasmbus_rpc::actor::prelude::WasmHost> {
 
     /// Constructs a client for sending to a LatticeController provider
     /// implementing the 'wasmcloud:latticecontrol' capability contract, with the specified link name
-    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::RpcResult<Self> {
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::error::RpcResult<Self> {
         let transport = wasmbus_rpc::actor::prelude::WasmHost::to_provider(
             "wasmcloud:latticecontrol",
             link_name,
@@ -3522,6 +3531,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': ProviderAuctionAcks", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Seek out a list of suitable hosts for an actor given a set of host
     /// label constraints.
@@ -3547,6 +3557,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': ActorAuctionAcks", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Queries the list of hosts currently visible to the lattice. This is
     /// a "gather" operation and so can be influenced by short timeouts,
@@ -3569,6 +3580,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': Hosts", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Queries for the contents of a host given the supplied 56-character unique ID
     async fn get_host_inventory<TS: ToString + ?Sized + std::marker::Sync>(
@@ -3593,6 +3605,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': HostInventory", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Queries the lattice for the list of known/cached claims by taking the response
     /// from the first host that answers the query.
@@ -3614,6 +3627,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': GetClaimsResponse", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Instructs a given host to scale the indicated actor
     async fn scale_actor(
@@ -3638,6 +3652,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Instructs a given host to start the indicated actor
     async fn start_actor(
@@ -3662,6 +3677,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Publish a link definition into the lattice, allowing it to be cached and
     /// delivered to the appropriate capability provider instances
@@ -3687,6 +3703,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests the removal of a link definition. The definition will be removed
     /// from the cache and the relevant capability providers will be given a chance
@@ -3713,6 +3730,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Queries all current link definitions in the lattice. The first host
     /// that receives this response will reply with the contents of the distributed
@@ -3735,6 +3753,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': LinkDefinitionList", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests that a specific host perform a live update on the indicated
     /// actor
@@ -3760,6 +3779,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests that the given host start the indicated capability provider
     async fn start_provider(
@@ -3784,6 +3804,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests that the given capability provider be stopped on the indicated host
     async fn stop_provider(
@@ -3808,6 +3829,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests that an actor be stopped on the given host
     async fn stop_actor(
@@ -3832,6 +3854,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
     /// Requests that the given host be stopped
     async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<CtlOperationAck> {
@@ -3852,7 +3875,13 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
+
     #[allow(unused)]
+    /// Instructs all listening hosts to use the enclosed credential map for
+    /// authentication to secure artifact (OCI/bindle) registries. Any host that
+    /// receives this message will _delete_ its previous credential map and replace
+    /// it with the enclosed. The credential map for a lattice can be purged by sending
+    /// this message with an empty map
     async fn set_registry_credentials(
         &self,
         ctx: &Context,
