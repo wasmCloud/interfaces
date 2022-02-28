@@ -4,8 +4,8 @@ top_targets = all build clean gen lint validate test
 project_dir = $(abspath $(shell pwd))
 # Reminder: when adding a subdir below don't forget to update
 # Cargo.toml (if it's a rust project), and codegen.toml (if there are smithy files)
-subdirs     = core control factorial httpclient httpserver \
-			  keyvalue logging messaging numbergen sqldb testing
+subdirs     = blobstore core factorial httpclient httpserver \
+			  keyvalue lattice-control logging messaging numbergen sqldb testing
 
 include build/makefiles/interface.mk
 
