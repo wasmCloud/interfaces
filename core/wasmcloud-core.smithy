@@ -19,6 +19,7 @@ use org.wasmcloud.model#wasmbusData
 use org.wasmcloud.model#wasmbus
 use org.wasmcloud.model#n
 use org.wasmcloud.model#U64
+use org.wasmcloud.model#U32
 
 /// Actor service
 @wasmbus(
@@ -98,6 +99,7 @@ list ActorLinks {
 
 /// initialization data for a capability provider
 @wasmbusData
+@codegenRust(nonExhaustive: true)
 structure HostData {
     @required
     @serialization(name: "host_id")
@@ -166,6 +168,11 @@ structure HostData {
     @serialization(name:"config_json")
     @n(12)
     configJson: String
+
+    /// Optional. Default RPC timeout in milliseconds. Default = 2000
+    @serialization(name:"default_rpc_timeout_ms")
+    @n(13)
+    defaultRpcTimeoutMs: U32,
 }
 
 list ClusterIssuers {
