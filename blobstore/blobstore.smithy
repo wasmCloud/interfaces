@@ -44,7 +44,8 @@ service Blobstore {
 /// The BlobStore service, actor side
 @wasmbus(
     contractId: "wasmcloud:blobstore",
-    actorReceive: true )
+    actorReceive: true,
+    protocol: "2" )
 service ChunkReceiver {
     version: "0.1",
     operations: [
@@ -164,6 +165,7 @@ operation ReceiveChunk {
 structure ChunkResponse {
 
     /// If set and `true`, the sender will stop sending chunks, 
+    @n(0)
     cancelDownload: Boolean
 }
 
@@ -171,17 +173,21 @@ structure ChunkResponse {
 structure ListObjectsRequest {
 
     /// Name of the container to search
+    @n(0)
     @required
     containerId: String,
 
     /// Request object names starting with this value. (Optional)
+    @n(1)
     startWith: String,
 
     /// Continuation token passed in ListObjectsResponse.
     /// If set, `startWith` is ignored. (Optional)
+    @n(2)
     continuation: String,
 
     /// Last item to return (inclusive terminator) (Optional)
+    @n(3)
     endWith: String,
 
     /// Optionally, stop returning items before returning this value.
@@ -189,12 +195,14 @@ structure ListObjectsRequest {
     /// If startFrom is "a" and endBefore is "b", and items are ordered
     /// alphabetically, then only items beginning with "a" would be returned.
     /// (Optional)
+    @n(4)
     endBefore: String,
 
     /// maximum number of items to return. If not specified, provider 
     /// will return an initial set of up to 1000 items. if maxItems > 1000,
     /// the provider implementation may return fewer items than requested.
     /// (Optional)
+    @n(5)
     maxItems: U32,
 }
 
@@ -205,11 +213,13 @@ structure ListObjectsRequest {
 structure ListObjectsResponse {
 
     /// set of objects returned
+    @n(0)
     @required
     objects: ObjectsInfo,
 
     /// Indicates if the item list is complete, or the last item
     /// in a multi-part response.
+    @n(1)
     @required
     isLast: Boolean,
 
@@ -217,6 +227,7 @@ structure ListObjectsResponse {
     /// of a `ListObjectsRequest`.
     /// Clients should not attempt to interpret this field: it may or may not
     /// be a real key or object name, and may be obfuscated by the provider.
+    @n(2)
     continuation: String,
 }
 
@@ -225,10 +236,12 @@ structure ListObjectsResponse {
 structure RemoveObjectsRequest {
 
     /// name of container
+    @n(0)
     @required
     containerId: ContainerId,
 
     /// list of object names to be removed
+    @n(1)
     @required
     objects: ObjectIds,
 }
@@ -241,11 +254,14 @@ string ObjectId
 
 /// Metadata for a container.
 structure ContainerMetadata {
+
     /// Container name
+    @n(0)
     @required
     containerId: ContainerId,
 
     /// Creation date, if available
+    @n(1)
     createdAt: Timestamp,
 }
 
@@ -253,17 +269,20 @@ structure ContainerMetadata {
 structure PutObjectRequest {
 
     /// File path and initial data
+    @n(0)
     @required
     chunk: Chunk,
 
     /// A MIME type of the object
     /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
+    @n(1)
     contentType: String,
 
     /// Specifies what content encodings have been applied to the object 
     /// and thus what decoding mechanisms must be applied to obtain the media-type 
     /// referenced by the contentType field. For more information, 
     /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11.
+    @n(2)
     contentEncoding: String,
 }
 
@@ -272,6 +291,7 @@ structure PutObjectResponse {
 
     /// If this is a multipart upload, `streamId` must be returned
     /// with subsequent PutChunk requests
+    @n(0)
     streamId: String,
 }
 
@@ -280,14 +300,17 @@ structure PutChunkRequest {
 
     /// upload chunk from the file.
     /// if chunk.isLast is set, this will be the last chunk uploaded
+    @n(0)
     @required
     chunk: Chunk,
 
     /// This value should be set to the `streamId` returned from the initial PutObject.
+    @n(1)
     streamId: String,
 
     /// If set, the receiving provider should cancel the upload process 
     /// and remove the file.
+    @n(2)
     cancelAndRemove: Boolean,
 }
 
@@ -295,24 +318,29 @@ structure ObjectMetadata {
     /// Object identifier that is unique within its container.
     /// Naming of objects is determined by the capability provider.
     /// An object id could be a path, hash of object contents, or some other unique identifier.
+    @n(0)
     @required
     objectId: ObjectId,
 
     /// container of the object
+    @n(1)
     @required
     containerId: ContainerId,
 
     /// size of the object in bytes
+    @n(2)
     @required
     contentLength: U64,
 
     /// date object was last modified
+    @n(3)
     lastModified: Timestamp,
 
     /// A MIME type of the object
     /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
     /// Provider implementations _may_ return None for this field for metadata
     /// returned from ListObjects
+    @n(4)
     contentType: String,
 
     /// Specifies what content encodings have been applied to the object 
@@ -321,6 +349,7 @@ structure ObjectMetadata {
     /// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11.
     /// Provider implementations _may_ return None for this field for metadata
     /// returned from ListObjects
+    @n(5)
     contentEncoding: String,
 }
 
@@ -329,10 +358,12 @@ structure ObjectMetadata {
 structure GetObjectRequest {
 
     /// object to download
+    @n(0)
     @required
     objectId: ObjectId,
 
     /// object's container
+    @n(1)
     @required
     containerId: ContainerId,
 
@@ -340,11 +371,13 @@ structure GetObjectRequest {
     /// The first byte is at offset 0. Range values are inclusive.
     /// If rangeStart is beyond the end of the file,
     /// an empty chunk will be returned with isLast == true
+    @n(2)
     rangeStart: U64,
 
     /// Requested end of object to retrieve. Defaults to the object's size.
     /// It is not an error for rangeEnd to be greater than the object size.
     /// Range values are inclusive.
+    @n(3)
     rangeEnd: U64,
 }
 
@@ -352,34 +385,43 @@ structure GetObjectRequest {
 structure GetObjectResponse {
 
     /// indication whether the request was successful
+    @n(0)
     @required
     success: Boolean
 
     /// If success is false, this may contain an error
+    @n(1)
     error: String
 
     /// The provider may begin the download by returning a first chunk
+    @n(2)
     initialChunk: Chunk
 
     /// Length of the content. (for multi-part downloads, this may not
     /// be the same as the length of the initial chunk)
+    @n(3)
     @required
     contentLength: u64
 
     /// A standard MIME type describing the format of the object data.
+    @n(4)
     contentType: String
 
     /// Specifies what content encodings have been applied to the object 
     /// and thus what decoding mechanisms must be applied to obtain the media-type 
     // referenced by the contenType field.
+    @n(5)
     contentEncoding: String
 }
 
 /// Combination of container id and object id
 structure ContainerObject {
+
+    @n(0)
     @required
     containerId: ContainerId,
 
+    @n(1)
     @required
     objectId: ObjectId,
 }
@@ -388,35 +430,45 @@ structure ContainerObject {
 /// is the last in a stream. The `offset` field indicates the 0-based offset
 /// from the start of the file for this chunk.
 structure Chunk {
+
+    @n(0)
     @required
     objectId: ObjectId,
 
+    @n(1)
     @required
     containerId: ContainerId,
 
     /// bytes in this chunk
+    @n(2)
     @required
     bytes: Blob,
 
     /// The byte offset within the object for this chunk
+    @n(3)
     @required
     offset: U64,
 
     /// true if this is the last chunk
+    @n(4)
     @required
     isLast: Boolean,
 }
 
 /// Result of input item
 structure ItemResult {
+
+    @n(0)
     @required
     key: String,
 
     /// whether the item succeeded or failed
+    @n(1)
     @required
     success: Boolean
 
     /// optional error message for failures
+    @n(2)
     error: String
 }
 
