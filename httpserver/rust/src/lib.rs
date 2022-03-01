@@ -4,7 +4,7 @@ mod httpserver;
 pub use httpserver::*;
 use serde::Serialize;
 use std::string::ToString;
-use wasmbus_rpc::RpcError;
+use wasmbus_rpc::error::RpcError;
 
 impl Default for HttpResponse {
     /// create default HttpResponse with status 200, empty body and empty header

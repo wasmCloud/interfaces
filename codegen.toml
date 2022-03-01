@@ -5,6 +5,7 @@
 [[models]]
 path = "docs/idl/org.wasmcloud"
 files = [ 
+    "blobstore.smithy",
     "control-interface.smithy",
     "factorial.smithy",
     "httpclient.smithy",

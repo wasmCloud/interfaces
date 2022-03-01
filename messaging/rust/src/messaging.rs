@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.3.0
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.2
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -490,7 +490,11 @@ pub trait MessageSubscriber {
 #[doc(hidden)]
 #[async_trait]
 pub trait MessageSubscriberReceiver: MessageDispatch + MessageSubscriber {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+    async fn dispatch<'disp__, 'ctx__, 'msg__>(
+        &'disp__ self,
+        ctx: &'ctx__ Context,
+        message: &Message<'msg__>,
+    ) -> Result<Message<'msg__>, RpcError> {
         match message.method {
             "HandleMessage" => {
                 let value: SubMessage = wasmbus_rpc::common::deserialize(&message.arg)
@@ -601,7 +605,11 @@ pub trait Messaging {
 #[doc(hidden)]
 #[async_trait]
 pub trait MessagingReceiver: MessageDispatch + Messaging {
-    async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
+    async fn dispatch<'disp__, 'ctx__, 'msg__>(
+        &'disp__ self,
+        ctx: &'ctx__ Context,
+        message: &Message<'msg__>,
+    ) -> Result<Message<'msg__>, RpcError> {
         match message.method {
             "Publish" => {
                 let value: PubMessage = wasmbus_rpc::common::deserialize(&message.arg)
@@ -664,7 +672,7 @@ impl MessagingSender<wasmbus_rpc::actor::prelude::WasmHost> {
 
     /// Constructs a client for sending to a Messaging provider
     /// implementing the 'wasmcloud:messaging' capability contract, with the specified link name
-    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::RpcResult<Self> {
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::error::RpcResult<Self> {
         let transport =
             wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:messaging", link_name)?;
         Ok(Self { transport })
@@ -693,6 +701,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Messaging for Messagi
             .await?;
         Ok(())
     }
+
     #[allow(unused)]
     /// Request - send a message in a request/reply pattern,
     /// waiting for a response.

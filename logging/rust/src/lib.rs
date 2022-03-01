@@ -15,7 +15,7 @@ pub use wasm_log::log;
 #[cfg(target_arch = "wasm32")]
 mod wasm_log {
     use std::string::ToString;
-    use wasmbus_rpc::RpcResult;
+    use wasmbus_rpc::error::RpcResult;
 
     /// log a text message at a severity level (debug, info, warn, or error)
     /// parameters may be `&str`, `String`, or `&String`.
@@ -26,7 +26,7 @@ mod wasm_log {
             level: level.to_string(),
             text: text.to_string(),
         };
-        let ctx = wasmbus_rpc::Context::default();
+        let ctx = wasmbus_rpc::common::Context::default();
         let logger = LoggingSender::new();
         logger.write_log(&ctx, &entry).await
     }
