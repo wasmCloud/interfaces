@@ -25,7 +25,8 @@ service KeyValue {
   operations: [
     Increment, Contains, Del, Get,
     ListAdd, ListClear, ListDel, ListRange,
-    Set, , SetAdd, SetDel, SetIntersection, SetQuery, SetUnion, SetClear,
+    Set, SetAdd, SetDel, SetIntersection, SetQuery, SetUnion, SetClear,
+    Scan
   ]
 }
 
@@ -248,3 +249,33 @@ operation SetClear {
     output: Boolean
 }
 
+/// scan through all keys using a cursor based approach
+/// the return structure contains the next value in the cursor
+/// and a list of keys.  To scan through an entire table,
+/// one would call scan with the cursor set to an initial value,
+/// and then use the returned cursor for each subsequent call.
+/// if no cursor is returned, the scan is complete.
+@readonly
+operation Scan {
+  input: ScanRequest,
+  output: ScanResponse,
+}
+
+structure ScanRequest {
+  /// cursor to the next chunk requested from the scan
+  /// omit to start a scan from the beginning of the result set
+  @n(0)
+  cursor: String
+}
+
+/// Response to scan
+structure ScanResponse {
+    /// cursor to pass with a subsequent request
+    /// present if more items exist, absent if the scan is complete
+    @n(0)
+    cursor: String,
+    /// keys returned from the scan
+    @required
+    @n(1)
+    keys: StringList,
+}

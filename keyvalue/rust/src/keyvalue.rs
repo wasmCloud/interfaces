@@ -477,6 +477,202 @@ pub fn decode_list_range_request(
     Ok(__result)
 }
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct ScanRequest {
+    /// cursor to the next chunk requested from the scan
+    /// omit to start a scan from the beginning of the result set
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cursor: Option<String>,
+}
+
+// Encode ScanRequest as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_scan_request<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &ScanRequest,
+) -> RpcResult<()> {
+    e.array(1)?;
+    if let Some(val) = val.cursor.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    Ok(())
+}
+
+// Decode ScanRequest from cbor input stream
+#[doc(hidden)]
+pub fn decode_scan_request(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<ScanRequest, RpcError> {
+    let __result = {
+        let mut cursor: Option<Option<String>> = Some(None);
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct ScanRequest, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct ScanRequest: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => {
+                        cursor = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct ScanRequest: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "cursor" => {
+                        cursor = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    _ => d.skip()?,
+                }
+            }
+        }
+        ScanRequest {
+            cursor: cursor.unwrap(),
+        }
+    };
+    Ok(__result)
+}
+/// Response to scan
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct ScanResponse {
+    /// cursor to pass with a subsequent request
+    /// present if more items exist, absent if the scan is complete
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cursor: Option<String>,
+    /// keys returned from the scan
+    pub keys: StringList,
+}
+
+// Encode ScanResponse as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_scan_response<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &ScanResponse,
+) -> RpcResult<()> {
+    e.array(2)?;
+    if let Some(val) = val.cursor.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    encode_string_list(e, &val.keys)?;
+    Ok(())
+}
+
+// Decode ScanResponse from cbor input stream
+#[doc(hidden)]
+pub fn decode_scan_response(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<ScanResponse, RpcError> {
+    let __result = {
+        let mut cursor: Option<Option<String>> = Some(None);
+        let mut keys: Option<StringList> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct ScanResponse, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct ScanResponse: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => {
+                        cursor = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    1 => {
+                        keys = Some(
+                            decode_string_list(d)
+                                .map_err(|e| format!("decoding 'StringList': {}", e))?,
+                        )
+                    }
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct ScanResponse: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "cursor" => {
+                        cursor = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "keys" => {
+                        keys = Some(
+                            decode_string_list(d)
+                                .map_err(|e| format!("decoding 'StringList': {}", e))?,
+                        )
+                    }
+                    _ => d.skip()?,
+                }
+            }
+        }
+        ScanResponse {
+            cursor: cursor.unwrap(),
+
+            keys: if let Some(__x) = keys {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ScanResponse.keys (#1)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SetAddRequest {
     /// name of the set
     #[serde(rename = "setName")]
@@ -870,6 +1066,13 @@ pub trait KeyValue {
         ctx: &Context,
         arg: &TS,
     ) -> RpcResult<bool>;
+    /// scan through all keys using a cursor based approach
+    /// the return structure contains the next value in the cursor
+    /// and a list of keys.  To scan through an entire table,
+    /// one would call scan with the cursor set to an initial value,
+    /// and then use the returned cursor for each subsequent call.
+    /// if no cursor is returned, the scan is complete.
+    async fn scan(&self, ctx: &Context, arg: &ScanRequest) -> RpcResult<ScanResponse>;
 }
 
 /// KeyValueReceiver receives messages defined in the KeyValue service trait
@@ -1032,6 +1235,16 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                     arg: Cow::Owned(buf),
                 })
             }
+            "Scan" => {
+                let value: ScanRequest = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'ScanRequest': {}", e)))?;
+                let resp = KeyValue::scan(self, ctx, &value).await?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
+                Ok(Message {
+                    method: "KeyValue.Scan",
+                    arg: Cow::Owned(buf),
+                })
+            }
             _ => Err(RpcError::MethodNotHandled(format!(
                 "KeyValue::{}",
                 message.method
@@ -1099,7 +1312,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': I32", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// returns whether the store contains the key
     async fn contains<TS: ToString + ?Sized + std::marker::Sync>(
@@ -1124,7 +1336,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Deletes a key, returning true if the key was deleted
     async fn del<TS: ToString + ?Sized + std::marker::Sync>(
@@ -1149,7 +1360,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Gets a value for a specified key. If the key exists,
     /// the return structure contains exists: true and the value,
@@ -1176,7 +1386,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': GetResponse", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Append a value onto the end of a list. Returns the new list size
     async fn list_add(&self, ctx: &Context, arg: &ListAddRequest) -> RpcResult<u32> {
@@ -1197,7 +1406,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Deletes a list and its contents
     /// input: list name
@@ -1224,7 +1432,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Deletes a value from a list. Returns true if the item was removed.
     async fn list_del(&self, ctx: &Context, arg: &ListDelRequest) -> RpcResult<bool> {
@@ -1245,7 +1452,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Retrieves a range of values from a list using 0-based indices.
     /// Start and end values are inclusive, for example, (0,10) returns
@@ -1269,7 +1475,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': StringList", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Sets the value of a key.
     /// expires is an optional number of seconds before the value should be automatically deleted,
@@ -1289,7 +1494,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .await?;
         Ok(())
     }
-
     #[allow(unused)]
     /// Add an item into a set. Returns number of items added (1 or 0)
     async fn set_add(&self, ctx: &Context, arg: &SetAddRequest) -> RpcResult<u32> {
@@ -1310,7 +1514,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Deletes an item from the set. Returns number of items removed from the set (1 or 0)
     async fn set_del(&self, ctx: &Context, arg: &SetDelRequest) -> RpcResult<u32> {
@@ -1331,7 +1534,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// perform intersection of sets and returns values from the intersection.
     /// input: list of sets for performing intersection (at least two)
@@ -1354,7 +1556,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': StringList", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Retrieves all items from a set
     /// input: String
@@ -1381,7 +1582,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': StringList", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// perform union of sets and returns values from the union
     /// input: list of sets for performing union (at least two)
@@ -1404,7 +1604,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
             .map_err(|e| RpcError::Deser(format!("'{}': StringList", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// clears all values from the set and removes it
     /// input: set name
@@ -1429,6 +1628,31 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
 
         let value: bool = wasmbus_rpc::common::deserialize(&resp)
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
+        Ok(value)
+    }
+    #[allow(unused)]
+    /// scan through all keys using a cursor based approach
+    /// the return structure contains the next value in the cursor
+    /// and a list of keys.  To scan through an entire table,
+    /// one would call scan with the cursor set to an initial value,
+    /// and then use the returned cursor for each subsequent call.
+    /// if no cursor is returned, the scan is complete.
+    async fn scan(&self, ctx: &Context, arg: &ScanRequest) -> RpcResult<ScanResponse> {
+        let buf = wasmbus_rpc::common::serialize(arg)?;
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "KeyValue.Scan",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        let value: ScanResponse = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': ScanResponse", e)))?;
         Ok(value)
     }
 }
