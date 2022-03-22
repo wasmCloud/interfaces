@@ -90,7 +90,7 @@ float F32
 double F64
 
 /// Rust codegen traits
-@trait(selector: "structure")
+@trait(selector: "*")
 structure codegenRust {
 
     /// if true, disables deriving 'Default' trait
@@ -101,6 +101,10 @@ structure codegenRust {
 
     /// adds `[#non_exhaustive]` attribute to a struct declaration
     nonExhaustive: Boolean,
+
+    /// if true, do not generate code for this item.
+    /// This trait can be used if an item needs to be hand-generated
+    skip: Boolean,
 }
 
 /// indicates that a trait or class extends one or more bases
@@ -161,4 +165,8 @@ structure renameItem {
 list rename {
     member: renameItem
 }
+
+/// Unit type
+@codegenRust(skip:true)
+structure Unit {}
 
