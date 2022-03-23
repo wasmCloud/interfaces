@@ -1,4 +1,4 @@
-# Interface for the Mlinference service, wasmcloud:mlinfernce
+# Interface for the Machine Learning Mlinference service, wasmcloud:mlinfernce
 
 ## Build the Interface
 
