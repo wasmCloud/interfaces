@@ -15,6 +15,7 @@ members = [
     "testing/rust",
     # examples
     "factorial/rust",
+    "ml/rust",
 ]
 
 exclude = [
