@@ -15,7 +15,6 @@ use org.wasmcloud.model#U8
 use org.wasmcloud.model#U16
 use org.wasmcloud.model#U32
 use org.wasmcloud.model#U64
-use org.wasmcloud.model#F16
 use org.wasmcloud.model#F32
 use org.wasmcloud.model#I32
 use org.wasmcloud.model#Unit
