@@ -27,34 +27,44 @@ impl Tensor {
         self.dimensions.iter().map(|d| *d as usize).collect()
     }
 
+    /// Sets the tensor flag to indicate row-major order
+    /// Setting this flag does not alter the data array
     pub fn set_row_major(&mut self) {
         self.flags = (self.flags & 0xfe) | TENSOR_FLAG_ROW_MAJOR;
     }
 
+    /// Returns true if the tensor is row-major order (based on flags setting)
     pub fn is_row_major(&self) -> bool {
         (self.flags & 1) == TENSOR_FLAG_ROW_MAJOR
     }
 
+    /// Sets the tensor flag to indicate column-major order
+    /// Setting this flag does not alter the data array
     pub fn set_column_major(&mut self) {
         self.flags = (self.flags & 0xfe) | TENSOR_FLAG_COLUMN_MAJOR;
     }
 
+    /// Returns true if the tensor is column-major order (based on flags setting)
     pub fn is_column_major(&self) -> bool {
         (self.flags & 1) == TENSOR_FLAG_COLUMN_MAJOR
     }
 
+    /// Sets the tensor flag to indicate data is in big endian format
     pub fn set_little_endian(&mut self) {
         self.flags = (self.flags & 0xfd) | TENSOR_FLAG_LITTLE_ENDIAN;
     }
 
+    /// Returns true if the tensor flags indicate that data is little endian
     pub fn is_little_endian(&self) -> bool {
         (self.flags & 2) == TENSOR_FLAG_LITTLE_ENDIAN
     }
 
+    /// Sets the tensor flag to indicate data is in big endian format
     pub fn set_big_endian(&mut self) {
         self.flags = (self.flags & 0xfd) | TENSOR_FLAG_BIG_ENDIAN;
     }
 
+    /// Returns true if the tensor flags indicate that data is big endian
     pub fn is_big_endian(&self) -> bool {
         (self.flags & 2) == TENSOR_FLAG_BIG_ENDIAN
     }
