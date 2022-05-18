@@ -583,7 +583,7 @@ structure RegistryCredential {
     /// If supplied, token authentication will be used for the registry
     token: String,
     /// If supplied, username and password will be used for HTTP Basic authentication
-    userName: String,
+    username: String,
     password: String
 }
 
