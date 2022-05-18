@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.2
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.3
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -17,6 +17,7 @@ use wasmbus_rpc::{
     Timestamp,
 };
 
+#[allow(dead_code)]
 pub const SMITHY_VERSION: &str = "1.0";
 
 /// One of a potential list of responses to an actor auction
@@ -32,8 +33,9 @@ pub struct ActorAuctionAck {
 
 // Encode ActorAuctionAck as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_actor_auction_ack<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorAuctionAck,
 ) -> RpcResult<()> {
     e.map(2)?;
@@ -63,11 +65,7 @@ pub fn decode_actor_auction_ack(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ActorAuctionAck: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => actor_ref = Some(d.str()?.to_string()),
@@ -76,11 +74,7 @@ pub fn decode_actor_auction_ack(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ActorAuctionAck: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "actorRef" => actor_ref = Some(d.str()?.to_string()),
@@ -113,8 +107,9 @@ pub type ActorAuctionAcks = Vec<ActorAuctionAck>;
 
 // Encode ActorAuctionAcks as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_actor_auction_acks<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorAuctionAcks,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -133,10 +128,12 @@ pub fn decode_actor_auction_acks(
         if let Some(n) = d.array()? {
             let mut arr: Vec<ActorAuctionAck> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(
-                    decode_actor_auction_ack(d)
-                        .map_err(|e| format!("decoding 'ActorAuctionAck': {}", e))?,
-                )
+                arr.push(decode_actor_auction_ack(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.lattice.control#ActorAuctionAck': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -146,10 +143,12 @@ pub fn decode_actor_auction_acks(
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_actor_auction_ack(d)
-                            .map_err(|e| format!("decoding 'ActorAuctionAck': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_actor_auction_ack(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.lattice.control#ActorAuctionAck': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -170,8 +169,9 @@ pub struct ActorAuctionRequest {
 
 // Encode ActorAuctionRequest as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_actor_auction_request<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorAuctionRequest,
 ) -> RpcResult<()> {
     e.map(2)?;
@@ -201,38 +201,33 @@ pub fn decode_actor_auction_request(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ActorAuctionRequest: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => actor_ref = Some(d.str()?.to_string()),
                     1 => {
-                        constraints = Some(
-                            decode_constraint_map(d)
-                                .map_err(|e| format!("decoding 'ConstraintMap': {}", e))?,
-                        )
+                        constraints = Some(decode_constraint_map(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.lattice.control#ConstraintMap': {}",
+                                e
+                            )
+                        })?)
                     }
                     _ => d.skip()?,
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ActorAuctionRequest: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "actorRef" => actor_ref = Some(d.str()?.to_string()),
                     "constraints" => {
-                        constraints = Some(
-                            decode_constraint_map(d)
-                                .map_err(|e| format!("decoding 'ConstraintMap': {}", e))?,
-                        )
+                        constraints = Some(decode_constraint_map(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.lattice.control#ConstraintMap': {}",
+                                e
+                            )
+                        })?)
                     }
                     _ => d.skip()?,
                 }
@@ -276,8 +271,9 @@ pub struct ActorDescription {
 
 // Encode ActorDescription as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_actor_description<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorDescription,
 ) -> RpcResult<()> {
     e.map(4)?;
@@ -321,11 +317,7 @@ pub fn decode_actor_description(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ActorDescription: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => id = Some(d.str()?.to_string()),
@@ -338,10 +330,12 @@ pub fn decode_actor_description(
                         }
                     }
                     2 => {
-                        instances = Some(
-                            decode_actor_instances(d)
-                                .map_err(|e| format!("decoding 'ActorInstances': {}", e))?,
-                        )
+                        instances = Some(decode_actor_instances(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.lattice.control#ActorInstances': {}",
+                                e
+                            )
+                        })?)
                     }
                     3 => {
                         name = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -356,11 +350,7 @@ pub fn decode_actor_description(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ActorDescription: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "id" => id = Some(d.str()?.to_string()),
@@ -373,10 +363,12 @@ pub fn decode_actor_description(
                         }
                     }
                     "instances" => {
-                        instances = Some(
-                            decode_actor_instances(d)
-                                .map_err(|e| format!("decoding 'ActorInstances': {}", e))?,
-                        )
+                        instances = Some(decode_actor_instances(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.lattice.control#ActorInstances': {}",
+                                e
+                            )
+                        })?)
                     }
                     "name" => {
                         name = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -416,8 +408,9 @@ pub type ActorDescriptions = Vec<ActorDescription>;
 
 // Encode ActorDescriptions as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_actor_descriptions<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorDescriptions,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -436,10 +429,12 @@ pub fn decode_actor_descriptions(
         if let Some(n) = d.array()? {
             let mut arr: Vec<ActorDescription> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(
-                    decode_actor_description(d)
-                        .map_err(|e| format!("decoding 'ActorDescription': {}", e))?,
-                )
+                arr.push(decode_actor_description(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.lattice.control#ActorDescription': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -449,10 +444,12 @@ pub fn decode_actor_descriptions(
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_actor_description(d)
-                            .map_err(|e| format!("decoding 'ActorDescription': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_actor_description(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.lattice.control#ActorDescription': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -476,8 +473,9 @@ pub struct ActorInstance {
 
 // Encode ActorInstance as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_actor_instance<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorInstance,
 ) -> RpcResult<()> {
     e.map(3)?;
@@ -514,11 +512,7 @@ pub fn decode_actor_instance(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ActorInstance: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
@@ -526,10 +520,12 @@ pub fn decode_actor_instance(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     1 => instance_id = Some(d.str()?.to_string()),
@@ -538,11 +534,7 @@ pub fn decode_actor_instance(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ActorInstance: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "annotations" => {
@@ -550,10 +542,12 @@ pub fn decode_actor_instance(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     "instanceId" => instance_id = Some(d.str()?.to_string()),
@@ -588,8 +582,9 @@ pub type ActorInstances = Vec<ActorInstance>;
 
 // Encode ActorInstances as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_actor_instances<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ActorInstances,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -608,10 +603,12 @@ pub fn decode_actor_instances(
         if let Some(n) = d.array()? {
             let mut arr: Vec<ActorInstance> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(
-                    decode_actor_instance(d)
-                        .map_err(|e| format!("decoding 'ActorInstance': {}", e))?,
-                )
+                arr.push(decode_actor_instance(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.lattice.control#ActorInstance': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -621,10 +618,12 @@ pub fn decode_actor_instances(
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_actor_instance(d)
-                            .map_err(|e| format!("decoding 'ActorInstance': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_actor_instance(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.lattice.control#ActorInstance': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -636,8 +635,9 @@ pub type AnnotationMap = std::collections::HashMap<String, String>;
 
 // Encode AnnotationMap as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_annotation_map<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &AnnotationMap,
 ) -> RpcResult<()> {
     e.map(val.len() as u64)?;
@@ -655,16 +655,13 @@ pub fn decode_annotation_map(
 ) -> Result<AnnotationMap, RpcError> {
     let __result = {
         {
+            let map_len = d.fixed_map()? as usize;
             let mut m: std::collections::HashMap<String, String> =
-                std::collections::HashMap::default();
-            if let Some(n) = d.map()? {
-                for _ in 0..(n as usize) {
-                    let k = d.str()?.to_string();
-                    let v = d.str()?.to_string();
-                    m.insert(k, v);
-                }
-            } else {
-                return Err(RpcError::Deser("indefinite maps not supported".to_string()));
+                std::collections::HashMap::with_capacity(map_len);
+            for _ in 0..map_len {
+                let k = d.str()?.to_string();
+                let v = d.str()?.to_string();
+                m.insert(k, v);
             }
             m
         }
@@ -675,8 +672,9 @@ pub type ClaimsList = Vec<ClaimsMap>;
 
 // Encode ClaimsList as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_claims_list<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ClaimsList,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -693,7 +691,9 @@ pub fn decode_claims_list(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Clai
         if let Some(n) = d.array()? {
             let mut arr: Vec<ClaimsMap> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(decode_claims_map(d).map_err(|e| format!("decoding 'ClaimsMap': {}", e))?)
+                arr.push(decode_claims_map(d).map_err(|e| {
+                    format!("decoding 'org.wasmcloud.lattice.control#ClaimsMap': {}", e)
+                })?)
             }
             arr
         } else {
@@ -703,9 +703,9 @@ pub fn decode_claims_list(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Clai
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_claims_map(d).map_err(|e| format!("decoding 'ClaimsMap': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_claims_map(d).map_err(|e| {
+                        format!("decoding 'org.wasmcloud.lattice.control#ClaimsMap': {}", e)
+                    })?),
                 }
             }
             arr
@@ -717,8 +717,9 @@ pub type ClaimsMap = std::collections::HashMap<String, String>;
 
 // Encode ClaimsMap as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_claims_map<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ClaimsMap,
 ) -> RpcResult<()> {
     e.map(val.len() as u64)?;
@@ -734,16 +735,13 @@ pub fn encode_claims_map<W: wasmbus_rpc::cbor::Write>(
 pub fn decode_claims_map(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<ClaimsMap, RpcError> {
     let __result = {
         {
+            let map_len = d.fixed_map()? as usize;
             let mut m: std::collections::HashMap<String, String> =
-                std::collections::HashMap::default();
-            if let Some(n) = d.map()? {
-                for _ in 0..(n as usize) {
-                    let k = d.str()?.to_string();
-                    let v = d.str()?.to_string();
-                    m.insert(k, v);
-                }
-            } else {
-                return Err(RpcError::Deser("indefinite maps not supported".to_string()));
+                std::collections::HashMap::with_capacity(map_len);
+            for _ in 0..map_len {
+                let k = d.str()?.to_string();
+                let v = d.str()?.to_string();
+                m.insert(k, v);
             }
             m
         }
@@ -754,8 +752,9 @@ pub type ConfigurationString = String;
 
 // Encode ConfigurationString as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_configuration_string<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ConfigurationString,
 ) -> RpcResult<()> {
     e.str(val)?;
@@ -774,8 +773,9 @@ pub type ConstraintMap = std::collections::HashMap<String, String>;
 
 // Encode ConstraintMap as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_constraint_map<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ConstraintMap,
 ) -> RpcResult<()> {
     e.map(val.len() as u64)?;
@@ -793,16 +793,13 @@ pub fn decode_constraint_map(
 ) -> Result<ConstraintMap, RpcError> {
     let __result = {
         {
+            let map_len = d.fixed_map()? as usize;
             let mut m: std::collections::HashMap<String, String> =
-                std::collections::HashMap::default();
-            if let Some(n) = d.map()? {
-                for _ in 0..(n as usize) {
-                    let k = d.str()?.to_string();
-                    let v = d.str()?.to_string();
-                    m.insert(k, v);
-                }
-            } else {
-                return Err(RpcError::Deser("indefinite maps not supported".to_string()));
+                std::collections::HashMap::with_capacity(map_len);
+            for _ in 0..map_len {
+                let k = d.str()?.to_string();
+                let v = d.str()?.to_string();
+                m.insert(k, v);
             }
             m
         }
@@ -820,8 +817,9 @@ pub struct CtlOperationAck {
 
 // Encode CtlOperationAck as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_ctl_operation_ack<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &CtlOperationAck,
 ) -> RpcResult<()> {
     e.map(2)?;
@@ -851,11 +849,7 @@ pub fn decode_ctl_operation_ack(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct CtlOperationAck: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => accepted = Some(d.bool()?),
@@ -864,11 +858,7 @@ pub fn decode_ctl_operation_ack(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct CtlOperationAck: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "accepted" => accepted = Some(d.bool()?),
@@ -905,8 +895,9 @@ pub struct GetClaimsResponse {
 
 // Encode GetClaimsResponse as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_get_claims_response<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetClaimsResponse,
 ) -> RpcResult<()> {
     e.map(1)?;
@@ -933,35 +924,25 @@ pub fn decode_get_claims_response(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct GetClaimsResponse: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        claims = Some(
-                            decode_claims_list(d)
-                                .map_err(|e| format!("decoding 'ClaimsList': {}", e))?,
-                        )
+                        claims = Some(decode_claims_list(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.lattice.control#ClaimsList': {}", e)
+                        })?)
                     }
                     _ => d.skip()?,
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct GetClaimsResponse: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "claims" => {
-                        claims = Some(
-                            decode_claims_list(d)
-                                .map_err(|e| format!("decoding 'ClaimsList': {}", e))?,
-                        )
+                        claims = Some(decode_claims_list(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.lattice.control#ClaimsList': {}", e)
+                        })?)
                     }
                     _ => d.skip()?,
                 }
@@ -991,8 +972,9 @@ pub struct Host {
 
 // Encode Host as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_host<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &Host,
 ) -> RpcResult<()> {
     e.map(2)?;
@@ -1020,9 +1002,7 @@ pub fn decode_host(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Host, RpcEr
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser("decoding struct Host: indefinite array not supported".to_string())
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => id = Some(d.str()?.to_string()),
@@ -1031,9 +1011,7 @@ pub fn decode_host(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Host, RpcEr
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser("decoding struct Host: indefinite map not supported".to_string())
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "id" => id = Some(d.str()?.to_string()),
@@ -1077,8 +1055,9 @@ pub struct HostInventory {
 
 // Encode HostInventory as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_host_inventory<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &HostInventory,
 ) -> RpcResult<()> {
     e.map(4)?;
@@ -1114,61 +1093,59 @@ pub fn decode_host_inventory(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct HostInventory: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        actors = Some(
-                            decode_actor_descriptions(d)
-                                .map_err(|e| format!("decoding 'ActorDescriptions': {}", e))?,
-                        )
+                        actors = Some(decode_actor_descriptions(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.lattice.control#ActorDescriptions': {}",
+                                e
+                            )
+                        })?)
                     }
                     1 => host_id = Some(d.str()?.to_string()),
                     2 => {
-                        labels = Some(
-                            decode_labels_map(d)
-                                .map_err(|e| format!("decoding 'LabelsMap': {}", e))?,
-                        )
+                        labels = Some(decode_labels_map(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.lattice.control#LabelsMap': {}", e)
+                        })?)
                     }
                     3 => {
-                        providers = Some(
-                            decode_provider_descriptions(d)
-                                .map_err(|e| format!("decoding 'ProviderDescriptions': {}", e))?,
-                        )
+                        providers = Some(decode_provider_descriptions(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.lattice.control#ProviderDescriptions': {}",
+                                e
+                            )
+                        })?)
                     }
                     _ => d.skip()?,
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct HostInventory: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "actors" => {
-                        actors = Some(
-                            decode_actor_descriptions(d)
-                                .map_err(|e| format!("decoding 'ActorDescriptions': {}", e))?,
-                        )
+                        actors = Some(decode_actor_descriptions(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.lattice.control#ActorDescriptions': {}",
+                                e
+                            )
+                        })?)
                     }
                     "hostId" => host_id = Some(d.str()?.to_string()),
                     "labels" => {
-                        labels = Some(
-                            decode_labels_map(d)
-                                .map_err(|e| format!("decoding 'LabelsMap': {}", e))?,
-                        )
+                        labels = Some(decode_labels_map(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.lattice.control#LabelsMap': {}", e)
+                        })?)
                     }
                     "providers" => {
-                        providers = Some(
-                            decode_provider_descriptions(d)
-                                .map_err(|e| format!("decoding 'ProviderDescriptions': {}", e))?,
-                        )
+                        providers = Some(decode_provider_descriptions(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.lattice.control#ProviderDescriptions': {}",
+                                e
+                            )
+                        })?)
                     }
                     _ => d.skip()?,
                 }
@@ -1214,8 +1191,9 @@ pub type Hosts = Vec<Host>;
 
 // Encode Hosts as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_hosts<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &Hosts,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -1228,36 +1206,40 @@ pub fn encode_hosts<W: wasmbus_rpc::cbor::Write>(
 // Decode Hosts from cbor input stream
 #[doc(hidden)]
 pub fn decode_hosts(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Hosts, RpcError> {
-    let __result = {
-        if let Some(n) = d.array()? {
-            let mut arr: Vec<Host> = Vec::with_capacity(n as usize);
-            for _ in 0..(n as usize) {
-                arr.push(decode_host(d).map_err(|e| format!("decoding 'Host': {}", e))?)
-            }
-            arr
-        } else {
-            // indefinite array
-            let mut arr: Vec<Host> = Vec::new();
-            loop {
-                match d.datatype() {
-                    Err(_) => break,
-                    Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => {
-                        arr.push(decode_host(d).map_err(|e| format!("decoding 'Host': {}", e))?)
+    let __result =
+        {
+            if let Some(n) = d.array()? {
+                let mut arr: Vec<Host> = Vec::with_capacity(n as usize);
+                for _ in 0..(n as usize) {
+                    arr.push(decode_host(d).map_err(|e| {
+                        format!("decoding 'org.wasmcloud.lattice.control#Host': {}", e)
+                    })?)
+                }
+                arr
+            } else {
+                // indefinite array
+                let mut arr: Vec<Host> = Vec::new();
+                loop {
+                    match d.datatype() {
+                        Err(_) => break,
+                        Ok(wasmbus_rpc::cbor::Type::Break) => break,
+                        Ok(_) => arr.push(decode_host(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.lattice.control#Host': {}", e)
+                        })?),
                     }
                 }
+                arr
             }
-            arr
-        }
-    };
+        };
     Ok(__result)
 }
 pub type LabelsMap = std::collections::HashMap<String, String>;
 
 // Encode LabelsMap as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_labels_map<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &LabelsMap,
 ) -> RpcResult<()> {
     e.map(val.len() as u64)?;
@@ -1273,16 +1255,13 @@ pub fn encode_labels_map<W: wasmbus_rpc::cbor::Write>(
 pub fn decode_labels_map(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<LabelsMap, RpcError> {
     let __result = {
         {
+            let map_len = d.fixed_map()? as usize;
             let mut m: std::collections::HashMap<String, String> =
-                std::collections::HashMap::default();
-            if let Some(n) = d.map()? {
-                for _ in 0..(n as usize) {
-                    let k = d.str()?.to_string();
-                    let v = d.str()?.to_string();
-                    m.insert(k, v);
-                }
-            } else {
-                return Err(RpcError::Deser("indefinite maps not supported".to_string()));
+                std::collections::HashMap::with_capacity(map_len);
+            for _ in 0..map_len {
+                let k = d.str()?.to_string();
+                let v = d.str()?.to_string();
+                m.insert(k, v);
             }
             m
         }
@@ -1297,8 +1276,9 @@ pub struct LinkDefinitionList {
 
 // Encode LinkDefinitionList as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_link_definition_list<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &LinkDefinitionList,
 ) -> RpcResult<()> {
     e.map(1)?;
@@ -1325,33 +1305,24 @@ pub fn decode_link_definition_list(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct LinkDefinitionList: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
                         links = Some(wasmbus_rpc::core::decode_actor_links(d).map_err(|e| {
-                            format!("decoding 'wasmbus_rpc::core::ActorLinks': {}", e)
+                            format!("decoding 'org.wasmcloud.core#ActorLinks': {}", e)
                         })?)
                     }
                     _ => d.skip()?,
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct LinkDefinitionList: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "links" => {
                         links = Some(wasmbus_rpc::core::decode_actor_links(d).map_err(|e| {
-                            format!("decoding 'wasmbus_rpc::core::ActorLinks': {}", e)
+                            format!("decoding 'org.wasmcloud.core#ActorLinks': {}", e)
                         })?)
                     }
                     _ => d.skip()?,
@@ -1386,8 +1357,9 @@ pub struct ProviderAuctionAck {
 
 // Encode ProviderAuctionAck as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_provider_auction_ack<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ProviderAuctionAck,
 ) -> RpcResult<()> {
     e.map(3)?;
@@ -1420,12 +1392,7 @@ pub fn decode_provider_auction_ack(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ProviderAuctionAck: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => host_id = Some(d.str()?.to_string()),
@@ -1435,11 +1402,7 @@ pub fn decode_provider_auction_ack(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ProviderAuctionAck: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "hostId" => host_id = Some(d.str()?.to_string()),
@@ -1481,8 +1444,9 @@ pub type ProviderAuctionAcks = Vec<ProviderAuctionAck>;
 
 // Encode ProviderAuctionAcks as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_provider_auction_acks<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ProviderAuctionAcks,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -1501,10 +1465,12 @@ pub fn decode_provider_auction_acks(
         if let Some(n) = d.array()? {
             let mut arr: Vec<ProviderAuctionAck> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(
-                    decode_provider_auction_ack(d)
-                        .map_err(|e| format!("decoding 'ProviderAuctionAck': {}", e))?,
-                )
+                arr.push(decode_provider_auction_ack(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.lattice.control#ProviderAuctionAck': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -1514,10 +1480,12 @@ pub fn decode_provider_auction_acks(
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_provider_auction_ack(d)
-                            .map_err(|e| format!("decoding 'ProviderAuctionAck': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_provider_auction_ack(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.lattice.control#ProviderAuctionAck': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -1543,8 +1511,9 @@ pub struct ProviderAuctionRequest {
 
 // Encode ProviderAuctionRequest as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_provider_auction_request<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ProviderAuctionRequest,
 ) -> RpcResult<()> {
     e.map(3)?;
@@ -1577,19 +1546,16 @@ pub fn decode_provider_auction_request(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ProviderAuctionRequest: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        constraints = Some(
-                            decode_constraint_map(d)
-                                .map_err(|e| format!("decoding 'ConstraintMap': {}", e))?,
-                        )
+                        constraints = Some(decode_constraint_map(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.lattice.control#ConstraintMap': {}",
+                                e
+                            )
+                        })?)
                     }
                     1 => link_name = Some(d.str()?.to_string()),
                     2 => provider_ref = Some(d.str()?.to_string()),
@@ -1597,19 +1563,16 @@ pub fn decode_provider_auction_request(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ProviderAuctionRequest: indefinite map not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "constraints" => {
-                        constraints = Some(
-                            decode_constraint_map(d)
-                                .map_err(|e| format!("decoding 'ConstraintMap': {}", e))?,
-                        )
+                        constraints = Some(decode_constraint_map(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.lattice.control#ConstraintMap': {}",
+                                e
+                            )
+                        })?)
                     }
                     "linkName" => link_name = Some(d.str()?.to_string()),
                     "providerRef" => provider_ref = Some(d.str()?.to_string()),
@@ -1667,8 +1630,9 @@ pub struct ProviderDescription {
 
 // Encode ProviderDescription as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_provider_description<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ProviderDescription,
 ) -> RpcResult<()> {
     e.map(5)?;
@@ -1715,12 +1679,7 @@ pub fn decode_provider_description(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ProviderDescription: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => id = Some(d.str()?.to_string()),
@@ -1746,11 +1705,7 @@ pub fn decode_provider_description(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ProviderDescription: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "id" => id = Some(d.str()?.to_string()),
@@ -1810,8 +1765,9 @@ pub type ProviderDescriptions = Vec<ProviderDescription>;
 
 // Encode ProviderDescriptions as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_provider_descriptions<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ProviderDescriptions,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -1830,10 +1786,12 @@ pub fn decode_provider_descriptions(
         if let Some(n) = d.array()? {
             let mut arr: Vec<ProviderDescription> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(
-                    decode_provider_description(d)
-                        .map_err(|e| format!("decoding 'ProviderDescription': {}", e))?,
-                )
+                arr.push(decode_provider_description(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.lattice.control#ProviderDescription': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -1843,10 +1801,12 @@ pub fn decode_provider_descriptions(
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_provider_description(d)
-                            .map_err(|e| format!("decoding 'ProviderDescription': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_provider_description(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.lattice.control#ProviderDescription': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -1862,15 +1822,15 @@ pub struct RegistryCredential {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
     /// If supplied, username and password will be used for HTTP Basic authentication
-    #[serde(rename = "userName")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_name: Option<String>,
+    pub username: Option<String>,
 }
 
 // Encode RegistryCredential as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_registry_credential<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &RegistryCredential,
 ) -> RpcResult<()> {
     e.map(3)?;
@@ -1886,8 +1846,8 @@ pub fn encode_registry_credential<W: wasmbus_rpc::cbor::Write>(
     } else {
         e.null()?;
     }
-    if let Some(val) = val.user_name.as_ref() {
-        e.str("userName")?;
+    if let Some(val) = val.username.as_ref() {
+        e.str("username")?;
         e.str(val)?;
     } else {
         e.null()?;
@@ -1903,7 +1863,7 @@ pub fn decode_registry_credential(
     let __result = {
         let mut password: Option<Option<String>> = Some(None);
         let mut token: Option<Option<String>> = Some(None);
-        let mut user_name: Option<Option<String>> = Some(None);
+        let mut username: Option<Option<String>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -1915,12 +1875,7 @@ pub fn decode_registry_credential(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct RegistryCredential: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
@@ -1940,7 +1895,7 @@ pub fn decode_registry_credential(
                         }
                     }
                     2 => {
-                        user_name = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                        username = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -1952,11 +1907,7 @@ pub fn decode_registry_credential(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct RegistryCredential: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "password" => {
@@ -1975,8 +1926,8 @@ pub fn decode_registry_credential(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    "userName" => {
-                        user_name = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                    "username" => {
+                        username = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -1990,7 +1941,7 @@ pub fn decode_registry_credential(
         RegistryCredential {
             password: password.unwrap(),
             token: token.unwrap(),
-            user_name: user_name.unwrap(),
+            username: username.unwrap(),
         }
     };
     Ok(__result)
@@ -2000,8 +1951,9 @@ pub type RegistryCredentialMap = std::collections::HashMap<String, RegistryCrede
 
 // Encode RegistryCredentialMap as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_registry_credential_map<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &RegistryCredentialMap,
 ) -> RpcResult<()> {
     e.map(val.len() as u64)?;
@@ -2019,17 +1971,18 @@ pub fn decode_registry_credential_map(
 ) -> Result<RegistryCredentialMap, RpcError> {
     let __result = {
         {
+            let map_len = d.fixed_map()? as usize;
             let mut m: std::collections::HashMap<String, RegistryCredential> =
-                std::collections::HashMap::default();
-            if let Some(n) = d.map()? {
-                for _ in 0..(n as usize) {
-                    let k = d.str()?.to_string();
-                    let v = decode_registry_credential(d)
-                        .map_err(|e| format!("decoding 'RegistryCredential': {}", e))?;
-                    m.insert(k, v);
-                }
-            } else {
-                return Err(RpcError::Deser("indefinite maps not supported".to_string()));
+                std::collections::HashMap::with_capacity(map_len);
+            for _ in 0..map_len {
+                let k = d.str()?.to_string();
+                let v = decode_registry_credential(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.lattice.control#RegistryCredential': {}",
+                        e
+                    )
+                })?;
+                m.insert(k, v);
             }
             m
         }
@@ -2053,8 +2006,9 @@ pub struct RemoveLinkDefinitionRequest {
 
 // Encode RemoveLinkDefinitionRequest as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_remove_link_definition_request<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &RemoveLinkDefinitionRequest,
 ) -> RpcResult<()> {
     e.map(3)?;
@@ -2088,12 +2042,7 @@ pub fn decode_remove_link_definition_request(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct RemoveLinkDefinitionRequest: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => actor_id = Some(d.str()?.to_string()),
@@ -2103,12 +2052,7 @@ pub fn decode_remove_link_definition_request(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct RemoveLinkDefinitionRequest: indefinite map not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "actorId" => actor_id = Some(d.str()?.to_string()),
@@ -2168,8 +2112,9 @@ pub struct ScaleActorCommand {
 
 // Encode ScaleActorCommand as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_scale_actor_command<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ScaleActorCommand,
 ) -> RpcResult<()> {
     e.map(5)?;
@@ -2212,11 +2157,7 @@ pub fn decode_scale_actor_command(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ScaleActorCommand: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => actor_id = Some(d.str()?.to_string()),
@@ -2226,10 +2167,12 @@ pub fn decode_scale_actor_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     3 => count = Some(d.u16()?),
@@ -2238,11 +2181,7 @@ pub fn decode_scale_actor_command(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ScaleActorCommand: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "actorId" => actor_id = Some(d.str()?.to_string()),
@@ -2252,10 +2191,12 @@ pub fn decode_scale_actor_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     "count" => count = Some(d.u16()?),
@@ -2323,8 +2264,9 @@ pub struct StartActorCommand {
 
 // Encode StartActorCommand as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_start_actor_command<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StartActorCommand,
 ) -> RpcResult<()> {
     e.map(4)?;
@@ -2364,11 +2306,7 @@ pub fn decode_start_actor_command(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct StartActorCommand: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => actor_ref = Some(d.str()?.to_string()),
@@ -2377,10 +2315,12 @@ pub fn decode_start_actor_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     2 => count = Some(d.u16()?),
@@ -2389,11 +2329,7 @@ pub fn decode_start_actor_command(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct StartActorCommand: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "actorRef" => actor_ref = Some(d.str()?.to_string()),
@@ -2402,10 +2338,12 @@ pub fn decode_start_actor_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     "count" => count = Some(d.u16()?),
@@ -2469,8 +2407,9 @@ pub struct StartProviderCommand {
 
 // Encode StartProviderCommand as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_start_provider_command<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StartProviderCommand,
 ) -> RpcResult<()> {
     e.map(5)?;
@@ -2517,12 +2456,7 @@ pub fn decode_start_provider_command(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct StartProviderCommand: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
@@ -2530,10 +2464,12 @@ pub fn decode_start_provider_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     1 => {
@@ -2541,9 +2477,7 @@ pub fn decode_start_provider_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(decode_configuration_string(d).map_err(|e| {
-                                format!("decoding 'ConfigurationString': {}", e)
-                            })?))
+                            Some(Some( decode_configuration_string(d).map_err(|e| format!("decoding 'org.wasmcloud.lattice.control#ConfigurationString': {}", e))? ))
                         }
                     }
                     2 => host_id = Some(d.str()?.to_string()),
@@ -2553,12 +2487,7 @@ pub fn decode_start_provider_command(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct StartProviderCommand: indefinite map not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "annotations" => {
@@ -2566,10 +2495,12 @@ pub fn decode_start_provider_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     "configuration" => {
@@ -2577,9 +2508,7 @@ pub fn decode_start_provider_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(decode_configuration_string(d).map_err(|e| {
-                                format!("decoding 'ConfigurationString': {}", e)
-                            })?))
+                            Some(Some( decode_configuration_string(d).map_err(|e| format!("decoding 'org.wasmcloud.lattice.control#ConfigurationString': {}", e))? ))
                         }
                     }
                     "hostId" => host_id = Some(d.str()?.to_string()),
@@ -2644,8 +2573,9 @@ pub struct StopActorCommand {
 
 // Encode StopActorCommand as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_stop_actor_command<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StopActorCommand,
 ) -> RpcResult<()> {
     e.map(4)?;
@@ -2685,11 +2615,7 @@ pub fn decode_stop_actor_command(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct StopActorCommand: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => actor_ref = Some(d.str()?.to_string()),
@@ -2698,10 +2624,12 @@ pub fn decode_stop_actor_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     2 => count = Some(d.u16()?),
@@ -2710,11 +2638,7 @@ pub fn decode_stop_actor_command(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct StopActorCommand: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "actorRef" => actor_ref = Some(d.str()?.to_string()),
@@ -2723,10 +2647,12 @@ pub fn decode_stop_actor_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     "count" => count = Some(d.u16()?),
@@ -2777,8 +2703,9 @@ pub struct StopHostCommand {
 
 // Encode StopHostCommand as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_stop_host_command<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StopHostCommand,
 ) -> RpcResult<()> {
     e.map(2)?;
@@ -2812,11 +2739,7 @@ pub fn decode_stop_host_command(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct StopHostCommand: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => host_id = Some(d.str()?.to_string()),
@@ -2833,11 +2756,7 @@ pub fn decode_stop_host_command(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct StopHostCommand: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "hostId" => host_id = Some(d.str()?.to_string()),
@@ -2890,8 +2809,9 @@ pub struct StopProviderCommand {
 
 // Encode StopProviderCommand as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_stop_provider_command<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &StopProviderCommand,
 ) -> RpcResult<()> {
     e.map(5)?;
@@ -2934,12 +2854,7 @@ pub fn decode_stop_provider_command(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct StopProviderCommand: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
@@ -2947,10 +2862,12 @@ pub fn decode_stop_provider_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     1 => contract_id = Some(d.str()?.to_string()),
@@ -2961,11 +2878,7 @@ pub fn decode_stop_provider_command(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct StopProviderCommand: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "annotations" => {
@@ -2973,10 +2886,12 @@ pub fn decode_stop_provider_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     "contractId" => contract_id = Some(d.str()?.to_string()),
@@ -3048,8 +2963,9 @@ pub struct UpdateActorCommand {
 
 // Encode UpdateActorCommand as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_update_actor_command<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &UpdateActorCommand,
 ) -> RpcResult<()> {
     e.map(4)?;
@@ -3089,12 +3005,7 @@ pub fn decode_update_actor_command(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct UpdateActorCommand: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => actor_id = Some(d.str()?.to_string()),
@@ -3103,10 +3014,12 @@ pub fn decode_update_actor_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     2 => host_id = Some(d.str()?.to_string()),
@@ -3115,11 +3028,7 @@ pub fn decode_update_actor_command(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct UpdateActorCommand: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "actorId" => actor_id = Some(d.str()?.to_string()),
@@ -3128,10 +3037,12 @@ pub fn decode_update_actor_command(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_annotation_map(d)
-                                    .map_err(|e| format!("decoding 'AnnotationMap': {}", e))?,
-                            ))
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     "hostId" => host_id = Some(d.str()?.to_string()),
@@ -3531,7 +3442,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': ProviderAuctionAcks", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Seek out a list of suitable hosts for an actor given a set of host
     /// label constraints.
@@ -3557,7 +3467,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': ActorAuctionAcks", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Queries the list of hosts currently visible to the lattice. This is
     /// a "gather" operation and so can be influenced by short timeouts,
@@ -3580,7 +3489,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': Hosts", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Queries for the contents of a host given the supplied 56-character unique ID
     async fn get_host_inventory<TS: ToString + ?Sized + std::marker::Sync>(
@@ -3605,7 +3513,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': HostInventory", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Queries the lattice for the list of known/cached claims by taking the response
     /// from the first host that answers the query.
@@ -3627,7 +3534,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': GetClaimsResponse", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Instructs a given host to scale the indicated actor
     async fn scale_actor(
@@ -3652,7 +3558,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Instructs a given host to start the indicated actor
     async fn start_actor(
@@ -3677,7 +3582,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Publish a link definition into the lattice, allowing it to be cached and
     /// delivered to the appropriate capability provider instances
@@ -3703,7 +3607,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests the removal of a link definition. The definition will be removed
     /// from the cache and the relevant capability providers will be given a chance
@@ -3730,7 +3633,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Queries all current link definitions in the lattice. The first host
     /// that receives this response will reply with the contents of the distributed
@@ -3753,7 +3655,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': LinkDefinitionList", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests that a specific host perform a live update on the indicated
     /// actor
@@ -3779,7 +3680,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests that the given host start the indicated capability provider
     async fn start_provider(
@@ -3804,7 +3704,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests that the given capability provider be stopped on the indicated host
     async fn stop_provider(
@@ -3829,7 +3728,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests that an actor be stopped on the given host
     async fn stop_actor(
@@ -3854,7 +3752,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests that the given host be stopped
     async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<CtlOperationAck> {
@@ -3875,7 +3772,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
             .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Instructs all listening hosts to use the enclosed credential map for
     /// authentication to secure artifact (OCI/bindle) registries. Any host that
