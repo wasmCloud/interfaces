@@ -1,0 +1,103 @@
+// Factorial: A simple service that calculates the factorial of a whole number
+package factorial
+
+import (
+	"github.com/wasmcloud/tinygo-msgpack"    //nolint
+	"github.com/wasmcloud/actor-tinygo" //nolint
+)
+
+// The Factorial service has a single method, calculate, which
+// calculates the factorial of its whole number parameter.
+type Factorial interface {
+	// Calculates the factorial (n!) of the input parameter
+	Calculate(ctx *actor.Context, arg uint32) (uint64, error)
+}
+
+// FactorialContractId returns the capability contract id for this interface
+func FactorialContractId() string { return "wasmcloud:example:factorial" }
+
+// FactorialReceiver receives messages defined in the Factorial service interface
+// The Factorial service has a single method, calculate, which
+// calculates the factorial of its whole number parameter.
+type FactorialReceiver struct{}
+
+func (r *FactorialReceiver) dispatch(ctx *actor.Context, svc Factorial, message *actor.Message) (*actor.Message, error) {
+	switch message.Method {
+	case "Calculate":
+		{
+
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := d.ReadUint32()
+			if err_ != nil {
+				return nil, err_
+			}
+
+			resp, err := svc.Calculate(ctx, value)
+			if err != nil {
+				return nil, err
+			}
+
+			var sizer msgpack.Sizer
+			size_enc := &sizer
+			size_enc.WriteUint64(resp)
+			buf := make([]byte, sizer.Len())
+			encoder := msgpack.NewEncoder(buf)
+			enc := &encoder
+			enc.WriteUint64(resp)
+
+			return &actor.Message{Method: "Factorial.Calculate", Arg: buf}, nil
+		}
+	default:
+		return nil, actor.NewRpcError("MethodNotHandled", "Factorial."+message.Method)
+	}
+}
+
+// FactorialSender sends messages to a Factorial service
+// The Factorial service has a single method, calculate, which
+// calculates the factorial of its whole number parameter.
+type FactorialSender struct{ transport actor.Transport }
+
+// NewActorSender constructs a client for actor-to-actor messaging
+// using the recipient actor's public key
+func NewActorFactorialSender(actor_id string) *FactorialSender {
+	transport := actor.ToActor(actor_id)
+	return &FactorialSender{transport: transport}
+}
+
+// NewProvider constructs a client for sending to a Factorial provider
+// implementing the 'wasmcloud:example:factorial' capability contract, with the "default" link
+func NewProviderFactorial() *FactorialSender {
+	transport := actor.ToProvider("wasmcloud:example:factorial", "default")
+	return &FactorialSender{transport: transport}
+}
+
+// NewProviderFactorialLink constructs a client for sending to a Factorial provider
+// implementing the 'wasmcloud:example:factorial' capability contract, with the specified link name
+func NewProviderFactorialLink(linkName string) *FactorialSender {
+	transport := actor.ToProvider("wasmcloud:example:factorial", linkName)
+	return &FactorialSender{transport: transport}
+}
+
+// Calculates the factorial (n!) of the input parameter
+func (s *FactorialSender) Calculate(ctx *actor.Context, arg uint32) (uint64, error) {
+
+	var sizer msgpack.Sizer
+	size_enc := &sizer
+	size_enc.WriteUint32(arg)
+	buf := make([]byte, sizer.Len())
+
+	var encoder = msgpack.NewEncoder(buf)
+	enc := &encoder
+	enc.WriteUint32(arg)
+
+	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Factorial.Calculate", Arg: buf})
+
+	d := msgpack.NewDecoder(out_buf)
+	resp, err_ := d.ReadUint64()
+	if err_ != nil {
+		return 0, err_
+	}
+	return resp, nil
+}
+
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.4
