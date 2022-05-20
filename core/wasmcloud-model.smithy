@@ -1,12 +1,12 @@
 // wasmcloud-model.smithy
 // Base types and traits used for wasmcloud models
-//
 
 // Tell the code generator how to reference symbols defined in this namespace
 metadata package = [ {
     namespace: "org.wasmcloud.model",
     crate: "wasmbus_rpc::model",
-    py_module: "wasmbus_rpc.model"
+    py_module: "wasmbus_rpc.model",
+    doc: "wasmcloud core data models for messaging and code generation"
 } ]
 
 namespace org.wasmcloud.model
@@ -114,6 +114,7 @@ structure extends {
 }
 
 /// list of identifiers
+/// This declaration supports code generations and is not part of an actor or provider sdk
 list IdentifierList {
     member: String,
 }
@@ -142,6 +143,7 @@ structure wasmbus {
 structure wasmbusData {}
 
 /// Capability contract id, e.g. 'wasmcloud:httpserver'
+/// This declaration supports code generations and is not part of an actor or provider sdk
 @nonEmptyString
 string CapabilityContractId
 
@@ -169,4 +171,3 @@ list rename {
 /// Unit type
 @codegenRust(skip:true)
 structure Unit {}
-
