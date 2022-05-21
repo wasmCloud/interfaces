@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.2
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.3
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -17,6 +17,7 @@ use wasmbus_rpc::{
     Timestamp,
 };
 
+#[allow(dead_code)]
 pub const SMITHY_VERSION: &str = "1.0";
 
 /// A portion of a file. The `isLast` field indicates whether this chunk
@@ -43,8 +44,9 @@ pub struct Chunk {
 
 // Encode Chunk as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_chunk<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &Chunk,
 ) -> RpcResult<()> {
     e.array(5)?;
@@ -76,22 +78,24 @@ pub fn decode_chunk(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Chunk, Rpc
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser("decoding struct Chunk: indefinite array not supported".to_string())
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
+                        object_id = Some(decode_object_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectId': {}",
+                                e
+                            )
+                        })?)
                     }
                     1 => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     2 => bytes = Some(d.bytes()?.to_vec()),
                     3 => offset = Some(d.u64()?),
@@ -100,22 +104,24 @@ pub fn decode_chunk(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Chunk, Rpc
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser("decoding struct Chunk: indefinite map not supported".to_string())
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "objectId" => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
+                        object_id = Some(decode_object_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectId': {}",
+                                e
+                            )
+                        })?)
                     }
                     "containerId" => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     "bytes" => bytes = Some(d.bytes()?.to_vec()),
                     "offset" => offset = Some(d.u64()?),
@@ -179,8 +185,9 @@ pub struct ChunkResponse {
 
 // Encode ChunkResponse as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_chunk_response<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ChunkResponse,
 ) -> RpcResult<()> {
     e.array(1)?;
@@ -206,11 +213,7 @@ pub fn decode_chunk_response(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ChunkResponse: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => cancel_download = Some(d.bool()?),
@@ -218,11 +221,7 @@ pub fn decode_chunk_response(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ChunkResponse: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "cancelDownload" => cancel_download = Some(d.bool()?),
@@ -247,8 +246,9 @@ pub type ContainerId = String;
 
 // Encode ContainerId as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_container_id<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ContainerId,
 ) -> RpcResult<()> {
     e.str(val)?;
@@ -268,8 +268,9 @@ pub type ContainerIds = Vec<ContainerId>;
 
 // Encode ContainerIds as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_container_ids<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ContainerIds,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -288,9 +289,12 @@ pub fn decode_container_ids(
         if let Some(n) = d.array()? {
             let mut arr: Vec<ContainerId> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(
-                    decode_container_id(d).map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                )
+                arr.push(decode_container_id(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -300,10 +304,12 @@ pub fn decode_container_ids(
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_container_id(d)
-                            .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_container_id(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -325,8 +331,9 @@ pub struct ContainerMetadata {
 
 // Encode ContainerMetadata as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_container_metadata<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ContainerMetadata,
 ) -> RpcResult<()> {
     e.array(2)?;
@@ -359,18 +366,16 @@ pub fn decode_container_metadata(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ContainerMetadata: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     1 => {
                         created_at = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -388,18 +393,16 @@ pub fn decode_container_metadata(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ContainerMetadata: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "containerId" => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     "createdAt" => {
                         created_at = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -440,8 +443,9 @@ pub struct ContainerObject {
 
 // Encode ContainerObject as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_container_object<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ContainerObject,
 ) -> RpcResult<()> {
     e.array(2)?;
@@ -469,47 +473,47 @@ pub fn decode_container_object(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ContainerObject: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     1 => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
+                        object_id = Some(decode_object_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectId': {}",
+                                e
+                            )
+                        })?)
                     }
                     _ => d.skip()?,
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ContainerObject: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "containerId" => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     "objectId" => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
+                        object_id = Some(decode_object_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectId': {}",
+                                e
+                            )
+                        })?)
                     }
                     _ => d.skip()?,
                 }
@@ -540,8 +544,9 @@ pub type ContainersInfo = Vec<ContainerMetadata>;
 
 // Encode ContainersInfo as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_containers_info<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ContainersInfo,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -560,10 +565,12 @@ pub fn decode_containers_info(
         if let Some(n) = d.array()? {
             let mut arr: Vec<ContainerMetadata> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(
-                    decode_container_metadata(d)
-                        .map_err(|e| format!("decoding 'ContainerMetadata': {}", e))?,
-                )
+                arr.push(decode_container_metadata(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.interface.blobstore#ContainerMetadata': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -573,10 +580,12 @@ pub fn decode_containers_info(
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_container_metadata(d)
-                            .map_err(|e| format!("decoding 'ContainerMetadata': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_container_metadata(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.interface.blobstore#ContainerMetadata': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -610,8 +619,9 @@ pub struct GetObjectRequest {
 
 // Encode GetObjectRequest as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_get_object_request<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetObjectRequest,
 ) -> RpcResult<()> {
     e.array(4)?;
@@ -651,24 +661,24 @@ pub fn decode_get_object_request(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct GetObjectRequest: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
+                        object_id = Some(decode_object_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectId': {}",
+                                e
+                            )
+                        })?)
                     }
                     1 => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     2 => {
                         range_start = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -691,24 +701,24 @@ pub fn decode_get_object_request(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct GetObjectRequest: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "objectId" => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
+                        object_id = Some(decode_object_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectId': {}",
+                                e
+                            )
+                        })?)
                     }
                     "containerId" => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     "rangeStart" => {
                         range_start = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -783,8 +793,9 @@ pub struct GetObjectResponse {
 
 // Encode GetObjectResponse as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_get_object_response<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetObjectResponse,
 ) -> RpcResult<()> {
     e.array(6)?;
@@ -836,11 +847,7 @@ pub fn decode_get_object_response(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct GetObjectResponse: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => success = Some(d.bool()?),
@@ -857,9 +864,9 @@ pub fn decode_get_object_response(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?,
-                            ))
+                            Some(Some(decode_chunk(d).map_err(|e| {
+                                format!("decoding 'org.wasmcloud.interface.blobstore#Chunk': {}", e)
+                            })?))
                         }
                     }
                     3 => content_length = Some(d.u64()?),
@@ -884,11 +891,7 @@ pub fn decode_get_object_response(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct GetObjectResponse: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "success" => success = Some(d.bool()?),
@@ -905,9 +908,9 @@ pub fn decode_get_object_response(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?,
-                            ))
+                            Some(Some(decode_chunk(d).map_err(|e| {
+                                format!("decoding 'org.wasmcloud.interface.blobstore#Chunk': {}", e)
+                            })?))
                         }
                     }
                     "contentLength" => content_length = Some(d.u64()?),
@@ -970,8 +973,9 @@ pub struct ItemResult {
 
 // Encode ItemResult as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_item_result<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ItemResult,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -1003,11 +1007,7 @@ pub fn decode_item_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Item
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ItemResult: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => key = Some(d.str()?.to_string()),
@@ -1025,11 +1025,7 @@ pub fn decode_item_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Item
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ItemResult: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "key" => key = Some(d.str()?.to_string()),
@@ -1105,8 +1101,9 @@ pub struct ListObjectsRequest {
 
 // Encode ListObjectsRequest as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_list_objects_request<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ListObjectsRequest,
 ) -> RpcResult<()> {
     e.array(6)?;
@@ -1162,12 +1159,7 @@ pub fn decode_list_objects_request(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ListObjectsRequest: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => container_id = Some(d.str()?.to_string()),
@@ -1216,11 +1208,7 @@ pub fn decode_list_objects_request(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ListObjectsRequest: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "containerId" => container_id = Some(d.str()?.to_string()),
@@ -1308,8 +1296,9 @@ pub struct ListObjectsResponse {
 
 // Encode ListObjectsResponse as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_list_objects_response<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ListObjectsResponse,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -1343,19 +1332,16 @@ pub fn decode_list_objects_response(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ListObjectsResponse: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        objects = Some(
-                            decode_objects_info(d)
-                                .map_err(|e| format!("decoding 'ObjectsInfo': {}", e))?,
-                        )
+                        objects = Some(decode_objects_info(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectsInfo': {}",
+                                e
+                            )
+                        })?)
                     }
                     1 => is_last = Some(d.bool()?),
                     2 => {
@@ -1371,18 +1357,16 @@ pub fn decode_list_objects_response(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ListObjectsResponse: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "objects" => {
-                        objects = Some(
-                            decode_objects_info(d)
-                                .map_err(|e| format!("decoding 'ObjectsInfo': {}", e))?,
-                        )
+                        objects = Some(decode_objects_info(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectsInfo': {}",
+                                e
+                            )
+                        })?)
                     }
                     "isLast" => is_last = Some(d.bool()?),
                     "continuation" => {
@@ -1423,8 +1407,9 @@ pub type MultiResult = Vec<ItemResult>;
 
 // Encode MultiResult as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_multi_result<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &MultiResult,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -1443,9 +1428,12 @@ pub fn decode_multi_result(
         if let Some(n) = d.array()? {
             let mut arr: Vec<ItemResult> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(
-                    decode_item_result(d).map_err(|e| format!("decoding 'ItemResult': {}", e))?,
-                )
+                arr.push(decode_item_result(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.interface.blobstore#ItemResult': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -1455,10 +1443,12 @@ pub fn decode_multi_result(
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_item_result(d)
-                            .map_err(|e| format!("decoding 'ItemResult': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_item_result(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.interface.blobstore#ItemResult': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -1471,8 +1461,9 @@ pub type ObjectId = String;
 
 // Encode ObjectId as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_object_id<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ObjectId,
 ) -> RpcResult<()> {
     e.str(val)?;
@@ -1490,8 +1481,9 @@ pub type ObjectIds = Vec<ObjectId>;
 
 // Encode ObjectIds as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_object_ids<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ObjectIds,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -1508,7 +1500,12 @@ pub fn decode_object_ids(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Objec
         if let Some(n) = d.array()? {
             let mut arr: Vec<ObjectId> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(decode_object_id(d).map_err(|e| format!("decoding 'ObjectId': {}", e))?)
+                arr.push(decode_object_id(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.interface.blobstore#ObjectId': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -1518,9 +1515,12 @@ pub fn decode_object_ids(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Objec
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_object_id(d).map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_object_id(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.interface.blobstore#ObjectId': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -1566,8 +1566,9 @@ pub struct ObjectMetadata {
 
 // Encode ObjectMetadata as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_object_metadata<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ObjectMetadata,
 ) -> RpcResult<()> {
     e.array(6)?;
@@ -1616,24 +1617,24 @@ pub fn decode_object_metadata(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ObjectMetadata: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
+                        object_id = Some(decode_object_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectId': {}",
+                                e
+                            )
+                        })?)
                     }
                     1 => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     2 => content_length = Some(d.u64()?),
                     3 => {
@@ -1668,24 +1669,24 @@ pub fn decode_object_metadata(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ObjectMetadata: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "objectId" => {
-                        object_id = Some(
-                            decode_object_id(d)
-                                .map_err(|e| format!("decoding 'ObjectId': {}", e))?,
-                        )
+                        object_id = Some(decode_object_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectId': {}",
+                                e
+                            )
+                        })?)
                     }
                     "containerId" => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     "contentLength" => content_length = Some(d.u64()?),
                     "lastModified" => {
@@ -1755,8 +1756,9 @@ pub type ObjectsInfo = Vec<ObjectMetadata>;
 
 // Encode ObjectsInfo as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_objects_info<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ObjectsInfo,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -1775,10 +1777,12 @@ pub fn decode_objects_info(
         if let Some(n) = d.array()? {
             let mut arr: Vec<ObjectMetadata> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(
-                    decode_object_metadata(d)
-                        .map_err(|e| format!("decoding 'ObjectMetadata': {}", e))?,
-                )
+                arr.push(decode_object_metadata(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.interface.blobstore#ObjectMetadata': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -1788,10 +1792,12 @@ pub fn decode_objects_info(
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_object_metadata(d)
-                            .map_err(|e| format!("decoding 'ObjectMetadata': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_object_metadata(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.interface.blobstore#ObjectMetadata': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -1818,8 +1824,9 @@ pub struct PutChunkRequest {
 
 // Encode PutChunkRequest as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_put_chunk_request<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PutChunkRequest,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -1853,16 +1860,13 @@ pub fn decode_put_chunk_request(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct PutChunkRequest: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        chunk =
-                            Some(decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?)
+                        chunk = Some(decode_chunk(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.interface.blobstore#Chunk': {}", e)
+                        })?)
                     }
                     1 => {
                         stream_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -1877,16 +1881,13 @@ pub fn decode_put_chunk_request(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct PutChunkRequest: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "chunk" => {
-                        chunk =
-                            Some(decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?)
+                        chunk = Some(decode_chunk(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.interface.blobstore#Chunk': {}", e)
+                        })?)
                     }
                     "streamId" => {
                         stream_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -1943,8 +1944,9 @@ pub struct PutObjectRequest {
 
 // Encode PutObjectRequest as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_put_object_request<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PutObjectRequest,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -1982,16 +1984,13 @@ pub fn decode_put_object_request(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct PutObjectRequest: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        chunk =
-                            Some(decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?)
+                        chunk = Some(decode_chunk(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.interface.blobstore#Chunk': {}", e)
+                        })?)
                     }
                     1 => {
                         content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -2014,16 +2013,13 @@ pub fn decode_put_object_request(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct PutObjectRequest: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "chunk" => {
-                        chunk =
-                            Some(decode_chunk(d).map_err(|e| format!("decoding 'Chunk': {}", e))?)
+                        chunk = Some(decode_chunk(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.interface.blobstore#Chunk': {}", e)
+                        })?)
                     }
                     "contentType" => {
                         content_type = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -2071,8 +2067,9 @@ pub struct PutObjectResponse {
 
 // Encode PutObjectResponse as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_put_object_response<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PutObjectResponse,
 ) -> RpcResult<()> {
     e.array(1)?;
@@ -2102,11 +2099,7 @@ pub fn decode_put_object_response(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct PutObjectResponse: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
@@ -2122,11 +2115,7 @@ pub fn decode_put_object_response(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct PutObjectResponse: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "streamId" => {
@@ -2159,8 +2148,9 @@ pub struct RemoveObjectsRequest {
 
 // Encode RemoveObjectsRequest as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_remove_objects_request<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &RemoveObjectsRequest,
 ) -> RpcResult<()> {
     e.array(2)?;
@@ -2188,49 +2178,47 @@ pub fn decode_remove_objects_request(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct RemoveObjectsRequest: indefinite array not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     1 => {
-                        objects = Some(
-                            decode_object_ids(d)
-                                .map_err(|e| format!("decoding 'ObjectIds': {}", e))?,
-                        )
+                        objects = Some(decode_object_ids(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectIds': {}",
+                                e
+                            )
+                        })?)
                     }
                     _ => d.skip()?,
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct RemoveObjectsRequest: indefinite map not supported"
-                        .to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "containerId" => {
-                        container_id = Some(
-                            decode_container_id(d)
-                                .map_err(|e| format!("decoding 'ContainerId': {}", e))?,
-                        )
+                        container_id = Some(decode_container_id(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ContainerId': {}",
+                                e
+                            )
+                        })?)
                     }
                     "objects" => {
-                        objects = Some(
-                            decode_object_ids(d)
-                                .map_err(|e| format!("decoding 'ObjectIds': {}", e))?,
-                        )
+                        objects = Some(decode_object_ids(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.blobstore#ObjectIds': {}",
+                                e
+                            )
+                        })?)
                     }
                     _ => d.skip()?,
                 }
@@ -2568,7 +2556,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Creates a container by name, returning success if it worked
     /// Note that container names may not be globally unique - just unique within the
@@ -2590,7 +2577,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .await?;
         Ok(())
     }
-
     #[allow(unused)]
     /// Retrieves information about the container.
     /// Returns error if the container id is invalid or not found.
@@ -2619,7 +2605,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': ContainerMetadata", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Returns list of container ids
     async fn list_containers(&self, ctx: &Context) -> RpcResult<ContainersInfo> {
@@ -2640,7 +2625,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': ContainersInfo", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Empty and remove the container(s)
     /// The MultiResult list contains one entry for each container
@@ -2666,7 +2650,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': MultiResult", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Returns whether the object exists
     async fn object_exists(&self, ctx: &Context, arg: &ContainerObject) -> RpcResult<bool> {
@@ -2689,7 +2672,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Retrieves information about the object.
     /// Returns error if the object id is invalid or not found.
@@ -2717,7 +2699,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': ObjectMetadata", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Lists the objects in the container.
     /// If the container exists and is empty, the returned `objects` list is empty.
@@ -2754,7 +2735,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': ListObjectsResponse", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Removes the objects. In the event any of the objects cannot be removed,
     /// the operation continues until all requested deletions have been attempted.
@@ -2784,7 +2764,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
             .map_err(|e| RpcError::Deser(format!("'{}': MultiResult", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests to start upload of a file/blob to the Blobstore.
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
@@ -2813,7 +2792,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': PutObjectResponse", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Requests to retrieve an object. If the object is large, the provider
     /// may split the response into multiple parts
@@ -2843,7 +2821,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Blobstore for Blobsto
                 .map_err(|e| RpcError::Deser(format!("'{}': GetObjectResponse", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Uploads a file chunk to a blobstore. This must be called AFTER PutObject
     /// It is recommended to keep chunks under 1MB to avoid exceeding nats default message size

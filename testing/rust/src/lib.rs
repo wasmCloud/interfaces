@@ -52,3 +52,24 @@ impl<'name, T: Serialize> From<NamedResult<'name, T>> for TestResult {
         }
     }
 }
+
+#[test]
+fn cbor_enc_dec() {
+    let x = SampleUnion::One("hello".to_string());
+    //let bytes = wasmbus_rpc::serialize(&x).expect("serialize union");
+    let bytes = rmp_serde::to_vec(&x).expect("serialize");
+    //let y = wasmbus_rpc::deserialize(&bytes).expect("deser union");
+    let y = rmp_serde::from_slice::<SampleUnion>(&bytes).expect("deser");
+    assert_eq!(x, y);
+
+    let x = SampleUnion::Two(TestResult {
+        name: "hello".to_string(),
+        passed: false,
+        snap_data: None,
+    });
+    //let bytes = wasmbus_rpc::serialize(&x).expect("serialize union");
+    //let y = wasmbus_rpc::deserialize(&bytes).expect("deser union");
+    let bytes = rmp_serde::to_vec(&x).expect("serialize");
+    let y = rmp_serde::from_slice::<SampleUnion>(&bytes).expect("deser");
+    assert_eq!(x, y);
+}

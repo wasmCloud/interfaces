@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.2
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.3
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -17,6 +17,7 @@ use wasmbus_rpc::{
     Timestamp,
 };
 
+#[allow(dead_code)]
 pub const SMITHY_VERSION: &str = "1.0";
 
 /// Metadata about a Column in the result set
@@ -36,8 +37,9 @@ pub struct Column {
 
 // Encode Column as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_column<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &Column,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -65,11 +67,7 @@ pub fn decode_column(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Column, R
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct Column: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => ordinal = Some(d.u32()?),
@@ -79,9 +77,7 @@ pub fn decode_column(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Column, R
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser("decoding struct Column: indefinite map not supported".to_string())
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "ordinal" => ordinal = Some(d.u32()?),
@@ -124,8 +120,9 @@ pub type Columns = Vec<Column>;
 
 // Encode Columns as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_columns<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &Columns,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -142,7 +139,9 @@ pub fn decode_columns(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Columns,
         if let Some(n) = d.array()? {
             let mut arr: Vec<Column> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(decode_column(d).map_err(|e| format!("decoding 'Column': {}", e))?)
+                arr.push(decode_column(d).map_err(|e| {
+                    format!("decoding 'org.wasmcloud.interface.sqldb#Column': {}", e)
+                })?)
             }
             arr
         } else {
@@ -152,9 +151,9 @@ pub fn decode_columns(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Columns,
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => {
-                        arr.push(decode_column(d).map_err(|e| format!("decoding 'Column': {}", e))?)
-                    }
+                    Ok(_) => arr.push(decode_column(d).map_err(|e| {
+                        format!("decoding 'org.wasmcloud.interface.sqldb#Column': {}", e)
+                    })?),
                 }
             }
             arr
@@ -177,8 +176,9 @@ pub struct ExecuteResult {
 
 // Encode ExecuteResult as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_execute_result<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ExecuteResult,
 ) -> RpcResult<()> {
     e.array(2)?;
@@ -210,11 +210,7 @@ pub fn decode_execute_result(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ExecuteResult: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => rows_affected = Some(d.u64()?),
@@ -223,10 +219,12 @@ pub fn decode_execute_result(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_sql_db_error(d)
-                                    .map_err(|e| format!("decoding 'SqlDbError': {}", e))?,
-                            ))
+                            Some(Some(decode_sql_db_error(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.interface.sqldb#SqlDbError': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
 
@@ -234,11 +232,7 @@ pub fn decode_execute_result(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ExecuteResult: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "rowsAffected" => rows_affected = Some(d.u64()?),
@@ -247,10 +241,12 @@ pub fn decode_execute_result(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_sql_db_error(d)
-                                    .map_err(|e| format!("decoding 'SqlDbError': {}", e))?,
-                            ))
+                            Some(Some(decode_sql_db_error(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.interface.sqldb#SqlDbError': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     _ => d.skip()?,
@@ -279,8 +275,9 @@ pub type Parameters = Vec<Vec<u8>>;
 
 // Encode Parameters as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_parameters<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &Parameters,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -324,8 +321,9 @@ pub struct PingResult {
 
 // Encode PingResult as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_ping_result<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PingResult,
 ) -> RpcResult<()> {
     e.map(1)?;
@@ -354,11 +352,7 @@ pub fn decode_ping_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Ping
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct PingResult: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
@@ -366,10 +360,12 @@ pub fn decode_ping_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Ping
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_sql_db_error(d)
-                                    .map_err(|e| format!("decoding 'SqlDbError': {}", e))?,
-                            ))
+                            Some(Some(decode_sql_db_error(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.interface.sqldb#SqlDbError': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
 
@@ -377,11 +373,7 @@ pub fn decode_ping_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Ping
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct PingResult: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "error" => {
@@ -389,10 +381,12 @@ pub fn decode_ping_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Ping
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_sql_db_error(d)
-                                    .map_err(|e| format!("decoding 'SqlDbError': {}", e))?,
-                            ))
+                            Some(Some(decode_sql_db_error(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.interface.sqldb#SqlDbError': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     _ => d.skip()?,
@@ -427,8 +421,9 @@ pub struct QueryResult {
 
 // Encode QueryResult as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_query_result<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &QueryResult,
 ) -> RpcResult<()> {
     e.array(4)?;
@@ -464,18 +459,14 @@ pub fn decode_query_result(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct QueryResult: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => num_rows = Some(d.u64()?),
                     1 => {
-                        columns = Some(
-                            decode_columns(d).map_err(|e| format!("decoding 'Columns': {}", e))?,
-                        )
+                        columns = Some(decode_columns(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.interface.sqldb#Columns': {}", e)
+                        })?)
                     }
                     2 => rows = Some(d.bytes()?.to_vec()),
                     3 => {
@@ -483,10 +474,12 @@ pub fn decode_query_result(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_sql_db_error(d)
-                                    .map_err(|e| format!("decoding 'SqlDbError': {}", e))?,
-                            ))
+                            Some(Some(decode_sql_db_error(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.interface.sqldb#SqlDbError': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
 
@@ -494,18 +487,14 @@ pub fn decode_query_result(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct QueryResult: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "numRows" => num_rows = Some(d.u64()?),
                     "columns" => {
-                        columns = Some(
-                            decode_columns(d).map_err(|e| format!("decoding 'Columns': {}", e))?,
-                        )
+                        columns = Some(decode_columns(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.interface.sqldb#Columns': {}", e)
+                        })?)
                     }
                     "rows" => rows = Some(d.bytes()?.to_vec()),
                     "error" => {
@@ -513,10 +502,12 @@ pub fn decode_query_result(
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_sql_db_error(d)
-                                    .map_err(|e| format!("decoding 'SqlDbError': {}", e))?,
-                            ))
+                            Some(Some(decode_sql_db_error(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.interface.sqldb#SqlDbError': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     _ => d.skip()?,
@@ -567,8 +558,9 @@ pub struct SqlDbError {
 
 // Encode SqlDbError as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_sql_db_error<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &SqlDbError,
 ) -> RpcResult<()> {
     e.array(2)?;
@@ -594,11 +586,7 @@ pub fn decode_sql_db_error(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Sql
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct SqlDbError: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => code = Some(d.str()?.to_string()),
@@ -607,11 +595,7 @@ pub fn decode_sql_db_error(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Sql
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct SqlDbError: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "code" => code = Some(d.str()?.to_string()),
@@ -656,8 +640,9 @@ pub struct Statement {
 
 // Encode Statement as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_statement<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &Statement,
 ) -> RpcResult<()> {
     e.map(3)?;
@@ -696,11 +681,7 @@ pub fn decode_statement(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Statem
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct Statement: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
@@ -716,10 +697,12 @@ pub fn decode_statement(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Statem
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_parameters(d)
-                                    .map_err(|e| format!("decoding 'Parameters': {}", e))?,
-                            ))
+                            Some(Some(decode_parameters(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.interface.sqldb#Parameters': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     2 => sql = Some(d.str()?.to_string()),
@@ -727,11 +710,7 @@ pub fn decode_statement(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Statem
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct Statement: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "database" => {
@@ -747,10 +726,12 @@ pub fn decode_statement(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Statem
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(
-                                decode_parameters(d)
-                                    .map_err(|e| format!("decoding 'Parameters': {}", e))?,
-                            ))
+                            Some(Some(decode_parameters(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.interface.sqldb#Parameters': {}",
+                                    e
+                                )
+                            })?))
                         }
                     }
                     "sql" => sql = Some(d.str()?.to_string()),
@@ -893,7 +874,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> SqlDb for SqlDbSender
             .map_err(|e| RpcError::Deser(format!("'{}': ExecuteResult", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Perform select query on database, returning all result rows
     async fn query(&self, ctx: &Context, arg: &Statement) -> RpcResult<QueryResult> {

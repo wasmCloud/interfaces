@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.2
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.3
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -17,6 +17,7 @@ use wasmbus_rpc::{
     Timestamp,
 };
 
+#[allow(dead_code)]
 pub const SMITHY_VERSION: &str = "1.0";
 
 /// map data structure for holding http headers
@@ -25,8 +26,9 @@ pub type HeaderMap = std::collections::HashMap<String, HeaderValues>;
 
 // Encode HeaderMap as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_header_map<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &HeaderMap,
 ) -> RpcResult<()> {
     e.map(val.len() as u64)?;
@@ -42,17 +44,18 @@ pub fn encode_header_map<W: wasmbus_rpc::cbor::Write>(
 pub fn decode_header_map(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<HeaderMap, RpcError> {
     let __result = {
         {
+            let map_len = d.fixed_map()? as usize;
             let mut m: std::collections::HashMap<String, HeaderValues> =
-                std::collections::HashMap::default();
-            if let Some(n) = d.map()? {
-                for _ in 0..(n as usize) {
-                    let k = d.str()?.to_string();
-                    let v = decode_header_values(d)
-                        .map_err(|e| format!("decoding 'HeaderValues': {}", e))?;
-                    m.insert(k, v);
-                }
-            } else {
-                return Err(RpcError::Deser("indefinite maps not supported".to_string()));
+                std::collections::HashMap::with_capacity(map_len);
+            for _ in 0..map_len {
+                let k = d.str()?.to_string();
+                let v = decode_header_values(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.interface.httpclient#HeaderValues': {}",
+                        e
+                    )
+                })?;
+                m.insert(k, v);
             }
             m
         }
@@ -63,8 +66,9 @@ pub type HeaderValues = Vec<String>;
 
 // Encode HeaderValues as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_header_values<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &HeaderValues,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -119,8 +123,9 @@ pub struct HttpRequest {
 
 // Encode HttpRequest as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_http_request<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &HttpRequest,
 ) -> RpcResult<()> {
     e.array(4)?;
@@ -152,40 +157,36 @@ pub fn decode_http_request(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct HttpRequest: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => method = Some(d.str()?.to_string()),
                     1 => url = Some(d.str()?.to_string()),
                     2 => {
-                        headers = Some(
-                            decode_header_map(d)
-                                .map_err(|e| format!("decoding 'HeaderMap': {}", e))?,
-                        )
+                        headers = Some(decode_header_map(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.httpclient#HeaderMap': {}",
+                                e
+                            )
+                        })?)
                     }
                     3 => body = Some(d.bytes()?.to_vec()),
                     _ => d.skip()?,
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct HttpRequest: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "method" => method = Some(d.str()?.to_string()),
                     "url" => url = Some(d.str()?.to_string()),
                     "headers" => {
-                        headers = Some(
-                            decode_header_map(d)
-                                .map_err(|e| format!("decoding 'HeaderMap': {}", e))?,
-                        )
+                        headers = Some(decode_header_map(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.httpclient#HeaderMap': {}",
+                                e
+                            )
+                        })?)
                     }
                     "body" => body = Some(d.bytes()?.to_vec()),
                     _ => d.skip()?,
@@ -253,8 +254,9 @@ pub struct HttpResponse {
 
 // Encode HttpResponse as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_http_response<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &HttpResponse,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -284,38 +286,34 @@ pub fn decode_http_response(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct HttpResponse: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => status_code = Some(d.u16()?),
                     1 => {
-                        header = Some(
-                            decode_header_map(d)
-                                .map_err(|e| format!("decoding 'HeaderMap': {}", e))?,
-                        )
+                        header = Some(decode_header_map(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.httpclient#HeaderMap': {}",
+                                e
+                            )
+                        })?)
                     }
                     2 => body = Some(d.bytes()?.to_vec()),
                     _ => d.skip()?,
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct HttpResponse: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "statusCode" => status_code = Some(d.u16()?),
                     "header" => {
-                        header = Some(
-                            decode_header_map(d)
-                                .map_err(|e| format!("decoding 'HeaderMap': {}", e))?,
-                        )
+                        header = Some(decode_header_map(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.httpclient#HeaderMap': {}",
+                                e
+                            )
+                        })?)
                     }
                     "body" => body = Some(d.bytes()?.to_vec()),
                     _ => d.skip()?,

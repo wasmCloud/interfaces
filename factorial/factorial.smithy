@@ -7,6 +7,7 @@ metadata package = [ {
     namespace: "org.wasmcloud.interface.factorial",
     crate: "wasmcloud_interface_factorial",
     py_module: "wasmcloud_interface_factorial",
+    doc: "Factorial: A simple service that calculates the factorial of a whole number",
 } ]
 
 namespace org.wasmcloud.interface.factorial

@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.2
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.3
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -17,6 +17,7 @@ use wasmbus_rpc::{
     Timestamp,
 };
 
+#[allow(dead_code)]
 pub const SMITHY_VERSION: &str = "1.0";
 
 /// The Factorial service has a single method, calculate, which

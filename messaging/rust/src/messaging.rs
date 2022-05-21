@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.2
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.3
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -17,6 +17,7 @@ use wasmbus_rpc::{
     Timestamp,
 };
 
+#[allow(dead_code)]
 pub const SMITHY_VERSION: &str = "1.0";
 
 /// A message to be published
@@ -37,8 +38,9 @@ pub struct PubMessage {
 
 // Encode PubMessage as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_pub_message<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PubMessage,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -70,11 +72,7 @@ pub fn decode_pub_message(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<PubM
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct PubMessage: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => subject = Some(d.str()?.to_string()),
@@ -91,11 +89,7 @@ pub fn decode_pub_message(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<PubM
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct PubMessage: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "subject" => subject = Some(d.str()?.to_string()),
@@ -151,8 +145,9 @@ pub struct ReplyMessage {
 
 // Encode ReplyMessage as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_reply_message<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &ReplyMessage,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -186,11 +181,7 @@ pub fn decode_reply_message(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ReplyMessage: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => subject = Some(d.str()?.to_string()),
@@ -207,11 +198,7 @@ pub fn decode_reply_message(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct ReplyMessage: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "subject" => subject = Some(d.str()?.to_string()),
@@ -267,8 +254,9 @@ pub struct RequestMessage {
 
 // Encode RequestMessage as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_request_message<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &RequestMessage,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -298,11 +286,7 @@ pub fn decode_request_message(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct RequestMessage: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => subject = Some(d.str()?.to_string()),
@@ -312,11 +296,7 @@ pub fn decode_request_message(
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct RequestMessage: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "subject" => subject = Some(d.str()?.to_string()),
@@ -372,8 +352,9 @@ pub struct SubMessage {
 
 // Encode SubMessage as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_sub_message<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &SubMessage,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -405,11 +386,7 @@ pub fn decode_sub_message(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<SubM
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct SubMessage: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => subject = Some(d.str()?.to_string()),
@@ -426,11 +403,7 @@ pub fn decode_sub_message(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<SubM
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct SubMessage: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "subject" => subject = Some(d.str()?.to_string()),
@@ -701,7 +674,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Messaging for Messagi
             .await?;
         Ok(())
     }
-
     #[allow(unused)]
     /// Request - send a message in a request/reply pattern,
     /// waiting for a response.

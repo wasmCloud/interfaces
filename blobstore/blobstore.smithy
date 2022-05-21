@@ -4,7 +4,8 @@
 // Tell the code generator how to reference symbols defined in this namespace
 metadata package = [{ 
     namespace: "org.wasmcloud.interface.blobstore", 
-    crate: "wasmcloud-interface-blobstore" 
+    crate: "wasmcloud-interface-blobstore",
+    doc: "Blobstore: wasmcloud capability contract for storing objects (blobs) in named containers",
 }]
 
 namespace org.wasmcloud.interface.blobstore
