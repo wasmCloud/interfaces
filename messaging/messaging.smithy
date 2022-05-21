@@ -9,6 +9,7 @@ metadata package = [{
     namespace: "org.wasmcloud.interface.messaging",
     crate: "wasmcloud_interface_messaging",
     py_module: "wasmcloud_interface_messaging",
+    doc: "Messaging: wasmcloud messaging capability provider: publish, request-reply, and subscriptions",
 }]
 
 namespace org.wasmcloud.interface.messaging

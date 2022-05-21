@@ -15,6 +15,8 @@ use org.wasmcloud.model#wasmbus
 use org.wasmcloud.model#n
 use org.wasmcloud.model#U32
 use org.wasmcloud.model#I32
+use org.wasmcloud.model#F32
+use org.wasmcloud.model#F64
 use org.wasmcloud.model#codegenRust
 
 /// Test api for testable actors and providers
@@ -22,11 +24,12 @@ use org.wasmcloud.model#codegenRust
     contractId: "wasmcloud:testing",
     providerReceive: true,
     actorReceive: true,
+    protocol: "2",
 )
 service Testing {
   version: "0.0.1",
   operations: [
-    Start
+    Start, Foo
   ]
 }
 
@@ -66,6 +69,39 @@ map OptMap {
 /// list of regex patterns
 list PatternList {
     member: String,
+}
+
+operation Foo {
+	output: SampleUnion
+}
+
+/// A test of union
+@codegenRust(noDeriveEq: true)
+union SampleUnion {
+
+    /// first field is a String
+    @n(0)
+    one: String,
+
+    /// Second field is a TestResult
+    @n(1)
+    two: TestResult,
+
+    /// Third field is array of f32
+    @n(2)
+    three: F32Data
+
+    /// Fourth field is array of f64
+    @n(3)
+    four: F64Data
+}
+
+list F32Data {
+    member: F32
+}
+
+list F64Data {
+    member: F64
 }
 
 structure TestResult {

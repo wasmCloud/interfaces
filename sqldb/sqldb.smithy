@@ -29,6 +29,7 @@ metadata package = [{
     namespace: "org.wasmcloud.interface.sqldb",
     crate: "wasmcloud_interface_sqldb",
     py_module: "wasmcloud_interface_sqldb",
+    doc: "sqldb: wasmcloud database capability contract",
 }]
 
 namespace org.wasmcloud.interface.sqldb

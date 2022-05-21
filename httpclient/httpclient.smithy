@@ -5,6 +5,7 @@ metadata package = [{
     namespace: "org.wasmcloud.interface.httpclient",
     crate: "wasmcloud_interface_httpclient"
     py_module: "wasmcloud_interface_httpclient",
+    doc: "Httpclient: wasmcloud capability contract for http client",
 }]
 
 namespace org.wasmcloud.interface.httpclient

@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.2
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.3
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -17,8 +17,91 @@ use wasmbus_rpc::{
     Timestamp,
 };
 
+#[allow(dead_code)]
 pub const SMITHY_VERSION: &str = "1.0";
 
+pub type F32Data = Vec<f32>;
+
+// Encode F32Data as CBOR and append to output stream
+#[doc(hidden)]
+#[allow(unused_mut)]
+pub fn encode_f32_data<W: wasmbus_rpc::cbor::Write>(
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &F32Data,
+) -> RpcResult<()> {
+    e.array(val.len() as u64)?;
+    for item in val.iter() {
+        e.f32(*item)?;
+    }
+    Ok(())
+}
+
+// Decode F32Data from cbor input stream
+#[doc(hidden)]
+pub fn decode_f32_data(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<F32Data, RpcError> {
+    let __result = {
+        if let Some(n) = d.array()? {
+            let mut arr: Vec<f32> = Vec::with_capacity(n as usize);
+            for _ in 0..(n as usize) {
+                arr.push(d.f32()?)
+            }
+            arr
+        } else {
+            // indefinite array
+            let mut arr: Vec<f32> = Vec::new();
+            loop {
+                match d.datatype() {
+                    Err(_) => break,
+                    Ok(wasmbus_rpc::cbor::Type::Break) => break,
+                    Ok(_) => arr.push(d.f32()?),
+                }
+            }
+            arr
+        }
+    };
+    Ok(__result)
+}
+pub type F64Data = Vec<f64>;
+
+// Encode F64Data as CBOR and append to output stream
+#[doc(hidden)]
+#[allow(unused_mut)]
+pub fn encode_f64_data<W: wasmbus_rpc::cbor::Write>(
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &F64Data,
+) -> RpcResult<()> {
+    e.array(val.len() as u64)?;
+    for item in val.iter() {
+        e.f64(*item)?;
+    }
+    Ok(())
+}
+
+// Decode F64Data from cbor input stream
+#[doc(hidden)]
+pub fn decode_f64_data(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<F64Data, RpcError> {
+    let __result = {
+        if let Some(n) = d.array()? {
+            let mut arr: Vec<f64> = Vec::with_capacity(n as usize);
+            for _ in 0..(n as usize) {
+                arr.push(d.f64()?)
+            }
+            arr
+        } else {
+            // indefinite array
+            let mut arr: Vec<f64> = Vec::new();
+            loop {
+                match d.datatype() {
+                    Err(_) => break,
+                    Ok(wasmbus_rpc::cbor::Type::Break) => break,
+                    Ok(_) => arr.push(d.f64()?),
+                }
+            }
+            arr
+        }
+    };
+    Ok(__result)
+}
 /// A map of test options.
 /// Keys may be test case names, or other keys meaningful for the test.
 /// Values are utf8 strings containing serialized json, with contents specific to the test
@@ -26,8 +109,9 @@ pub type OptMap = std::collections::HashMap<String, String>;
 
 // Encode OptMap as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_opt_map<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &OptMap,
 ) -> RpcResult<()> {
     e.map(val.len() as u64)?;
@@ -43,16 +127,13 @@ pub fn encode_opt_map<W: wasmbus_rpc::cbor::Write>(
 pub fn decode_opt_map(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<OptMap, RpcError> {
     let __result = {
         {
+            let map_len = d.fixed_map()? as usize;
             let mut m: std::collections::HashMap<String, String> =
-                std::collections::HashMap::default();
-            if let Some(n) = d.map()? {
-                for _ in 0..(n as usize) {
-                    let k = d.str()?.to_string();
-                    let v = d.str()?.to_string();
-                    m.insert(k, v);
-                }
-            } else {
-                return Err(RpcError::Deser("indefinite maps not supported".to_string()));
+                std::collections::HashMap::with_capacity(map_len);
+            for _ in 0..map_len {
+                let k = d.str()?.to_string();
+                let v = d.str()?.to_string();
+                m.insert(k, v);
             }
             m
         }
@@ -64,8 +145,9 @@ pub type PatternList = Vec<String>;
 
 // Encode PatternList as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_pattern_list<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &PatternList,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -102,6 +184,103 @@ pub fn decode_pattern_list(
     };
     Ok(__result)
 }
+/// A test of union
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub enum SampleUnion {
+    /// first field is a String
+    /// n(0)
+    One(String),
+    /// Second field is a TestResult
+    /// n(1)
+    Two(TestResult),
+    /// Third field is array of f32
+    /// n(2)
+    Three(F32Data),
+    /// Fourth field is array of f64
+    /// n(3)
+    Four(F64Data),
+}
+
+// Encode SampleUnion as CBOR and append to output stream
+#[doc(hidden)]
+#[allow(unused_mut)]
+pub fn encode_sample_union<W: wasmbus_rpc::cbor::Write>(
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &SampleUnion,
+) -> RpcResult<()> {
+    // encoding union SampleUnion
+    e.array(2)?;
+    match val {
+        SampleUnion::One(v) => {
+            e.u16(0)?;
+            e.str(v)?;
+        }
+        SampleUnion::Two(v) => {
+            e.u16(1)?;
+            encode_test_result(e, v)?;
+        }
+        SampleUnion::Three(v) => {
+            e.u16(2)?;
+            encode_f32_data(e, v)?;
+        }
+        SampleUnion::Four(v) => {
+            e.u16(3)?;
+            encode_f64_data(e, v)?;
+        }
+    }
+    Ok(())
+}
+
+// Decode SampleUnion from cbor input stream
+#[doc(hidden)]
+pub fn decode_sample_union(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<SampleUnion, RpcError> {
+    let __result = {
+        // decoding union SampleUnion
+        let len = d.fixed_array()?;
+        if len != 2 {
+            return Err(RpcError::Deser(
+                "decoding union 'SampleUnion': expected 2-array".to_string(),
+            ));
+        }
+        match d.u16()? {
+            0 => {
+                let val = d.str()?.to_string();
+                SampleUnion::One(val)
+            }
+
+            1 => {
+                let val = decode_test_result(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.interface.testing#TestResult': {}",
+                        e
+                    )
+                })?;
+                SampleUnion::Two(val)
+            }
+
+            2 => {
+                let val = decode_f32_data(d).map_err(|e| {
+                    format!("decoding 'org.wasmcloud.interface.testing#F32Data': {}", e)
+                })?;
+                SampleUnion::Three(val)
+            }
+
+            3 => {
+                let val = decode_f64_data(d).map_err(|e| {
+                    format!("decoding 'org.wasmcloud.interface.testing#F64Data': {}", e)
+                })?;
+                SampleUnion::Four(val)
+            }
+
+            n => {
+                return Err(RpcError::Deser(format!("invalid field number for union 'org.wasmcloud.interface.testing#SampleUnion':{}", n)));
+            }
+        }
+    };
+    Ok(__result)
+}
 /// Options passed to all test cases
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct TestOptions {
@@ -116,8 +295,9 @@ pub struct TestOptions {
 
 // Encode TestOptions as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_test_options<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &TestOptions,
 ) -> RpcResult<()> {
     e.array(2)?;
@@ -145,45 +325,41 @@ pub fn decode_test_options(
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct TestOptions: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => {
-                        patterns = Some(
-                            decode_pattern_list(d)
-                                .map_err(|e| format!("decoding 'PatternList': {}", e))?,
-                        )
+                        patterns = Some(decode_pattern_list(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.testing#PatternList': {}",
+                                e
+                            )
+                        })?)
                     }
                     1 => {
-                        options = Some(
-                            decode_opt_map(d).map_err(|e| format!("decoding 'OptMap': {}", e))?,
-                        )
+                        options = Some(decode_opt_map(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.interface.testing#OptMap': {}", e)
+                        })?)
                     }
                     _ => d.skip()?,
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct TestOptions: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "patterns" => {
-                        patterns = Some(
-                            decode_pattern_list(d)
-                                .map_err(|e| format!("decoding 'PatternList': {}", e))?,
-                        )
+                        patterns = Some(decode_pattern_list(d).map_err(|e| {
+                            format!(
+                                "decoding 'org.wasmcloud.interface.testing#PatternList': {}",
+                                e
+                            )
+                        })?)
                     }
                     "options" => {
-                        options = Some(
-                            decode_opt_map(d).map_err(|e| format!("decoding 'OptMap': {}", e))?,
-                        )
+                        options = Some(decode_opt_map(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.interface.testing#OptMap': {}", e)
+                        })?)
                     }
                     _ => d.skip()?,
                 }
@@ -228,8 +404,9 @@ pub struct TestResult {
 
 // Encode TestResult as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_test_result<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &TestResult,
 ) -> RpcResult<()> {
     e.array(3)?;
@@ -261,11 +438,7 @@ pub fn decode_test_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Test
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct TestResult: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => name = Some(d.str()?.to_string()),
@@ -283,11 +456,7 @@ pub fn decode_test_result(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Test
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct TestResult: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "name" => name = Some(d.str()?.to_string()),
@@ -329,8 +498,9 @@ pub type TestResults = Vec<TestResult>;
 
 // Encode TestResults as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_test_results<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &TestResults,
 ) -> RpcResult<()> {
     e.array(val.len() as u64)?;
@@ -349,9 +519,12 @@ pub fn decode_test_results(
         if let Some(n) = d.array()? {
             let mut arr: Vec<TestResult> = Vec::with_capacity(n as usize);
             for _ in 0..(n as usize) {
-                arr.push(
-                    decode_test_result(d).map_err(|e| format!("decoding 'TestResult': {}", e))?,
-                )
+                arr.push(decode_test_result(d).map_err(|e| {
+                    format!(
+                        "decoding 'org.wasmcloud.interface.testing#TestResult': {}",
+                        e
+                    )
+                })?)
             }
             arr
         } else {
@@ -361,10 +534,12 @@ pub fn decode_test_results(
                 match d.datatype() {
                     Err(_) => break,
                     Ok(wasmbus_rpc::cbor::Type::Break) => break,
-                    Ok(_) => arr.push(
-                        decode_test_result(d)
-                            .map_err(|e| format!("decoding 'TestResult': {}", e))?,
-                    ),
+                    Ok(_) => arr.push(decode_test_result(d).map_err(|e| {
+                        format!(
+                            "decoding 'org.wasmcloud.interface.testing#TestResult': {}",
+                            e
+                        )
+                    })?),
                 }
             }
             arr
@@ -384,6 +559,7 @@ pub trait Testing {
     }
     /// Begin tests
     async fn start(&self, ctx: &Context, arg: &TestOptions) -> RpcResult<TestResults>;
+    async fn foo(&self, ctx: &Context) -> RpcResult<SampleUnion>;
 }
 
 /// TestingReceiver receives messages defined in the Testing service trait
@@ -398,12 +574,25 @@ pub trait TestingReceiver: MessageDispatch + Testing {
     ) -> Result<Message<'msg__>, RpcError> {
         match message.method {
             "Start" => {
-                let value: TestOptions = wasmbus_rpc::common::deserialize(&message.arg)
-                    .map_err(|e| RpcError::Deser(format!("'TestOptions': {}", e)))?;
+                let value: TestOptions =
+                    wasmbus_rpc::common::decode(&message.arg, &decode_test_options)
+                        .map_err(|e| RpcError::Deser(format!("'TestOptions': {}", e)))?;
                 let resp = Testing::start(self, ctx, &value).await?;
-                let buf = wasmbus_rpc::common::serialize(&resp)?;
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
+                encode_test_results(&mut e, &resp)?;
+                let buf = e.into_inner();
                 Ok(Message {
                     method: "Testing.Start",
+                    arg: Cow::Owned(buf),
+                })
+            }
+            "Foo" => {
+                let resp = Testing::foo(self, ctx).await?;
+                let mut e = wasmbus_rpc::cbor::vec_encoder(true);
+                encode_sample_union(&mut e, &resp)?;
+                let buf = e.into_inner();
+                Ok(Message {
+                    method: "Testing.Foo",
                     arg: Cow::Owned(buf),
                 })
             }
@@ -479,7 +668,9 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Testing for TestingSe
     #[allow(unused)]
     /// Begin tests
     async fn start(&self, ctx: &Context, arg: &TestOptions) -> RpcResult<TestResults> {
-        let buf = wasmbus_rpc::common::serialize(arg)?;
+        let mut e = wasmbus_rpc::cbor::vec_encoder(true);
+        encode_test_options(&mut e, arg)?;
+        let buf = e.into_inner();
         let resp = self
             .transport
             .send(
@@ -492,8 +683,27 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> Testing for TestingSe
             )
             .await?;
 
-        let value: TestResults = wasmbus_rpc::common::deserialize(&resp)
+        let value: TestResults = wasmbus_rpc::common::decode(&resp, &decode_test_results)
             .map_err(|e| RpcError::Deser(format!("'{}': TestResults", e)))?;
+        Ok(value)
+    }
+    #[allow(unused)]
+    async fn foo(&self, ctx: &Context) -> RpcResult<SampleUnion> {
+        let buf = *b"";
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "Testing.Foo",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        let value: SampleUnion = wasmbus_rpc::common::decode(&resp, &decode_sample_union)
+            .map_err(|e| RpcError::Deser(format!("'{}': SampleUnion", e)))?;
         Ok(value)
     }
 }

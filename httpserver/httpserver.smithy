@@ -6,6 +6,7 @@ metadata package = [{
     namespace: "org.wasmcloud.interface.httpserver",
     crate: "wasmcloud_interface_httpserver"
     py_module: "wasmcloud_interface_httpserver",
+    doc: "Httpserver: wasmcloud capability contract for http server",
 }]
 
 namespace org.wasmcloud.interface.httpserver

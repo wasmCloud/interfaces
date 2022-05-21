@@ -4,8 +4,13 @@
 path = "."
 files = [ "wasmcloud-model.smithy", "wasmcloud-core.smithy" ]
 
-[rust]
-output_dir = "rust"
+[tinygo]
+output_dir = ""
+files = [
+    { path = "tinygo/core.go", package="actor", namespace = "org.wasmcloud.core" },
+    { path = "tinygo/model.go", package="actor", namespace = "org.wasmcloud.model" },
+]
+
 
 #[[rust.files]]
 #path = "../src/wasmbus_core.rs"

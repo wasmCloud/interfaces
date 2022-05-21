@@ -1,4 +1,4 @@
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.2
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.3
 
 #[allow(unused_imports)]
 use async_trait::async_trait;
@@ -17,6 +17,7 @@ use wasmbus_rpc::{
     Timestamp,
 };
 
+#[allow(dead_code)]
 pub const SMITHY_VERSION: &str = "1.0";
 
 /// Input range for RandomInRange, inclusive. Result will be >= min and <= max
@@ -32,8 +33,9 @@ pub struct RangeLimit {
 
 // Encode RangeLimit as CBOR and append to output stream
 #[doc(hidden)]
+#[allow(unused_mut)]
 pub fn encode_range_limit<W: wasmbus_rpc::cbor::Write>(
-    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &RangeLimit,
 ) -> RpcResult<()> {
     e.array(2)?;
@@ -59,11 +61,7 @@ pub fn decode_range_limit(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Rang
             }
         };
         if is_array {
-            let len = d.array()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct RangeLimit: indefinite array not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
                     0 => min = Some(d.u32()?),
@@ -72,11 +70,7 @@ pub fn decode_range_limit(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Rang
                 }
             }
         } else {
-            let len = d.map()?.ok_or_else(|| {
-                RpcError::Deser(
-                    "decoding struct RangeLimit: indefinite map not supported".to_string(),
-                )
-            })?;
+            let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "min" => min = Some(d.u32()?),
@@ -235,7 +229,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .map_err(|e| RpcError::Deser(format!("'{}': String", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Request a random integer within a range
     /// The result will will be in the range [min,max), i.e., >= min and < max.
@@ -257,7 +250,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
         Ok(value)
     }
-
     #[allow(unused)]
     /// Request a 32-bit random number
     async fn random_32(&self, ctx: &Context) -> RpcResult<u32> {

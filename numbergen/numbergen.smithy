@@ -8,6 +8,7 @@ metadata package = [{
     namespace: "org.wasmcloud.interface.numbergen",
     crate: "wasmcloud_interface_numbergen",
     py_module: "wasmcloud_interface_numbergen",
+    doc: "Numbergen: wasmcloud built-in capability provider for number generation",
 }]
 
 namespace org.wasmcloud.interface.numbergen

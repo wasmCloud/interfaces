@@ -7,6 +7,7 @@ metadata package = [{
     namespace: "org.wasmcloud.interface.keyvalue",
     crate: "wasmcloud_interface_keyvalue",
     py_module: "wasmcloud_interface_keyvalue",
+    doc: "Keyvalue: wasmcloud capability contract for key-value store",
 }]
 
 namespace org.wasmcloud.interface.keyvalue

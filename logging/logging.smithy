@@ -8,6 +8,7 @@ metadata package = [{
     namespace: "org.wasmcloud.interface.logging",
     crate: "wasmcloud_interface_logging",
     py_module: "wasmcloud_interface_logging",
+    doc: "Logging: wasmcloud built-in logging capability provider",
 }]
 
 namespace org.wasmcloud.interface.logging
