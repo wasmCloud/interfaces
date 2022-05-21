@@ -651,16 +651,11 @@ pub struct GetObjectRequest {
 pub fn encode_get_object_request<W: wasmbus_rpc::cbor::Write>(
     mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetObjectRequest,
-<<<<<<< HEAD
 ) -> RpcResult<()>
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.array(4)?;
-=======
-) -> RpcResult<()> {
     e.array(5)?;
->>>>>>> added field resp_async
     encode_object_id(e, &val.object_id)?;
     encode_container_id(e, &val.container_id)?;
     if let Some(val) = val.range_start.as_ref() {
