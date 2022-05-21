@@ -2,8 +2,8 @@
 package logging
 
 import (
-	"github.com/wasmcloud/tinygo-msgpack"    //nolint
-	"github.com/wasmcloud/actor-tinygo" //nolint
+	"github.com/wasmcloud/actor-tinygo"   //nolint
+	"github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 type LogEntry struct {
@@ -13,6 +13,7 @@ type LogEntry struct {
 	Text string
 }
 
+// Encode serializes a LogEntry using msgpack
 func (o *LogEntry) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
 	encoder.WriteString("Level")
@@ -22,8 +23,9 @@ func (o *LogEntry) Encode(encoder msgpack.Writer) error {
 
 	return nil
 }
-func DecodeLogEntry(d msgpack.Decoder) (LogEntry, error) {
 
+// Decode deserializes a LogEntry using msgpack
+func DecodeLogEntry(d msgpack.Decoder) (LogEntry, error) {
 	var val LogEntry
 	isNil, err := d.IsNextNil()
 	if err != nil {
@@ -42,16 +44,12 @@ func DecodeLogEntry(d msgpack.Decoder) (LogEntry, error) {
 			return val, err
 		}
 		switch field {
-
 		case "Level":
 			val.Level, err = d.ReadString()
 		case "Text":
 			val.Text, err = d.ReadString()
 		default:
 			err = d.Skip()
-			if err != nil {
-				return val, err
-			}
 		}
 		if err != nil {
 			return val, err
@@ -68,8 +66,11 @@ type Logging interface {
 	WriteLog(ctx *actor.Context, arg LogEntry) error
 }
 
-// LoggingContractId returns the capability contract id for this interface
-func LoggingContractId() string { return "wasmcloud:builtin:logging" }
+// LoggingHandler is called by an actor during `main` to generate a dispatch handler
+// The output of this call should be passed into `actor.RegisterHandlers`
+func LoggingHandler() actor.Handler {
+	return actor.NewHandler("Logging", LoggingReceiver{})
+}
 
 // LoggingReceiver receives messages defined in the Logging service interface
 type LoggingReceiver struct{}
@@ -99,20 +100,6 @@ func (r *LoggingReceiver) dispatch(ctx *actor.Context, svc Logging, message *act
 
 // LoggingSender sends messages to a Logging service
 type LoggingSender struct{ transport actor.Transport }
-
-// NewProvider constructs a client for sending to a Logging provider
-// implementing the 'wasmcloud:builtin:logging' capability contract, with the "default" link
-func NewProviderLogging() *LoggingSender {
-	transport := actor.ToProvider("wasmcloud:builtin:logging", "default")
-	return &LoggingSender{transport: transport}
-}
-
-// NewProviderLoggingLink constructs a client for sending to a Logging provider
-// implementing the 'wasmcloud:builtin:logging' capability contract, with the specified link name
-func NewProviderLoggingLink(linkName string) *LoggingSender {
-	transport := actor.ToProvider("wasmcloud:builtin:logging", linkName)
-	return &LoggingSender{transport: transport}
-}
 
 //
 // WriteLog - log a text message

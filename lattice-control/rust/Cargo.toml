@@ -19,10 +19,10 @@ async-trait = "0.1"
 data-encoding = "2.3.1"
 futures = "0.3"
 log = "0.4.14"
-ring = "0.16.20"
-rmp-serde = "1.0.0"
+#ring = "0.16.20"
+rmp-serde = "1.1.0"
 serde = { version = "1.0.118", features = ["derive"] }
-wasmbus-rpc = "0.8.2"
+wasmbus-rpc = { path = "../../../weld/rpc-rs" }
 
 [build-dependencies]
-weld-codegen = "0.4.2"
+weld-codegen = { path = "../../../weld/codegen" }

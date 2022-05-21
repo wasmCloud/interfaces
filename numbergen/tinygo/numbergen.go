@@ -2,8 +2,8 @@
 package numbergen
 
 import (
-	"github.com/wasmcloud/tinygo-msgpack"    //nolint
-	"github.com/wasmcloud/actor-tinygo" //nolint
+	"github.com/wasmcloud/actor-tinygo"   //nolint
+	"github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // Input range for RandomInRange, inclusive. Result will be >= min and <= max
@@ -14,6 +14,7 @@ type RangeLimit struct {
 	Max uint32
 }
 
+// Encode serializes a RangeLimit using msgpack
 func (o *RangeLimit) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
 	encoder.WriteString("Min")
@@ -23,8 +24,9 @@ func (o *RangeLimit) Encode(encoder msgpack.Writer) error {
 
 	return nil
 }
-func DecodeRangeLimit(d msgpack.Decoder) (RangeLimit, error) {
 
+// Decode deserializes a RangeLimit using msgpack
+func DecodeRangeLimit(d msgpack.Decoder) (RangeLimit, error) {
 	var val RangeLimit
 	isNil, err := d.IsNextNil()
 	if err != nil {
@@ -43,16 +45,12 @@ func DecodeRangeLimit(d msgpack.Decoder) (RangeLimit, error) {
 			return val, err
 		}
 		switch field {
-
 		case "Min":
 			val.Min, err = d.ReadUint32()
 		case "Max":
 			val.Max, err = d.ReadUint32()
 		default:
 			err = d.Skip()
-			if err != nil {
-				return val, err
-			}
 		}
 		if err != nil {
 			return val, err
@@ -75,8 +73,11 @@ type NumberGen interface {
 	Random32(ctx *actor.Context) (uint32, error)
 }
 
-// NumberGenContractId returns the capability contract id for this interface
-func NumberGenContractId() string { return "wasmcloud:builtin:numbergen" }
+// NumberGenHandler is called by an actor during `main` to generate a dispatch handler
+// The output of this call should be passed into `actor.RegisterHandlers`
+func NumberGenHandler() actor.Handler {
+	return actor.NewHandler("NumberGen", NumberGenReceiver{})
+}
 
 // NumberGenReceiver receives messages defined in the NumberGen service interface
 type NumberGenReceiver struct{}
@@ -97,7 +98,6 @@ func (r *NumberGenReceiver) dispatch(ctx *actor.Context, svc NumberGen, message 
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
 			enc.WriteString(resp)
-
 			return &actor.Message{Method: "NumberGen.GenerateGuid", Arg: buf}, nil
 		}
 	case "RandomInRange":
@@ -121,7 +121,6 @@ func (r *NumberGenReceiver) dispatch(ctx *actor.Context, svc NumberGen, message 
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
 			enc.WriteUint32(resp)
-
 			return &actor.Message{Method: "NumberGen.RandomInRange", Arg: buf}, nil
 		}
 	case "Random32":
@@ -138,7 +137,6 @@ func (r *NumberGenReceiver) dispatch(ctx *actor.Context, svc NumberGen, message 
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
 			enc.WriteUint32(resp)
-
 			return &actor.Message{Method: "NumberGen.Random32", Arg: buf}, nil
 		}
 	default:
@@ -149,20 +147,6 @@ func (r *NumberGenReceiver) dispatch(ctx *actor.Context, svc NumberGen, message 
 // NumberGenSender sends messages to a NumberGen service
 type NumberGenSender struct{ transport actor.Transport }
 
-// NewProvider constructs a client for sending to a NumberGen provider
-// implementing the 'wasmcloud:builtin:numbergen' capability contract, with the "default" link
-func NewProviderNumberGen() *NumberGenSender {
-	transport := actor.ToProvider("wasmcloud:builtin:numbergen", "default")
-	return &NumberGenSender{transport: transport}
-}
-
-// NewProviderNumberGenLink constructs a client for sending to a NumberGen provider
-// implementing the 'wasmcloud:builtin:numbergen' capability contract, with the specified link name
-func NewProviderNumberGenLink(linkName string) *NumberGenSender {
-	transport := actor.ToProvider("wasmcloud:builtin:numbergen", linkName)
-	return &NumberGenSender{transport: transport}
-}
-
 //
 // GenerateGuid - return a 128-bit guid in the form 123e4567-e89b-12d3-a456-426655440000
 // These guids are known as "version 4", meaning all bits are random or pseudo-random.
@@ -170,7 +154,6 @@ func NewProviderNumberGenLink(linkName string) *NumberGenSender {
 func (s *NumberGenSender) GenerateGuid(ctx *actor.Context) (string, error) {
 	buf := make([]byte, 0)
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "NumberGen.GenerateGuid", Arg: buf})
-
 	d := msgpack.NewDecoder(out_buf)
 	resp, err_ := d.ReadString()
 	if err_ != nil {
@@ -193,7 +176,6 @@ func (s *NumberGenSender) RandomInRange(ctx *actor.Context, arg RangeLimit) (uin
 	arg.Encode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "NumberGen.RandomInRange", Arg: buf})
-
 	d := msgpack.NewDecoder(out_buf)
 	resp, err_ := d.ReadUint32()
 	if err_ != nil {
@@ -206,7 +188,6 @@ func (s *NumberGenSender) RandomInRange(ctx *actor.Context, arg RangeLimit) (uin
 func (s *NumberGenSender) Random32(ctx *actor.Context) (uint32, error) {
 	buf := make([]byte, 0)
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "NumberGen.Random32", Arg: buf})
-
 	d := msgpack.NewDecoder(out_buf)
 	resp, err_ := d.ReadUint32()
 	if err_ != nil {

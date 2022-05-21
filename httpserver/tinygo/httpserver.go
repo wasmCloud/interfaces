@@ -2,14 +2,15 @@
 package httpserver
 
 import (
-	"github.com/wasmcloud/tinygo-msgpack"    //nolint
-	"github.com/wasmcloud/actor-tinygo" //nolint
+	"github.com/wasmcloud/actor-tinygo"   //nolint
+	"github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // map data structure for holding http headers
 //
 type HeaderMap map[string]HeaderValues
 
+// Encode serializes a HeaderMap using msgpack
 func (o *HeaderMap) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(uint32(len(*o)))
 	for key_o, val_o := range *o {
@@ -19,8 +20,9 @@ func (o *HeaderMap) Encode(encoder msgpack.Writer) error {
 
 	return nil
 }
-func DecodeHeaderMap(d msgpack.Decoder) (HeaderMap, error) {
 
+// Decode deserializes a HeaderMap using msgpack
+func DecodeHeaderMap(d msgpack.Decoder) (HeaderMap, error) {
 	isNil, err := d.IsNextNil()
 	if err != nil && isNil {
 		d.Skip()
@@ -40,11 +42,11 @@ func DecodeHeaderMap(d msgpack.Decoder) (HeaderMap, error) {
 		val[k] = v
 	}
 	return val, nil
-
 }
 
 type HeaderValues []string
 
+// Encode serializes a HeaderValues using msgpack
 func (o *HeaderValues) Encode(encoder msgpack.Writer) error {
 
 	encoder.WriteArraySize(uint32(len(*o)))
@@ -54,8 +56,9 @@ func (o *HeaderValues) Encode(encoder msgpack.Writer) error {
 
 	return nil
 }
-func DecodeHeaderValues(d msgpack.Decoder) (HeaderValues, error) {
 
+// Decode deserializes a HeaderValues using msgpack
+func DecodeHeaderValues(d msgpack.Decoder) (HeaderValues, error) {
 	isNil, err := d.IsNextNil()
 	if err == nil && isNil {
 		d.Skip()
@@ -74,7 +77,6 @@ func DecodeHeaderValues(d msgpack.Decoder) (HeaderValues, error) {
 		val = append(val, item)
 	}
 	return val, nil
-
 }
 
 // HttpRequest contains data sent to actor about the http request
@@ -91,6 +93,7 @@ type HttpRequest struct {
 	Body []byte
 }
 
+// Encode serializes a HttpRequest using msgpack
 func (o *HttpRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(5)
 	encoder.WriteString("Method")
@@ -106,8 +109,9 @@ func (o *HttpRequest) Encode(encoder msgpack.Writer) error {
 
 	return nil
 }
-func DecodeHttpRequest(d msgpack.Decoder) (HttpRequest, error) {
 
+// Decode deserializes a HttpRequest using msgpack
+func DecodeHttpRequest(d msgpack.Decoder) (HttpRequest, error) {
 	var val HttpRequest
 	isNil, err := d.IsNextNil()
 	if err != nil {
@@ -126,7 +130,6 @@ func DecodeHttpRequest(d msgpack.Decoder) (HttpRequest, error) {
 			return val, err
 		}
 		switch field {
-
 		case "Method":
 			val.Method, err = d.ReadString()
 		case "Path":
@@ -139,9 +142,6 @@ func DecodeHttpRequest(d msgpack.Decoder) (HttpRequest, error) {
 			val.Body, err = d.ReadByteArray()
 		default:
 			err = d.Skip()
-			if err != nil {
-				return val, err
-			}
 		}
 		if err != nil {
 			return val, err
@@ -162,6 +162,7 @@ type HttpResponse struct {
 	Body []byte
 }
 
+// Encode serializes a HttpResponse using msgpack
 func (o *HttpResponse) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
 	encoder.WriteString("StatusCode")
@@ -173,8 +174,9 @@ func (o *HttpResponse) Encode(encoder msgpack.Writer) error {
 
 	return nil
 }
-func DecodeHttpResponse(d msgpack.Decoder) (HttpResponse, error) {
 
+// Decode deserializes a HttpResponse using msgpack
+func DecodeHttpResponse(d msgpack.Decoder) (HttpResponse, error) {
 	var val HttpResponse
 	isNil, err := d.IsNextNil()
 	if err != nil {
@@ -193,7 +195,6 @@ func DecodeHttpResponse(d msgpack.Decoder) (HttpResponse, error) {
 			return val, err
 		}
 		switch field {
-
 		case "StatusCode":
 			val.StatusCode, err = d.ReadUint16()
 		case "Header":
@@ -202,9 +203,6 @@ func DecodeHttpResponse(d msgpack.Decoder) (HttpResponse, error) {
 			val.Body, err = d.ReadByteArray()
 		default:
 			err = d.Skip()
-			if err != nil {
-				return val, err
-			}
 		}
 		if err != nil {
 			return val, err
@@ -219,8 +217,11 @@ type HttpServer interface {
 	HandleRequest(ctx *actor.Context, arg HttpRequest) (*HttpResponse, error)
 }
 
-// HttpServerContractId returns the capability contract id for this interface
-func HttpServerContractId() string { return "wasmcloud:httpserver" }
+// HttpServerHandler is called by an actor during `main` to generate a dispatch handler
+// The output of this call should be passed into `actor.RegisterHandlers`
+func HttpServerHandler() actor.Handler {
+	return actor.NewHandler("HttpServer", HttpServerReceiver{})
+}
 
 // HttpServerReceiver receives messages defined in the HttpServer service interface
 // HttpServer is the contract to be implemented by actor
@@ -249,7 +250,6 @@ func (r *HttpServerReceiver) dispatch(ctx *actor.Context, svc HttpServer, messag
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
 			resp.Encode(enc)
-
 			return &actor.Message{Method: "HttpServer.HandleRequest", Arg: buf}, nil
 		}
 	default:
@@ -261,12 +261,6 @@ func (r *HttpServerReceiver) dispatch(ctx *actor.Context, svc HttpServer, messag
 // HttpServer is the contract to be implemented by actor
 type HttpServerSender struct{ transport actor.Transport }
 
-// NewActorSender constructs a client for actor-to-actor messaging
-// using the recipient actor's public key
-func NewActorHttpServerSender(actor_id string) *HttpServerSender {
-	transport := actor.ToActor(actor_id)
-	return &HttpServerSender{transport: transport}
-}
 func (s *HttpServerSender) HandleRequest(ctx *actor.Context, arg HttpRequest) (*HttpResponse, error) {
 
 	var sizer msgpack.Sizer
@@ -279,7 +273,6 @@ func (s *HttpServerSender) HandleRequest(ctx *actor.Context, arg HttpRequest) (*
 	arg.Encode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "HttpServer.HandleRequest", Arg: buf})
-
 	d := msgpack.NewDecoder(out_buf)
 	resp, err_ := DecodeHttpResponse(d)
 	if err_ != nil {
