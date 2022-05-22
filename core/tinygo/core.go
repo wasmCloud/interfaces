@@ -2,7 +2,7 @@
 package actor
 
 import (
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // List of linked actors for a provider
@@ -22,9 +22,11 @@ func (o *ActorLinks) Encode(encoder msgpack.Writer) error {
 // Decode deserializes a ActorLinks using msgpack
 func DecodeActorLinks(d msgpack.Decoder) (ActorLinks, error) {
 	isNil, err := d.IsNextNil()
-	if err == nil && isNil {
-		d.Skip()
-		return make([]LinkDefinition, 0), nil
+	if isNil {
+		if err != nil {
+			err = d.Skip()
+		}
+		return make([]LinkDefinition, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {
@@ -74,9 +76,11 @@ func (o *ClusterIssuers) Encode(encoder msgpack.Writer) error {
 // Decode deserializes a ClusterIssuers using msgpack
 func DecodeClusterIssuers(d msgpack.Decoder) (ClusterIssuers, error) {
 	isNil, err := d.IsNextNil()
-	if err == nil && isNil {
-		d.Skip()
-		return make([]ClusterIssuerKey, 0), nil
+	if isNil {
+		if err != nil {
+			err = d.Skip()
+		}
+		return make([]ClusterIssuerKey, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {
@@ -324,8 +328,8 @@ func (o *HostEnvValues) Encode(encoder msgpack.Writer) error {
 func DecodeHostEnvValues(d msgpack.Decoder) (HostEnvValues, error) {
 	isNil, err := d.IsNextNil()
 	if err != nil && isNil {
-		d.Skip()
-		return make(map[string]string, 0), nil
+		err = d.Skip()
+		return make(map[string]string, 0), err
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -591,8 +595,8 @@ func (o *LinkSettings) Encode(encoder msgpack.Writer) error {
 func DecodeLinkSettings(d msgpack.Decoder) (LinkSettings, error) {
 	isNil, err := d.IsNextNil()
 	if err != nil && isNil {
-		d.Skip()
-		return make(map[string]string, 0), nil
+		err = d.Skip()
+		return make(map[string]string, 0), err
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -628,8 +632,8 @@ func (o *TraceContext) Encode(encoder msgpack.Writer) error {
 func DecodeTraceContext(d msgpack.Decoder) (TraceContext, error) {
 	isNil, err := d.IsNextNil()
 	if err != nil && isNil {
-		d.Skip()
-		return make(map[string]string, 0), nil
+		err = d.Skip()
+		return make(map[string]string, 0), err
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -711,16 +715,18 @@ type Actor interface {
 
 // ActorHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func ActorHandler() Handler {
-	return NewHandler("Actor", ActorReceiver{})
+func ActorHandler(actor_ Actor) Handler {
+	return NewHandler("Actor", &ActorReceiver{}, actor_)
 }
 
 // ActorReceiver receives messages defined in the Actor service interface
 // Actor service
 type ActorReceiver struct{}
 
-func (r *ActorReceiver) dispatch(ctx *Context, svc Actor, message *Message) (*Message, error) {
+func (r *ActorReceiver) Dispatch(ctx *Context, svc interface{}, message *Message) (*Message, error) {
+	svc_, _ := svc.(Actor)
 	switch message.Method {
+
 	case "HealthRequest":
 		{
 
@@ -730,7 +736,7 @@ func (r *ActorReceiver) dispatch(ctx *Context, svc Actor, message *Message) (*Me
 				return nil, err_
 			}
 
-			resp, err := svc.HealthRequest(ctx, value)
+			resp, err := svc_.HealthRequest(ctx, value)
 			if err != nil {
 				return nil, err
 			}

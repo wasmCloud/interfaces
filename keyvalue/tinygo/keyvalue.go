@@ -2,8 +2,8 @@
 package keyvalue
 
 import (
-	"github.com/wasmcloud/actor-tinygo"   //nolint
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	"github.com/wasmcloud/actor-tinygo"           //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // Response to get request
@@ -461,9 +461,11 @@ func (o *StringList) Encode(encoder msgpack.Writer) error {
 // Decode deserializes a StringList using msgpack
 func DecodeStringList(d msgpack.Decoder) (StringList, error) {
 	isNil, err := d.IsNextNil()
-	if err == nil && isNil {
-		d.Skip()
-		return make([]string, 0), nil
+	if isNil {
+		if err != nil {
+			err = d.Skip()
+		}
+		return make([]string, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {
@@ -532,15 +534,17 @@ type KeyValue interface {
 
 // KeyValueHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func KeyValueHandler() actor.Handler {
-	return actor.NewHandler("KeyValue", KeyValueReceiver{})
+func KeyValueHandler(actor_ KeyValue) actor.Handler {
+	return actor.NewHandler("KeyValue", &KeyValueReceiver{}, actor_)
 }
 
 // KeyValueReceiver receives messages defined in the KeyValue service interface
 type KeyValueReceiver struct{}
 
-func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *actor.Message) (*actor.Message, error) {
+func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message *actor.Message) (*actor.Message, error) {
+	svc_, _ := svc.(KeyValue)
 	switch message.Method {
+
 	case "Increment":
 		{
 
@@ -550,7 +554,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.Increment(ctx, value)
+			resp, err := svc_.Increment(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -573,7 +577,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.Contains(ctx, value)
+			resp, err := svc_.Contains(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -596,7 +600,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.Del(ctx, value)
+			resp, err := svc_.Del(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -619,7 +623,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.Get(ctx, value)
+			resp, err := svc_.Get(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -642,7 +646,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.ListAdd(ctx, value)
+			resp, err := svc_.ListAdd(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -665,7 +669,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.ListClear(ctx, value)
+			resp, err := svc_.ListClear(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -688,7 +692,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.ListDel(ctx, value)
+			resp, err := svc_.ListDel(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -711,7 +715,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.ListRange(ctx, value)
+			resp, err := svc_.ListRange(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -734,7 +738,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			err := svc.Set(ctx, value)
+			err := svc_.Set(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -750,7 +754,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.SetAdd(ctx, value)
+			resp, err := svc_.SetAdd(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -773,7 +777,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.SetDel(ctx, value)
+			resp, err := svc_.SetDel(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -796,7 +800,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.SetIntersection(ctx, value)
+			resp, err := svc_.SetIntersection(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -819,7 +823,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.SetQuery(ctx, value)
+			resp, err := svc_.SetQuery(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -842,7 +846,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.SetUnion(ctx, value)
+			resp, err := svc_.SetUnion(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -865,7 +869,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.SetClear(ctx, value)
+			resp, err := svc_.SetClear(ctx, value)
 			if err != nil {
 				return nil, err
 			}

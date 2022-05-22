@@ -2,8 +2,8 @@
 package httpclient
 
 import (
-	"github.com/wasmcloud/actor-tinygo"   //nolint
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	"github.com/wasmcloud/actor-tinygo"           //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // map data structure for holding http headers
@@ -25,8 +25,8 @@ func (o *HeaderMap) Encode(encoder msgpack.Writer) error {
 func DecodeHeaderMap(d msgpack.Decoder) (HeaderMap, error) {
 	isNil, err := d.IsNextNil()
 	if err != nil && isNil {
-		d.Skip()
-		return make(map[string]HeaderValues, 0), nil
+		err = d.Skip()
+		return make(map[string]HeaderValues, 0), err
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -60,9 +60,11 @@ func (o *HeaderValues) Encode(encoder msgpack.Writer) error {
 // Decode deserializes a HeaderValues using msgpack
 func DecodeHeaderValues(d msgpack.Decoder) (HeaderValues, error) {
 	isNil, err := d.IsNextNil()
-	if err == nil && isNil {
-		d.Skip()
-		return make([]string, 0), nil
+	if isNil {
+		if err != nil {
+			err = d.Skip()
+		}
+		return make([]string, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {
@@ -222,8 +224,8 @@ type HttpClient interface {
 
 // HttpClientHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func HttpClientHandler() actor.Handler {
-	return actor.NewHandler("HttpClient", HttpClientReceiver{})
+func HttpClientHandler(actor_ HttpClient) actor.Handler {
+	return actor.NewHandler("HttpClient", &HttpClientReceiver{}, actor_)
 }
 
 // HttpClientReceiver receives messages defined in the HttpClient service interface
@@ -232,8 +234,10 @@ func HttpClientHandler() actor.Handler {
 // with "wasmcloud:httpclient"
 type HttpClientReceiver struct{}
 
-func (r *HttpClientReceiver) dispatch(ctx *actor.Context, svc HttpClient, message *actor.Message) (*actor.Message, error) {
+func (r *HttpClientReceiver) Dispatch(ctx *actor.Context, svc interface{}, message *actor.Message) (*actor.Message, error) {
+	svc_, _ := svc.(HttpClient)
 	switch message.Method {
+
 	case "Request":
 		{
 
@@ -243,7 +247,7 @@ func (r *HttpClientReceiver) dispatch(ctx *actor.Context, svc HttpClient, messag
 				return nil, err_
 			}
 
-			resp, err := svc.Request(ctx, value)
+			resp, err := svc_.Request(ctx, value)
 			if err != nil {
 				return nil, err
 			}

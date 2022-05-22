@@ -2,8 +2,8 @@
 package numbergen
 
 import (
-	"github.com/wasmcloud/actor-tinygo"   //nolint
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	"github.com/wasmcloud/actor-tinygo"           //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // Input range for RandomInRange, inclusive. Result will be >= min and <= max
@@ -75,18 +75,20 @@ type NumberGen interface {
 
 // NumberGenHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func NumberGenHandler() actor.Handler {
-	return actor.NewHandler("NumberGen", NumberGenReceiver{})
+func NumberGenHandler(actor_ NumberGen) actor.Handler {
+	return actor.NewHandler("NumberGen", &NumberGenReceiver{}, actor_)
 }
 
 // NumberGenReceiver receives messages defined in the NumberGen service interface
 type NumberGenReceiver struct{}
 
-func (r *NumberGenReceiver) dispatch(ctx *actor.Context, svc NumberGen, message *actor.Message) (*actor.Message, error) {
+func (r *NumberGenReceiver) Dispatch(ctx *actor.Context, svc interface{}, message *actor.Message) (*actor.Message, error) {
+	svc_, _ := svc.(NumberGen)
 	switch message.Method {
+
 	case "GenerateGuid":
 		{
-			resp, err := svc.GenerateGuid(ctx)
+			resp, err := svc_.GenerateGuid(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -109,7 +111,7 @@ func (r *NumberGenReceiver) dispatch(ctx *actor.Context, svc NumberGen, message 
 				return nil, err_
 			}
 
-			resp, err := svc.RandomInRange(ctx, value)
+			resp, err := svc_.RandomInRange(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -125,7 +127,7 @@ func (r *NumberGenReceiver) dispatch(ctx *actor.Context, svc NumberGen, message 
 		}
 	case "Random32":
 		{
-			resp, err := svc.Random32(ctx)
+			resp, err := svc_.Random32(ctx)
 			if err != nil {
 				return nil, err
 			}

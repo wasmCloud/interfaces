@@ -2,7 +2,7 @@
 package actor
 
 import (
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // Capability contract id, e.g. 'wasmcloud:httpserver'
@@ -60,9 +60,11 @@ func (o *IdentifierList) Encode(encoder msgpack.Writer) error {
 // Decode deserializes a IdentifierList using msgpack
 func DecodeIdentifierList(d msgpack.Decoder) (IdentifierList, error) {
 	isNil, err := d.IsNextNil()
-	if err == nil && isNil {
-		d.Skip()
-		return make([]string, 0), nil
+	if isNil {
+		if err != nil {
+			err = d.Skip()
+		}
+		return make([]string, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {

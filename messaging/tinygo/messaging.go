@@ -2,8 +2,8 @@
 package messaging
 
 import (
-	"github.com/wasmcloud/actor-tinygo"   //nolint
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	"github.com/wasmcloud/actor-tinygo"           //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // A message to be published
@@ -256,8 +256,8 @@ type MessageSubscriber interface {
 
 // MessageSubscriberHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func MessageSubscriberHandler() actor.Handler {
-	return actor.NewHandler("MessageSubscriber", MessageSubscriberReceiver{})
+func MessageSubscriberHandler(actor_ MessageSubscriber) actor.Handler {
+	return actor.NewHandler("MessageSubscriber", &MessageSubscriberReceiver{}, actor_)
 }
 
 // MessageSubscriberReceiver receives messages defined in the MessageSubscriber service interface
@@ -266,8 +266,10 @@ func MessageSubscriberHandler() actor.Handler {
 // sent by the Messaging provider
 type MessageSubscriberReceiver struct{}
 
-func (r *MessageSubscriberReceiver) dispatch(ctx *actor.Context, svc MessageSubscriber, message *actor.Message) (*actor.Message, error) {
+func (r *MessageSubscriberReceiver) Dispatch(ctx *actor.Context, svc interface{}, message *actor.Message) (*actor.Message, error) {
+	svc_, _ := svc.(MessageSubscriber)
 	switch message.Method {
+
 	case "HandleMessage":
 		{
 
@@ -277,7 +279,7 @@ func (r *MessageSubscriberReceiver) dispatch(ctx *actor.Context, svc MessageSubs
 				return nil, err_
 			}
 
-			err := svc.HandleMessage(ctx, value)
+			err := svc_.HandleMessage(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -327,8 +329,8 @@ type Messaging interface {
 
 // MessagingHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func MessagingHandler() actor.Handler {
-	return actor.NewHandler("Messaging", MessagingReceiver{})
+func MessagingHandler(actor_ Messaging) actor.Handler {
+	return actor.NewHandler("Messaging", &MessagingReceiver{}, actor_)
 }
 
 // MessagingReceiver receives messages defined in the Messaging service interface
@@ -336,8 +338,10 @@ func MessagingHandler() actor.Handler {
 // that can deliver messages
 type MessagingReceiver struct{}
 
-func (r *MessagingReceiver) dispatch(ctx *actor.Context, svc Messaging, message *actor.Message) (*actor.Message, error) {
+func (r *MessagingReceiver) Dispatch(ctx *actor.Context, svc interface{}, message *actor.Message) (*actor.Message, error) {
+	svc_, _ := svc.(Messaging)
 	switch message.Method {
+
 	case "Publish":
 		{
 
@@ -347,7 +351,7 @@ func (r *MessagingReceiver) dispatch(ctx *actor.Context, svc Messaging, message 
 				return nil, err_
 			}
 
-			err := svc.Publish(ctx, value)
+			err := svc_.Publish(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -363,7 +367,7 @@ func (r *MessagingReceiver) dispatch(ctx *actor.Context, svc Messaging, message 
 				return nil, err_
 			}
 
-			resp, err := svc.Request(ctx, value)
+			resp, err := svc_.Request(ctx, value)
 			if err != nil {
 				return nil, err
 			}

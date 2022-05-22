@@ -2,8 +2,8 @@
 package factorial
 
 import (
-	"github.com/wasmcloud/actor-tinygo"   //nolint
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	"github.com/wasmcloud/actor-tinygo"           //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // The Factorial service has a single method, calculate, which
@@ -15,8 +15,8 @@ type Factorial interface {
 
 // FactorialHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func FactorialHandler() actor.Handler {
-	return actor.NewHandler("Factorial", FactorialReceiver{})
+func FactorialHandler(actor_ Factorial) actor.Handler {
+	return actor.NewHandler("Factorial", &FactorialReceiver{}, actor_)
 }
 
 // FactorialReceiver receives messages defined in the Factorial service interface
@@ -24,8 +24,10 @@ func FactorialHandler() actor.Handler {
 // calculates the factorial of its whole number parameter.
 type FactorialReceiver struct{}
 
-func (r *FactorialReceiver) dispatch(ctx *actor.Context, svc Factorial, message *actor.Message) (*actor.Message, error) {
+func (r *FactorialReceiver) Dispatch(ctx *actor.Context, svc interface{}, message *actor.Message) (*actor.Message, error) {
+	svc_, _ := svc.(Factorial)
 	switch message.Method {
+
 	case "Calculate":
 		{
 
@@ -35,7 +37,7 @@ func (r *FactorialReceiver) dispatch(ctx *actor.Context, svc Factorial, message 
 				return nil, err_
 			}
 
-			resp, err := svc.Calculate(ctx, value)
+			resp, err := svc_.Calculate(ctx, value)
 			if err != nil {
 				return nil, err
 			}
