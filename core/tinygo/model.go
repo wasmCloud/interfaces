@@ -2,7 +2,7 @@
 package actor
 
 import (
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // Capability contract id, e.g. 'wasmcloud:httpserver'
@@ -16,7 +16,7 @@ func (o *CapabilityContractId) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a CapabilityContractId using msgpack
-func DecodeCapabilityContractId(d msgpack.Decoder) (CapabilityContractId, error) {
+func DecodeCapabilityContractId(d *msgpack.Decoder) (CapabilityContractId, error) {
 	val, err := d.ReadString()
 	if err != nil {
 		return "", err
@@ -58,11 +58,10 @@ func (o *IdentifierList) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a IdentifierList using msgpack
-func DecodeIdentifierList(d msgpack.Decoder) (IdentifierList, error) {
+func DecodeIdentifierList(d *msgpack.Decoder) (IdentifierList, error) {
 	isNil, err := d.IsNextNil()
-	if err == nil && isNil {
-		d.Skip()
-		return make([]string, 0), nil
+	if err != nil || isNil {
+		return make([]string, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {
@@ -102,7 +101,7 @@ func (o *Unit) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a Unit using msgpack
-func DecodeUnit(d msgpack.Decoder) (Unit, error) {
+func DecodeUnit(d *msgpack.Decoder) (Unit, error) {
 	_ = d.Skip()
 	return Unit{}, nil
 }

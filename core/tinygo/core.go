@@ -2,7 +2,7 @@
 package actor
 
 import (
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // List of linked actors for a provider
@@ -20,11 +20,10 @@ func (o *ActorLinks) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a ActorLinks using msgpack
-func DecodeActorLinks(d msgpack.Decoder) (ActorLinks, error) {
+func DecodeActorLinks(d *msgpack.Decoder) (ActorLinks, error) {
 	isNil, err := d.IsNextNil()
-	if err == nil && isNil {
-		d.Skip()
-		return make([]LinkDefinition, 0), nil
+	if err != nil || isNil {
+		return make([]LinkDefinition, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {
@@ -50,7 +49,7 @@ func (o *ClusterIssuerKey) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a ClusterIssuerKey using msgpack
-func DecodeClusterIssuerKey(d msgpack.Decoder) (ClusterIssuerKey, error) {
+func DecodeClusterIssuerKey(d *msgpack.Decoder) (ClusterIssuerKey, error) {
 	val, err := d.ReadString()
 	if err != nil {
 		return "", err
@@ -72,11 +71,10 @@ func (o *ClusterIssuers) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a ClusterIssuers using msgpack
-func DecodeClusterIssuers(d msgpack.Decoder) (ClusterIssuers, error) {
+func DecodeClusterIssuers(d *msgpack.Decoder) (ClusterIssuers, error) {
 	isNil, err := d.IsNextNil()
-	if err == nil && isNil {
-		d.Skip()
-		return make([]ClusterIssuerKey, 0), nil
+	if err != nil || isNil {
+		return make([]ClusterIssuerKey, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {
@@ -105,14 +103,11 @@ func (o *HealthCheckRequest) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a HealthCheckRequest using msgpack
-func DecodeHealthCheckRequest(d msgpack.Decoder) (HealthCheckRequest, error) {
+func DecodeHealthCheckRequest(d *msgpack.Decoder) (HealthCheckRequest, error) {
 	var val HealthCheckRequest
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -146,23 +141,20 @@ type HealthCheckResponse struct {
 // Encode serializes a HealthCheckResponse using msgpack
 func (o *HealthCheckResponse) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
-	encoder.WriteString("Healthy")
+	encoder.WriteString("healthy")
 	encoder.WriteBool(o.Healthy)
-	encoder.WriteString("Message")
+	encoder.WriteString("message")
 	encoder.WriteString(o.Message)
 
 	return nil
 }
 
 // Decode deserializes a HealthCheckResponse using msgpack
-func DecodeHealthCheckResponse(d msgpack.Decoder) (HealthCheckResponse, error) {
+func DecodeHealthCheckResponse(d *msgpack.Decoder) (HealthCheckResponse, error) {
 	var val HealthCheckResponse
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -174,9 +166,9 @@ func DecodeHealthCheckResponse(d msgpack.Decoder) (HealthCheckResponse, error) {
 			return val, err
 		}
 		switch field {
-		case "Healthy":
+		case "healthy":
 			val.Healthy, err = d.ReadBool()
-		case "Message":
+		case "message":
 			val.Message, err = d.ReadString()
 		default:
 			err = d.Skip()
@@ -248,14 +240,11 @@ func (o *HostData) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a HostData using msgpack
-func DecodeHostData(d msgpack.Decoder) (HostData, error) {
+func DecodeHostData(d *msgpack.Decoder) (HostData, error) {
 	var val HostData
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -321,11 +310,10 @@ func (o *HostEnvValues) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a HostEnvValues using msgpack
-func DecodeHostEnvValues(d msgpack.Decoder) (HostEnvValues, error) {
+func DecodeHostEnvValues(d *msgpack.Decoder) (HostEnvValues, error) {
 	isNil, err := d.IsNextNil()
-	if err != nil && isNil {
-		d.Skip()
-		return make(map[string]string, 0), nil
+	if err != nil || isNil {
+		return make(map[string]string, 0), err
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -361,15 +349,15 @@ type Invocation struct {
 // Encode serializes a Invocation using msgpack
 func (o *Invocation) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(9)
-	encoder.WriteString("Origin")
+	encoder.WriteString("origin")
 	o.Origin.Encode(encoder)
-	encoder.WriteString("Target")
+	encoder.WriteString("target")
 	o.Target.Encode(encoder)
-	encoder.WriteString("Operation")
+	encoder.WriteString("operation")
 	encoder.WriteString(o.Operation)
-	encoder.WriteString("Msg")
+	encoder.WriteString("msg")
 	encoder.WriteByteArray(o.Msg)
-	encoder.WriteString("Id")
+	encoder.WriteString("id")
 	encoder.WriteString(o.Id)
 	encoder.WriteString("encoded_claims")
 	encoder.WriteString(o.EncodedClaims)
@@ -377,7 +365,7 @@ func (o *Invocation) Encode(encoder msgpack.Writer) error {
 	encoder.WriteString(o.HostId)
 	encoder.WriteString("content_length")
 	encoder.WriteUint64(o.ContentLength)
-	encoder.WriteString("TraceContext")
+	encoder.WriteString("traceContext")
 	if o.TraceContext == nil {
 		encoder.WriteNil()
 	} else {
@@ -388,14 +376,11 @@ func (o *Invocation) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a Invocation using msgpack
-func DecodeInvocation(d msgpack.Decoder) (Invocation, error) {
+func DecodeInvocation(d *msgpack.Decoder) (Invocation, error) {
 	var val Invocation
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -407,15 +392,15 @@ func DecodeInvocation(d msgpack.Decoder) (Invocation, error) {
 			return val, err
 		}
 		switch field {
-		case "Origin":
+		case "origin":
 			val.Origin, err = DecodeWasmCloudEntity(d)
-		case "Target":
+		case "target":
 			val.Target, err = DecodeWasmCloudEntity(d)
-		case "Operation":
+		case "operation":
 			val.Operation, err = d.ReadString()
-		case "Msg":
+		case "msg":
 			val.Msg, err = d.ReadByteArray()
-		case "Id":
+		case "id":
 			val.Id, err = d.ReadString()
 		case "encoded_claims":
 			val.EncodedClaims, err = d.ReadString()
@@ -423,7 +408,7 @@ func DecodeInvocation(d msgpack.Decoder) (Invocation, error) {
 			val.HostId, err = d.ReadString()
 		case "content_length":
 			val.ContentLength, err = d.ReadUint64()
-		case "TraceContext":
+		case "traceContext":
 			val.TraceContext, err = DecodeTraceContext(d)
 		default:
 			err = d.Skip()
@@ -451,11 +436,11 @@ type InvocationResponse struct {
 // Encode serializes a InvocationResponse using msgpack
 func (o *InvocationResponse) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(4)
-	encoder.WriteString("Msg")
+	encoder.WriteString("msg")
 	encoder.WriteByteArray(o.Msg)
 	encoder.WriteString("invocation_id")
 	encoder.WriteString(o.InvocationId)
-	encoder.WriteString("Error")
+	encoder.WriteString("error")
 	encoder.WriteString(o.Error)
 	encoder.WriteString("content_length")
 	encoder.WriteUint64(o.ContentLength)
@@ -464,14 +449,11 @@ func (o *InvocationResponse) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a InvocationResponse using msgpack
-func DecodeInvocationResponse(d msgpack.Decoder) (InvocationResponse, error) {
+func DecodeInvocationResponse(d *msgpack.Decoder) (InvocationResponse, error) {
 	var val InvocationResponse
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -483,11 +465,11 @@ func DecodeInvocationResponse(d msgpack.Decoder) (InvocationResponse, error) {
 			return val, err
 		}
 		switch field {
-		case "Msg":
+		case "msg":
 			val.Msg, err = d.ReadByteArray()
 		case "invocation_id":
 			val.InvocationId, err = d.ReadString()
-		case "Error":
+		case "error":
 			val.Error, err = d.ReadString()
 		case "content_length":
 			val.ContentLength, err = d.ReadUint64()
@@ -526,21 +508,18 @@ func (o *LinkDefinition) Encode(encoder msgpack.Writer) error {
 	encoder.WriteString(o.LinkName)
 	encoder.WriteString("contract_id")
 	encoder.WriteString(o.ContractId)
-	encoder.WriteString("Values")
+	encoder.WriteString("values")
 	o.Values.Encode(encoder)
 
 	return nil
 }
 
 // Decode deserializes a LinkDefinition using msgpack
-func DecodeLinkDefinition(d msgpack.Decoder) (LinkDefinition, error) {
+func DecodeLinkDefinition(d *msgpack.Decoder) (LinkDefinition, error) {
 	var val LinkDefinition
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -560,7 +539,7 @@ func DecodeLinkDefinition(d msgpack.Decoder) (LinkDefinition, error) {
 			val.LinkName, err = d.ReadString()
 		case "contract_id":
 			val.ContractId, err = d.ReadString()
-		case "Values":
+		case "values":
 			val.Values, err = DecodeLinkSettings(d)
 		default:
 			err = d.Skip()
@@ -588,11 +567,10 @@ func (o *LinkSettings) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a LinkSettings using msgpack
-func DecodeLinkSettings(d msgpack.Decoder) (LinkSettings, error) {
+func DecodeLinkSettings(d *msgpack.Decoder) (LinkSettings, error) {
 	isNil, err := d.IsNextNil()
-	if err != nil && isNil {
-		d.Skip()
-		return make(map[string]string, 0), nil
+	if err != nil || isNil {
+		return make(map[string]string, 0), err
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -625,11 +603,10 @@ func (o *TraceContext) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a TraceContext using msgpack
-func DecodeTraceContext(d msgpack.Decoder) (TraceContext, error) {
+func DecodeTraceContext(d *msgpack.Decoder) (TraceContext, error) {
 	isNil, err := d.IsNextNil()
-	if err != nil && isNil {
-		d.Skip()
-		return make(map[string]string, 0), nil
+	if err != nil || isNil {
+		return make(map[string]string, 0), err
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -667,14 +644,11 @@ func (o *WasmCloudEntity) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a WasmCloudEntity using msgpack
-func DecodeWasmCloudEntity(d msgpack.Decoder) (WasmCloudEntity, error) {
+func DecodeWasmCloudEntity(d *msgpack.Decoder) (WasmCloudEntity, error) {
 	var val WasmCloudEntity
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -711,26 +685,28 @@ type Actor interface {
 
 // ActorHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func ActorHandler() Handler {
-	return NewHandler("Actor", ActorReceiver{})
+func ActorHandler(actor_ Actor) Handler {
+	return NewHandler("Actor", &ActorReceiver{}, actor_)
 }
 
 // ActorReceiver receives messages defined in the Actor service interface
 // Actor service
 type ActorReceiver struct{}
 
-func (r *ActorReceiver) dispatch(ctx *Context, svc Actor, message *Message) (*Message, error) {
+func (r *ActorReceiver) Dispatch(ctx *Context, svc interface{}, message *Message) (*Message, error) {
+	svc_, _ := svc.(Actor)
 	switch message.Method {
+
 	case "HealthRequest":
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeHealthCheckRequest(d)
+			value, err_ := DecodeHealthCheckRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			resp, err := svc.HealthRequest(ctx, value)
+			resp, err := svc_.HealthRequest(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -753,6 +729,13 @@ func (r *ActorReceiver) dispatch(ctx *Context, svc Actor, message *Message) (*Me
 // Actor service
 type ActorSender struct{ transport Transport }
 
+// NewActorSender constructs a client for actor-to-actor messaging
+// using the recipient actor's public key
+func NewActorActorSender(actor_id string) *ActorSender {
+	transport := ToActor(actor_id)
+	return &ActorSender{transport: transport}
+}
+
 // Perform health check. Called at regular intervals by host
 func (s *ActorSender) HealthRequest(ctx *Context, arg HealthCheckRequest) (*HealthCheckResponse, error) {
 
@@ -767,7 +750,7 @@ func (s *ActorSender) HealthRequest(ctx *Context, arg HealthCheckRequest) (*Heal
 
 	out_buf, _ := s.transport.Send(ctx, Message{Method: "Actor.HealthRequest", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeHealthCheckResponse(d)
+	resp, err_ := DecodeHealthCheckResponse(&d)
 	if err_ != nil {
 		return nil, err_
 	}
