@@ -2,8 +2,8 @@
 package messaging
 
 import (
-	"github.com/wasmcloud/actor-tinygo"   //nolint
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	"github.com/wasmcloud/actor-tinygo"           //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // A message to be published
@@ -19,25 +19,22 @@ type PubMessage struct {
 // Encode serializes a PubMessage using msgpack
 func (o *PubMessage) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
-	encoder.WriteString("Subject")
+	encoder.WriteString("subject")
 	encoder.WriteString(o.Subject)
-	encoder.WriteString("ReplyTo")
+	encoder.WriteString("replyTo")
 	encoder.WriteString(o.ReplyTo)
-	encoder.WriteString("Body")
+	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
 
 	return nil
 }
 
 // Decode deserializes a PubMessage using msgpack
-func DecodePubMessage(d msgpack.Decoder) (PubMessage, error) {
+func DecodePubMessage(d *msgpack.Decoder) (PubMessage, error) {
 	var val PubMessage
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -49,11 +46,11 @@ func DecodePubMessage(d msgpack.Decoder) (PubMessage, error) {
 			return val, err
 		}
 		switch field {
-		case "Subject":
+		case "subject":
 			val.Subject, err = d.ReadString()
-		case "ReplyTo":
+		case "replyTo":
 			val.ReplyTo, err = d.ReadString()
-		case "Body":
+		case "body":
 			val.Body, err = d.ReadByteArray()
 		default:
 			err = d.Skip()
@@ -79,25 +76,22 @@ type ReplyMessage struct {
 // Encode serializes a ReplyMessage using msgpack
 func (o *ReplyMessage) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
-	encoder.WriteString("Subject")
+	encoder.WriteString("subject")
 	encoder.WriteString(o.Subject)
-	encoder.WriteString("ReplyTo")
+	encoder.WriteString("replyTo")
 	encoder.WriteString(o.ReplyTo)
-	encoder.WriteString("Body")
+	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
 
 	return nil
 }
 
 // Decode deserializes a ReplyMessage using msgpack
-func DecodeReplyMessage(d msgpack.Decoder) (ReplyMessage, error) {
+func DecodeReplyMessage(d *msgpack.Decoder) (ReplyMessage, error) {
 	var val ReplyMessage
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -109,11 +103,11 @@ func DecodeReplyMessage(d msgpack.Decoder) (ReplyMessage, error) {
 			return val, err
 		}
 		switch field {
-		case "Subject":
+		case "subject":
 			val.Subject, err = d.ReadString()
-		case "ReplyTo":
+		case "replyTo":
 			val.ReplyTo, err = d.ReadString()
-		case "Body":
+		case "body":
 			val.Body, err = d.ReadByteArray()
 		default:
 			err = d.Skip()
@@ -139,25 +133,22 @@ type RequestMessage struct {
 // Encode serializes a RequestMessage using msgpack
 func (o *RequestMessage) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
-	encoder.WriteString("Subject")
+	encoder.WriteString("subject")
 	encoder.WriteString(o.Subject)
-	encoder.WriteString("Body")
+	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
-	encoder.WriteString("TimeoutMs")
+	encoder.WriteString("timeoutMs")
 	encoder.WriteUint32(o.TimeoutMs)
 
 	return nil
 }
 
 // Decode deserializes a RequestMessage using msgpack
-func DecodeRequestMessage(d msgpack.Decoder) (RequestMessage, error) {
+func DecodeRequestMessage(d *msgpack.Decoder) (RequestMessage, error) {
 	var val RequestMessage
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -169,11 +160,11 @@ func DecodeRequestMessage(d msgpack.Decoder) (RequestMessage, error) {
 			return val, err
 		}
 		switch field {
-		case "Subject":
+		case "subject":
 			val.Subject, err = d.ReadString()
-		case "Body":
+		case "body":
 			val.Body, err = d.ReadByteArray()
-		case "TimeoutMs":
+		case "timeoutMs":
 			val.TimeoutMs, err = d.ReadUint32()
 		default:
 			err = d.Skip()
@@ -199,25 +190,22 @@ type SubMessage struct {
 // Encode serializes a SubMessage using msgpack
 func (o *SubMessage) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
-	encoder.WriteString("Subject")
+	encoder.WriteString("subject")
 	encoder.WriteString(o.Subject)
-	encoder.WriteString("ReplyTo")
+	encoder.WriteString("replyTo")
 	encoder.WriteString(o.ReplyTo)
-	encoder.WriteString("Body")
+	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
 
 	return nil
 }
 
 // Decode deserializes a SubMessage using msgpack
-func DecodeSubMessage(d msgpack.Decoder) (SubMessage, error) {
+func DecodeSubMessage(d *msgpack.Decoder) (SubMessage, error) {
 	var val SubMessage
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -229,11 +217,11 @@ func DecodeSubMessage(d msgpack.Decoder) (SubMessage, error) {
 			return val, err
 		}
 		switch field {
-		case "Subject":
+		case "subject":
 			val.Subject, err = d.ReadString()
-		case "ReplyTo":
+		case "replyTo":
 			val.ReplyTo, err = d.ReadString()
-		case "Body":
+		case "body":
 			val.Body, err = d.ReadByteArray()
 		default:
 			err = d.Skip()
@@ -256,9 +244,12 @@ type MessageSubscriber interface {
 
 // MessageSubscriberHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func MessageSubscriberHandler() actor.Handler {
-	return actor.NewHandler("MessageSubscriber", MessageSubscriberReceiver{})
+func MessageSubscriberHandler(actor_ MessageSubscriber) actor.Handler {
+	return actor.NewHandler("MessageSubscriber", &MessageSubscriberReceiver{}, actor_)
 }
+
+// MessageSubscriberContractId returns the capability contract id for this interface
+func MessageSubscriberContractId() string { return "wasmcloud:messaging" }
 
 // MessageSubscriberReceiver receives messages defined in the MessageSubscriber service interface
 // The MessageSubscriber interface describes
@@ -266,18 +257,20 @@ func MessageSubscriberHandler() actor.Handler {
 // sent by the Messaging provider
 type MessageSubscriberReceiver struct{}
 
-func (r *MessageSubscriberReceiver) dispatch(ctx *actor.Context, svc MessageSubscriber, message *actor.Message) (*actor.Message, error) {
+func (r *MessageSubscriberReceiver) Dispatch(ctx *actor.Context, svc interface{}, message *actor.Message) (*actor.Message, error) {
+	svc_, _ := svc.(MessageSubscriber)
 	switch message.Method {
+
 	case "HandleMessage":
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeSubMessage(d)
+			value, err_ := DecodeSubMessage(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			err := svc.HandleMessage(ctx, value)
+			err := svc_.HandleMessage(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -294,6 +287,13 @@ func (r *MessageSubscriberReceiver) dispatch(ctx *actor.Context, svc MessageSubs
 // an actor interface that receives messages
 // sent by the Messaging provider
 type MessageSubscriberSender struct{ transport actor.Transport }
+
+// NewActorSender constructs a client for actor-to-actor messaging
+// using the recipient actor's public key
+func NewActorMessageSubscriberSender(actor_id string) *MessageSubscriberSender {
+	transport := actor.ToActor(actor_id)
+	return &MessageSubscriberSender{transport: transport}
+}
 
 // subscription handler
 func (s *MessageSubscriberSender) HandleMessage(ctx *actor.Context, arg SubMessage) error {
@@ -327,27 +327,32 @@ type Messaging interface {
 
 // MessagingHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func MessagingHandler() actor.Handler {
-	return actor.NewHandler("Messaging", MessagingReceiver{})
+func MessagingHandler(actor_ Messaging) actor.Handler {
+	return actor.NewHandler("Messaging", &MessagingReceiver{}, actor_)
 }
+
+// MessagingContractId returns the capability contract id for this interface
+func MessagingContractId() string { return "wasmcloud:messaging" }
 
 // MessagingReceiver receives messages defined in the Messaging service interface
 // The Messaging interface describes a service
 // that can deliver messages
 type MessagingReceiver struct{}
 
-func (r *MessagingReceiver) dispatch(ctx *actor.Context, svc Messaging, message *actor.Message) (*actor.Message, error) {
+func (r *MessagingReceiver) Dispatch(ctx *actor.Context, svc interface{}, message *actor.Message) (*actor.Message, error) {
+	svc_, _ := svc.(Messaging)
 	switch message.Method {
+
 	case "Publish":
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodePubMessage(d)
+			value, err_ := DecodePubMessage(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			err := svc.Publish(ctx, value)
+			err := svc_.Publish(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -358,12 +363,12 @@ func (r *MessagingReceiver) dispatch(ctx *actor.Context, svc Messaging, message 
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeRequestMessage(d)
+			value, err_ := DecodeRequestMessage(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			resp, err := svc.Request(ctx, value)
+			resp, err := svc_.Request(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -386,6 +391,20 @@ func (r *MessagingReceiver) dispatch(ctx *actor.Context, svc Messaging, message 
 // The Messaging interface describes a service
 // that can deliver messages
 type MessagingSender struct{ transport actor.Transport }
+
+// NewProvider constructs a client for sending to a Messaging provider
+// implementing the 'wasmcloud:messaging' capability contract, with the "default" link
+func NewProviderMessaging() *MessagingSender {
+	transport := actor.ToProvider("wasmcloud:messaging", "default")
+	return &MessagingSender{transport: transport}
+}
+
+// NewProviderMessagingLink constructs a client for sending to a Messaging provider
+// implementing the 'wasmcloud:messaging' capability contract, with the specified link name
+func NewProviderMessagingLink(linkName string) *MessagingSender {
+	transport := actor.ToProvider("wasmcloud:messaging", linkName)
+	return &MessagingSender{transport: transport}
+}
 
 // Publish - send a message
 // The function returns after the message has been sent.
@@ -422,7 +441,7 @@ func (s *MessagingSender) Request(ctx *actor.Context, arg RequestMessage) (*Repl
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Messaging.Request", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeReplyMessage(d)
+	resp, err_ := DecodeReplyMessage(&d)
 	if err_ != nil {
 		return nil, err_
 	}

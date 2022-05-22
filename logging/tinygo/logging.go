@@ -2,8 +2,8 @@
 package logging
 
 import (
-	"github.com/wasmcloud/actor-tinygo"   //nolint
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	"github.com/wasmcloud/actor-tinygo"           //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 type LogEntry struct {
@@ -16,23 +16,20 @@ type LogEntry struct {
 // Encode serializes a LogEntry using msgpack
 func (o *LogEntry) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
-	encoder.WriteString("Level")
+	encoder.WriteString("level")
 	encoder.WriteString(o.Level)
-	encoder.WriteString("Text")
+	encoder.WriteString("text")
 	encoder.WriteString(o.Text)
 
 	return nil
 }
 
 // Decode deserializes a LogEntry using msgpack
-func DecodeLogEntry(d msgpack.Decoder) (LogEntry, error) {
+func DecodeLogEntry(d *msgpack.Decoder) (LogEntry, error) {
 	var val LogEntry
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -44,9 +41,9 @@ func DecodeLogEntry(d msgpack.Decoder) (LogEntry, error) {
 			return val, err
 		}
 		switch field {
-		case "Level":
+		case "level":
 			val.Level, err = d.ReadString()
-		case "Text":
+		case "text":
 			val.Text, err = d.ReadString()
 		default:
 			err = d.Skip()
@@ -68,25 +65,30 @@ type Logging interface {
 
 // LoggingHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func LoggingHandler() actor.Handler {
-	return actor.NewHandler("Logging", LoggingReceiver{})
+func LoggingHandler(actor_ Logging) actor.Handler {
+	return actor.NewHandler("Logging", &LoggingReceiver{}, actor_)
 }
+
+// LoggingContractId returns the capability contract id for this interface
+func LoggingContractId() string { return "wasmcloud:builtin:logging" }
 
 // LoggingReceiver receives messages defined in the Logging service interface
 type LoggingReceiver struct{}
 
-func (r *LoggingReceiver) dispatch(ctx *actor.Context, svc Logging, message *actor.Message) (*actor.Message, error) {
+func (r *LoggingReceiver) Dispatch(ctx *actor.Context, svc interface{}, message *actor.Message) (*actor.Message, error) {
+	svc_, _ := svc.(Logging)
 	switch message.Method {
+
 	case "WriteLog":
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeLogEntry(d)
+			value, err_ := DecodeLogEntry(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			err := svc.WriteLog(ctx, value)
+			err := svc_.WriteLog(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -100,6 +102,20 @@ func (r *LoggingReceiver) dispatch(ctx *actor.Context, svc Logging, message *act
 
 // LoggingSender sends messages to a Logging service
 type LoggingSender struct{ transport actor.Transport }
+
+// NewProvider constructs a client for sending to a Logging provider
+// implementing the 'wasmcloud:builtin:logging' capability contract, with the "default" link
+func NewProviderLogging() *LoggingSender {
+	transport := actor.ToProvider("wasmcloud:builtin:logging", "default")
+	return &LoggingSender{transport: transport}
+}
+
+// NewProviderLoggingLink constructs a client for sending to a Logging provider
+// implementing the 'wasmcloud:builtin:logging' capability contract, with the specified link name
+func NewProviderLoggingLink(linkName string) *LoggingSender {
+	transport := actor.ToProvider("wasmcloud:builtin:logging", linkName)
+	return &LoggingSender{transport: transport}
+}
 
 //
 // WriteLog - log a text message

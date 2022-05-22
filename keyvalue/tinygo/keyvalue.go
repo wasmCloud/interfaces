@@ -2,8 +2,8 @@
 package keyvalue
 
 import (
-	"github.com/wasmcloud/actor-tinygo"   //nolint
-	"github.com/wasmcloud/tinygo-msgpack" //nolint
+	"github.com/wasmcloud/actor-tinygo"           //nolint
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // Response to get request
@@ -17,23 +17,20 @@ type GetResponse struct {
 // Encode serializes a GetResponse using msgpack
 func (o *GetResponse) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
-	encoder.WriteString("Value")
+	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
-	encoder.WriteString("Exists")
+	encoder.WriteString("exists")
 	encoder.WriteBool(o.Exists)
 
 	return nil
 }
 
 // Decode deserializes a GetResponse using msgpack
-func DecodeGetResponse(d msgpack.Decoder) (GetResponse, error) {
+func DecodeGetResponse(d *msgpack.Decoder) (GetResponse, error) {
 	var val GetResponse
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -45,9 +42,9 @@ func DecodeGetResponse(d msgpack.Decoder) (GetResponse, error) {
 			return val, err
 		}
 		switch field {
-		case "Value":
+		case "value":
 			val.Value, err = d.ReadString()
-		case "Exists":
+		case "exists":
 			val.Exists, err = d.ReadBool()
 		default:
 			err = d.Skip()
@@ -70,23 +67,20 @@ type IncrementRequest struct {
 // Encode serializes a IncrementRequest using msgpack
 func (o *IncrementRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
-	encoder.WriteString("Key")
+	encoder.WriteString("key")
 	encoder.WriteString(o.Key)
-	encoder.WriteString("Value")
+	encoder.WriteString("value")
 	encoder.WriteInt32(o.Value)
 
 	return nil
 }
 
 // Decode deserializes a IncrementRequest using msgpack
-func DecodeIncrementRequest(d msgpack.Decoder) (IncrementRequest, error) {
+func DecodeIncrementRequest(d *msgpack.Decoder) (IncrementRequest, error) {
 	var val IncrementRequest
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -98,9 +92,9 @@ func DecodeIncrementRequest(d msgpack.Decoder) (IncrementRequest, error) {
 			return val, err
 		}
 		switch field {
-		case "Key":
+		case "key":
 			val.Key, err = d.ReadString()
-		case "Value":
+		case "value":
 			val.Value, err = d.ReadInt32()
 		default:
 			err = d.Skip()
@@ -124,23 +118,20 @@ type ListAddRequest struct {
 // Encode serializes a ListAddRequest using msgpack
 func (o *ListAddRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
-	encoder.WriteString("ListName")
+	encoder.WriteString("listName")
 	encoder.WriteString(o.ListName)
-	encoder.WriteString("Value")
+	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
 
 	return nil
 }
 
 // Decode deserializes a ListAddRequest using msgpack
-func DecodeListAddRequest(d msgpack.Decoder) (ListAddRequest, error) {
+func DecodeListAddRequest(d *msgpack.Decoder) (ListAddRequest, error) {
 	var val ListAddRequest
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -152,9 +143,9 @@ func DecodeListAddRequest(d msgpack.Decoder) (ListAddRequest, error) {
 			return val, err
 		}
 		switch field {
-		case "ListName":
+		case "listName":
 			val.ListName, err = d.ReadString()
-		case "Value":
+		case "value":
 			val.Value, err = d.ReadString()
 		default:
 			err = d.Skip()
@@ -179,23 +170,20 @@ type ListDelRequest struct {
 // Encode serializes a ListDelRequest using msgpack
 func (o *ListDelRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
-	encoder.WriteString("ListName")
+	encoder.WriteString("listName")
 	encoder.WriteString(o.ListName)
-	encoder.WriteString("Value")
+	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
 
 	return nil
 }
 
 // Decode deserializes a ListDelRequest using msgpack
-func DecodeListDelRequest(d msgpack.Decoder) (ListDelRequest, error) {
+func DecodeListDelRequest(d *msgpack.Decoder) (ListDelRequest, error) {
 	var val ListDelRequest
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -207,9 +195,9 @@ func DecodeListDelRequest(d msgpack.Decoder) (ListDelRequest, error) {
 			return val, err
 		}
 		switch field {
-		case "ListName":
+		case "listName":
 			val.ListName, err = d.ReadString()
-		case "Value":
+		case "value":
 			val.Value, err = d.ReadString()
 		default:
 			err = d.Skip()
@@ -234,25 +222,22 @@ type ListRangeRequest struct {
 // Encode serializes a ListRangeRequest using msgpack
 func (o *ListRangeRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
-	encoder.WriteString("ListName")
+	encoder.WriteString("listName")
 	encoder.WriteString(o.ListName)
-	encoder.WriteString("Start")
+	encoder.WriteString("start")
 	encoder.WriteInt32(o.Start)
-	encoder.WriteString("Stop")
+	encoder.WriteString("stop")
 	encoder.WriteInt32(o.Stop)
 
 	return nil
 }
 
 // Decode deserializes a ListRangeRequest using msgpack
-func DecodeListRangeRequest(d msgpack.Decoder) (ListRangeRequest, error) {
+func DecodeListRangeRequest(d *msgpack.Decoder) (ListRangeRequest, error) {
 	var val ListRangeRequest
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -264,11 +249,11 @@ func DecodeListRangeRequest(d msgpack.Decoder) (ListRangeRequest, error) {
 			return val, err
 		}
 		switch field {
-		case "ListName":
+		case "listName":
 			val.ListName, err = d.ReadString()
-		case "Start":
+		case "start":
 			val.Start, err = d.ReadInt32()
-		case "Stop":
+		case "stop":
 			val.Stop, err = d.ReadInt32()
 		default:
 			err = d.Skip()
@@ -291,23 +276,20 @@ type SetAddRequest struct {
 // Encode serializes a SetAddRequest using msgpack
 func (o *SetAddRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
-	encoder.WriteString("SetName")
+	encoder.WriteString("setName")
 	encoder.WriteString(o.SetName)
-	encoder.WriteString("Value")
+	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
 
 	return nil
 }
 
 // Decode deserializes a SetAddRequest using msgpack
-func DecodeSetAddRequest(d msgpack.Decoder) (SetAddRequest, error) {
+func DecodeSetAddRequest(d *msgpack.Decoder) (SetAddRequest, error) {
 	var val SetAddRequest
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -319,9 +301,9 @@ func DecodeSetAddRequest(d msgpack.Decoder) (SetAddRequest, error) {
 			return val, err
 		}
 		switch field {
-		case "SetName":
+		case "setName":
 			val.SetName, err = d.ReadString()
-		case "Value":
+		case "value":
 			val.Value, err = d.ReadString()
 		default:
 			err = d.Skip()
@@ -342,23 +324,20 @@ type SetDelRequest struct {
 // Encode serializes a SetDelRequest using msgpack
 func (o *SetDelRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
-	encoder.WriteString("SetName")
+	encoder.WriteString("setName")
 	encoder.WriteString(o.SetName)
-	encoder.WriteString("Value")
+	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
 
 	return nil
 }
 
 // Decode deserializes a SetDelRequest using msgpack
-func DecodeSetDelRequest(d msgpack.Decoder) (SetDelRequest, error) {
+func DecodeSetDelRequest(d *msgpack.Decoder) (SetDelRequest, error) {
 	var val SetDelRequest
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -370,9 +349,9 @@ func DecodeSetDelRequest(d msgpack.Decoder) (SetDelRequest, error) {
 			return val, err
 		}
 		switch field {
-		case "SetName":
+		case "setName":
 			val.SetName, err = d.ReadString()
-		case "Value":
+		case "value":
 			val.Value, err = d.ReadString()
 		default:
 			err = d.Skip()
@@ -397,25 +376,22 @@ type SetRequest struct {
 // Encode serializes a SetRequest using msgpack
 func (o *SetRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
-	encoder.WriteString("Key")
+	encoder.WriteString("key")
 	encoder.WriteString(o.Key)
-	encoder.WriteString("Value")
+	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
-	encoder.WriteString("Expires")
+	encoder.WriteString("expires")
 	encoder.WriteUint32(o.Expires)
 
 	return nil
 }
 
 // Decode deserializes a SetRequest using msgpack
-func DecodeSetRequest(d msgpack.Decoder) (SetRequest, error) {
+func DecodeSetRequest(d *msgpack.Decoder) (SetRequest, error) {
 	var val SetRequest
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -427,11 +403,11 @@ func DecodeSetRequest(d msgpack.Decoder) (SetRequest, error) {
 			return val, err
 		}
 		switch field {
-		case "Key":
+		case "key":
 			val.Key, err = d.ReadString()
-		case "Value":
+		case "value":
 			val.Value, err = d.ReadString()
-		case "Expires":
+		case "expires":
 			val.Expires, err = d.ReadUint32()
 		default:
 			err = d.Skip()
@@ -459,11 +435,10 @@ func (o *StringList) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a StringList using msgpack
-func DecodeStringList(d msgpack.Decoder) (StringList, error) {
+func DecodeStringList(d *msgpack.Decoder) (StringList, error) {
 	isNil, err := d.IsNextNil()
-	if err == nil && isNil {
-		d.Skip()
-		return make([]string, 0), nil
+	if err != nil || isNil {
+		return make([]string, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {
@@ -532,25 +507,30 @@ type KeyValue interface {
 
 // KeyValueHandler is called by an actor during `main` to generate a dispatch handler
 // The output of this call should be passed into `actor.RegisterHandlers`
-func KeyValueHandler() actor.Handler {
-	return actor.NewHandler("KeyValue", KeyValueReceiver{})
+func KeyValueHandler(actor_ KeyValue) actor.Handler {
+	return actor.NewHandler("KeyValue", &KeyValueReceiver{}, actor_)
 }
+
+// KeyValueContractId returns the capability contract id for this interface
+func KeyValueContractId() string { return "wasmcloud:keyvalue" }
 
 // KeyValueReceiver receives messages defined in the KeyValue service interface
 type KeyValueReceiver struct{}
 
-func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *actor.Message) (*actor.Message, error) {
+func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message *actor.Message) (*actor.Message, error) {
+	svc_, _ := svc.(KeyValue)
 	switch message.Method {
+
 	case "Increment":
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeIncrementRequest(d)
+			value, err_ := DecodeIncrementRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			resp, err := svc.Increment(ctx, value)
+			resp, err := svc_.Increment(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -573,7 +553,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.Contains(ctx, value)
+			resp, err := svc_.Contains(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -596,7 +576,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.Del(ctx, value)
+			resp, err := svc_.Del(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -619,7 +599,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.Get(ctx, value)
+			resp, err := svc_.Get(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -637,12 +617,12 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeListAddRequest(d)
+			value, err_ := DecodeListAddRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			resp, err := svc.ListAdd(ctx, value)
+			resp, err := svc_.ListAdd(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -665,7 +645,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.ListClear(ctx, value)
+			resp, err := svc_.ListClear(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -683,12 +663,12 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeListDelRequest(d)
+			value, err_ := DecodeListDelRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			resp, err := svc.ListDel(ctx, value)
+			resp, err := svc_.ListDel(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -706,12 +686,12 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeListRangeRequest(d)
+			value, err_ := DecodeListRangeRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			resp, err := svc.ListRange(ctx, value)
+			resp, err := svc_.ListRange(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -729,12 +709,12 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeSetRequest(d)
+			value, err_ := DecodeSetRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			err := svc.Set(ctx, value)
+			err := svc_.Set(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -745,12 +725,12 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeSetAddRequest(d)
+			value, err_ := DecodeSetAddRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			resp, err := svc.SetAdd(ctx, value)
+			resp, err := svc_.SetAdd(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -768,12 +748,12 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeSetDelRequest(d)
+			value, err_ := DecodeSetDelRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			resp, err := svc.SetDel(ctx, value)
+			resp, err := svc_.SetDel(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -791,12 +771,12 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeStringList(d)
+			value, err_ := DecodeStringList(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			resp, err := svc.SetIntersection(ctx, value)
+			resp, err := svc_.SetIntersection(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -819,7 +799,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.SetQuery(ctx, value)
+			resp, err := svc_.SetQuery(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -837,12 +817,12 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeStringList(d)
+			value, err_ := DecodeStringList(&d)
 			if err_ != nil {
 				return nil, err_
 			}
 
-			resp, err := svc.SetUnion(ctx, value)
+			resp, err := svc_.SetUnion(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -865,7 +845,7 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 				return nil, err_
 			}
 
-			resp, err := svc.SetClear(ctx, value)
+			resp, err := svc_.SetClear(ctx, value)
 			if err != nil {
 				return nil, err
 			}
@@ -886,6 +866,20 @@ func (r *KeyValueReceiver) dispatch(ctx *actor.Context, svc KeyValue, message *a
 
 // KeyValueSender sends messages to a KeyValue service
 type KeyValueSender struct{ transport actor.Transport }
+
+// NewProvider constructs a client for sending to a KeyValue provider
+// implementing the 'wasmcloud:keyvalue' capability contract, with the "default" link
+func NewProviderKeyValue() *KeyValueSender {
+	transport := actor.ToProvider("wasmcloud:keyvalue", "default")
+	return &KeyValueSender{transport: transport}
+}
+
+// NewProviderKeyValueLink constructs a client for sending to a KeyValue provider
+// implementing the 'wasmcloud:keyvalue' capability contract, with the specified link name
+func NewProviderKeyValueLink(linkName string) *KeyValueSender {
+	transport := actor.ToProvider("wasmcloud:keyvalue", linkName)
+	return &KeyValueSender{transport: transport}
+}
 
 // Increments a numeric value, returning the new value
 func (s *KeyValueSender) Increment(ctx *actor.Context, arg IncrementRequest) (int32, error) {
@@ -966,7 +960,7 @@ func (s *KeyValueSender) Get(ctx *actor.Context, arg string) (*GetResponse, erro
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.Get", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeGetResponse(d)
+	resp, err_ := DecodeGetResponse(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -1055,7 +1049,7 @@ func (s *KeyValueSender) ListRange(ctx *actor.Context, arg ListRangeRequest) (*S
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.ListRange", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeStringList(d)
+	resp, err_ := DecodeStringList(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -1138,7 +1132,7 @@ func (s *KeyValueSender) SetIntersection(ctx *actor.Context, arg StringList) (*S
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.SetIntersection", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeStringList(d)
+	resp, err_ := DecodeStringList(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -1161,7 +1155,7 @@ func (s *KeyValueSender) SetQuery(ctx *actor.Context, arg string) (*StringList, 
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.SetQuery", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeStringList(d)
+	resp, err_ := DecodeStringList(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -1184,7 +1178,7 @@ func (s *KeyValueSender) SetUnion(ctx *actor.Context, arg StringList) (*StringLi
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.SetUnion", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeStringList(d)
+	resp, err_ := DecodeStringList(&d)
 	if err_ != nil {
 		return nil, err_
 	}
