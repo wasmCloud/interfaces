@@ -19,6 +19,9 @@ func FactorialHandler(actor_ Factorial) actor.Handler {
 	return actor.NewHandler("Factorial", &FactorialReceiver{}, actor_)
 }
 
+// FactorialContractId returns the capability contract id for this interface
+func FactorialContractId() string { return "wasmcloud:example:factorial" }
+
 // FactorialReceiver receives messages defined in the Factorial service interface
 // The Factorial service has a single method, calculate, which
 // calculates the factorial of its whole number parameter.
@@ -60,6 +63,27 @@ func (r *FactorialReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 // The Factorial service has a single method, calculate, which
 // calculates the factorial of its whole number parameter.
 type FactorialSender struct{ transport actor.Transport }
+
+// NewActorSender constructs a client for actor-to-actor messaging
+// using the recipient actor's public key
+func NewActorFactorialSender(actor_id string) *FactorialSender {
+	transport := actor.ToActor(actor_id)
+	return &FactorialSender{transport: transport}
+}
+
+// NewProvider constructs a client for sending to a Factorial provider
+// implementing the 'wasmcloud:example:factorial' capability contract, with the "default" link
+func NewProviderFactorial() *FactorialSender {
+	transport := actor.ToProvider("wasmcloud:example:factorial", "default")
+	return &FactorialSender{transport: transport}
+}
+
+// NewProviderFactorialLink constructs a client for sending to a Factorial provider
+// implementing the 'wasmcloud:example:factorial' capability contract, with the specified link name
+func NewProviderFactorialLink(linkName string) *FactorialSender {
+	transport := actor.ToProvider("wasmcloud:example:factorial", linkName)
+	return &FactorialSender{transport: transport}
+}
 
 // Calculates the factorial (n!) of the input parameter
 func (s *FactorialSender) Calculate(ctx *actor.Context, arg uint32) (uint64, error) {

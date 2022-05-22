@@ -16,7 +16,7 @@ func (o *CapabilityContractId) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a CapabilityContractId using msgpack
-func DecodeCapabilityContractId(d msgpack.Decoder) (CapabilityContractId, error) {
+func DecodeCapabilityContractId(d *msgpack.Decoder) (CapabilityContractId, error) {
 	val, err := d.ReadString()
 	if err != nil {
 		return "", err
@@ -58,12 +58,9 @@ func (o *IdentifierList) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a IdentifierList using msgpack
-func DecodeIdentifierList(d msgpack.Decoder) (IdentifierList, error) {
+func DecodeIdentifierList(d *msgpack.Decoder) (IdentifierList, error) {
 	isNil, err := d.IsNextNil()
-	if isNil {
-		if err != nil {
-			err = d.Skip()
-		}
+	if err != nil || isNil {
 		return make([]string, 0), err
 	}
 	size, err := d.ReadArraySize()
@@ -104,7 +101,7 @@ func (o *Unit) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a Unit using msgpack
-func DecodeUnit(d msgpack.Decoder) (Unit, error) {
+func DecodeUnit(d *msgpack.Decoder) (Unit, error) {
 	_ = d.Skip()
 	return Unit{}, nil
 }

@@ -22,10 +22,9 @@ func (o *HeaderMap) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a HeaderMap using msgpack
-func DecodeHeaderMap(d msgpack.Decoder) (HeaderMap, error) {
+func DecodeHeaderMap(d *msgpack.Decoder) (HeaderMap, error) {
 	isNil, err := d.IsNextNil()
-	if err != nil && isNil {
-		err = d.Skip()
+	if err != nil || isNil {
 		return make(map[string]HeaderValues, 0), err
 	}
 	size, err := d.ReadMapSize()
@@ -58,12 +57,9 @@ func (o *HeaderValues) Encode(encoder msgpack.Writer) error {
 }
 
 // Decode deserializes a HeaderValues using msgpack
-func DecodeHeaderValues(d msgpack.Decoder) (HeaderValues, error) {
+func DecodeHeaderValues(d *msgpack.Decoder) (HeaderValues, error) {
 	isNil, err := d.IsNextNil()
-	if isNil {
-		if err != nil {
-			err = d.Skip()
-		}
+	if err != nil || isNil {
 		return make([]string, 0), err
 	}
 	size, err := d.ReadArraySize()
@@ -98,29 +94,26 @@ type HttpRequest struct {
 // Encode serializes a HttpRequest using msgpack
 func (o *HttpRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(5)
-	encoder.WriteString("Method")
+	encoder.WriteString("method")
 	encoder.WriteString(o.Method)
-	encoder.WriteString("Path")
+	encoder.WriteString("path")
 	encoder.WriteString(o.Path)
-	encoder.WriteString("QueryString")
+	encoder.WriteString("queryString")
 	encoder.WriteString(o.QueryString)
-	encoder.WriteString("Header")
+	encoder.WriteString("header")
 	o.Header.Encode(encoder)
-	encoder.WriteString("Body")
+	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
 
 	return nil
 }
 
 // Decode deserializes a HttpRequest using msgpack
-func DecodeHttpRequest(d msgpack.Decoder) (HttpRequest, error) {
+func DecodeHttpRequest(d *msgpack.Decoder) (HttpRequest, error) {
 	var val HttpRequest
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -132,15 +125,15 @@ func DecodeHttpRequest(d msgpack.Decoder) (HttpRequest, error) {
 			return val, err
 		}
 		switch field {
-		case "Method":
+		case "method":
 			val.Method, err = d.ReadString()
-		case "Path":
+		case "path":
 			val.Path, err = d.ReadString()
-		case "QueryString":
+		case "queryString":
 			val.QueryString, err = d.ReadString()
-		case "Header":
+		case "header":
 			val.Header, err = DecodeHeaderMap(d)
-		case "Body":
+		case "body":
 			val.Body, err = d.ReadByteArray()
 		default:
 			err = d.Skip()
@@ -167,25 +160,22 @@ type HttpResponse struct {
 // Encode serializes a HttpResponse using msgpack
 func (o *HttpResponse) Encode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
-	encoder.WriteString("StatusCode")
+	encoder.WriteString("statusCode")
 	encoder.WriteUint16(o.StatusCode)
-	encoder.WriteString("Header")
+	encoder.WriteString("header")
 	o.Header.Encode(encoder)
-	encoder.WriteString("Body")
+	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
 
 	return nil
 }
 
 // Decode deserializes a HttpResponse using msgpack
-func DecodeHttpResponse(d msgpack.Decoder) (HttpResponse, error) {
+func DecodeHttpResponse(d *msgpack.Decoder) (HttpResponse, error) {
 	var val HttpResponse
 	isNil, err := d.IsNextNil()
-	if err != nil {
+	if err != nil || isNil {
 		return val, err
-	}
-	if isNil {
-		return val, nil
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
@@ -197,11 +187,11 @@ func DecodeHttpResponse(d msgpack.Decoder) (HttpResponse, error) {
 			return val, err
 		}
 		switch field {
-		case "StatusCode":
+		case "statusCode":
 			val.StatusCode, err = d.ReadUint16()
-		case "Header":
+		case "header":
 			val.Header, err = DecodeHeaderMap(d)
-		case "Body":
+		case "body":
 			val.Body, err = d.ReadByteArray()
 		default:
 			err = d.Skip()
@@ -225,6 +215,9 @@ func HttpServerHandler(actor_ HttpServer) actor.Handler {
 	return actor.NewHandler("HttpServer", &HttpServerReceiver{}, actor_)
 }
 
+// HttpServerContractId returns the capability contract id for this interface
+func HttpServerContractId() string { return "wasmcloud:httpserver" }
+
 // HttpServerReceiver receives messages defined in the HttpServer service interface
 // HttpServer is the contract to be implemented by actor
 type HttpServerReceiver struct{}
@@ -237,7 +230,7 @@ func (r *HttpServerReceiver) Dispatch(ctx *actor.Context, svc interface{}, messa
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeHttpRequest(d)
+			value, err_ := DecodeHttpRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -265,6 +258,13 @@ func (r *HttpServerReceiver) Dispatch(ctx *actor.Context, svc interface{}, messa
 // HttpServer is the contract to be implemented by actor
 type HttpServerSender struct{ transport actor.Transport }
 
+// NewActorSender constructs a client for actor-to-actor messaging
+// using the recipient actor's public key
+func NewActorHttpServerSender(actor_id string) *HttpServerSender {
+	transport := actor.ToActor(actor_id)
+	return &HttpServerSender{transport: transport}
+}
+
 func (s *HttpServerSender) HandleRequest(ctx *actor.Context, arg HttpRequest) (*HttpResponse, error) {
 
 	var sizer msgpack.Sizer
@@ -278,7 +278,7 @@ func (s *HttpServerSender) HandleRequest(ctx *actor.Context, arg HttpRequest) (*
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "HttpServer.HandleRequest", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeHttpResponse(d)
+	resp, err_ := DecodeHttpResponse(&d)
 	if err_ != nil {
 		return nil, err_
 	}
