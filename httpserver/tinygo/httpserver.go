@@ -3,6 +3,7 @@ package httpserver
 
 import (
 	"github.com/wasmcloud/actor-tinygo"           //nolint
+	cbor "github.com/wasmcloud/tinygo-cbor"       //nolint
 	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
@@ -10,31 +11,67 @@ import (
 //
 type HeaderMap map[string]HeaderValues
 
-// Encode serializes a HeaderMap using msgpack
-func (o *HeaderMap) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a HeaderMap using msgpack
+func (o *HeaderMap) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(uint32(len(*o)))
 	for key_o, val_o := range *o {
 		encoder.WriteString(key_o)
-		val_o.Encode(encoder)
+		val_o.MEncode(encoder)
 	}
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a HeaderMap using msgpack
-func DecodeHeaderMap(d *msgpack.Decoder) (HeaderMap, error) {
+// MDecodeHeaderMap deserializes a HeaderMap using msgpack
+func MDecodeHeaderMap(d *msgpack.Decoder) (HeaderMap, error) {
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
 		return make(map[string]HeaderValues, 0), err
 	}
 	size, err := d.ReadMapSize()
 	if err != nil {
-		size = 0
+		return make(map[string]HeaderValues, 0), err
 	}
 	val := make(map[string]HeaderValues, size)
 	for i := uint32(0); i < size; i++ {
-		k, err := d.ReadString()
-		v, err := DecodeHeaderValues(d)
+		k, _ := d.ReadString()
+		v, err := MDecodeHeaderValues(d)
+		if err != nil {
+			return val, err
+		}
+		val[k] = v
+	}
+	return val, nil
+}
+
+// CEncode serializes a HeaderMap using cbor
+func (o *HeaderMap) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(uint32(len(*o)))
+	for key_o, val_o := range *o {
+		encoder.WriteString(key_o)
+		val_o.CEncode(encoder)
+	}
+
+	return encoder.CheckError()
+}
+
+// CDecodeHeaderMap deserializes a HeaderMap using cbor
+func CDecodeHeaderMap(d *cbor.Decoder) (HeaderMap, error) {
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return make(map[string]HeaderValues, 0), err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return make(map[string]HeaderValues, 0), err
+	}
+	val := make(map[string]HeaderValues, size)
+	for i := uint32(0); i < size; i++ {
+		k, _ := d.ReadString()
+		v, err := CDecodeHeaderValues(d)
 		if err != nil {
 			return val, err
 		}
@@ -45,26 +82,61 @@ func DecodeHeaderMap(d *msgpack.Decoder) (HeaderMap, error) {
 
 type HeaderValues []string
 
-// Encode serializes a HeaderValues using msgpack
-func (o *HeaderValues) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a HeaderValues using msgpack
+func (o *HeaderValues) MEncode(encoder msgpack.Writer) error {
 
 	encoder.WriteArraySize(uint32(len(*o)))
 	for _, item_o := range *o {
 		encoder.WriteString(item_o)
 	}
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a HeaderValues using msgpack
-func DecodeHeaderValues(d *msgpack.Decoder) (HeaderValues, error) {
+// MDecodeHeaderValues deserializes a HeaderValues using msgpack
+func MDecodeHeaderValues(d *msgpack.Decoder) (HeaderValues, error) {
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
 		return make([]string, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {
-		size = 0
+		return make([]string, 0), err
+	}
+	val := make([]string, size)
+	for i := uint32(0); i < size; i++ {
+		item, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		val = append(val, item)
+	}
+	return val, nil
+}
+
+// CEncode serializes a HeaderValues using cbor
+func (o *HeaderValues) CEncode(encoder cbor.Writer) error {
+
+	encoder.WriteArraySize(uint32(len(*o)))
+	for _, item_o := range *o {
+		encoder.WriteString(item_o)
+	}
+
+	return encoder.CheckError()
+}
+
+// CDecodeHeaderValues deserializes a HeaderValues using cbor
+func CDecodeHeaderValues(d *cbor.Decoder) (HeaderValues, error) {
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return make([]string, 0), err
+	}
+	size, indef, err := d.ReadArraySize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite arrays not supported")
+	}
+	if err != nil {
+		return make([]string, 0), err
 	}
 	val := make([]string, size)
 	for i := uint32(0); i < size; i++ {
@@ -91,8 +163,8 @@ type HttpRequest struct {
 	Body []byte
 }
 
-// Encode serializes a HttpRequest using msgpack
-func (o *HttpRequest) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a HttpRequest using msgpack
+func (o *HttpRequest) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(5)
 	encoder.WriteString("method")
 	encoder.WriteString(o.Method)
@@ -101,15 +173,15 @@ func (o *HttpRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteString("queryString")
 	encoder.WriteString(o.QueryString)
 	encoder.WriteString("header")
-	o.Header.Encode(encoder)
+	o.Header.MEncode(encoder)
 	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a HttpRequest using msgpack
-func DecodeHttpRequest(d *msgpack.Decoder) (HttpRequest, error) {
+// MDecodeHttpRequest deserializes a HttpRequest using msgpack
+func MDecodeHttpRequest(d *msgpack.Decoder) (HttpRequest, error) {
 	var val HttpRequest
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -132,7 +204,7 @@ func DecodeHttpRequest(d *msgpack.Decoder) (HttpRequest, error) {
 		case "queryString":
 			val.QueryString, err = d.ReadString()
 		case "header":
-			val.Header, err = DecodeHeaderMap(d)
+			val.Header, err = MDecodeHeaderMap(d)
 		case "body":
 			val.Body, err = d.ReadByteArray()
 		default:
@@ -143,7 +215,63 @@ func DecodeHttpRequest(d *msgpack.Decoder) (HttpRequest, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a HttpRequest using cbor
+func (o *HttpRequest) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(5)
+	encoder.WriteString("method")
+	encoder.WriteString(o.Method)
+	encoder.WriteString("path")
+	encoder.WriteString(o.Path)
+	encoder.WriteString("queryString")
+	encoder.WriteString(o.QueryString)
+	encoder.WriteString("header")
+	o.Header.CEncode(encoder)
+	encoder.WriteString("body")
+	encoder.WriteByteArray(o.Body)
+
+	return encoder.CheckError()
+}
+
+// CDecodeHttpRequest deserializes a HttpRequest using cbor
+func CDecodeHttpRequest(d *cbor.Decoder) (HttpRequest, error) {
+	var val HttpRequest
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "method":
+			val.Method, err = d.ReadString()
+		case "path":
+			val.Path, err = d.ReadString()
+		case "queryString":
+			val.QueryString, err = d.ReadString()
+		case "header":
+			val.Header, err = CDecodeHeaderMap(d)
+		case "body":
+			val.Body, err = d.ReadByteArray()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 // HttpResponse contains the actor's response to return to the http client
@@ -157,21 +285,21 @@ type HttpResponse struct {
 	Body []byte
 }
 
-// Encode serializes a HttpResponse using msgpack
-func (o *HttpResponse) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a HttpResponse using msgpack
+func (o *HttpResponse) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
 	encoder.WriteString("statusCode")
 	encoder.WriteUint16(o.StatusCode)
 	encoder.WriteString("header")
-	o.Header.Encode(encoder)
+	o.Header.MEncode(encoder)
 	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a HttpResponse using msgpack
-func DecodeHttpResponse(d *msgpack.Decoder) (HttpResponse, error) {
+// MDecodeHttpResponse deserializes a HttpResponse using msgpack
+func MDecodeHttpResponse(d *msgpack.Decoder) (HttpResponse, error) {
 	var val HttpResponse
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -190,7 +318,7 @@ func DecodeHttpResponse(d *msgpack.Decoder) (HttpResponse, error) {
 		case "statusCode":
 			val.StatusCode, err = d.ReadUint16()
 		case "header":
-			val.Header, err = DecodeHeaderMap(d)
+			val.Header, err = MDecodeHeaderMap(d)
 		case "body":
 			val.Body, err = d.ReadByteArray()
 		default:
@@ -201,7 +329,55 @@ func DecodeHttpResponse(d *msgpack.Decoder) (HttpResponse, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a HttpResponse using cbor
+func (o *HttpResponse) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(3)
+	encoder.WriteString("statusCode")
+	encoder.WriteUint16(o.StatusCode)
+	encoder.WriteString("header")
+	o.Header.CEncode(encoder)
+	encoder.WriteString("body")
+	encoder.WriteByteArray(o.Body)
+
+	return encoder.CheckError()
+}
+
+// CDecodeHttpResponse deserializes a HttpResponse using cbor
+func CDecodeHttpResponse(d *cbor.Decoder) (HttpResponse, error) {
+	var val HttpResponse
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "statusCode":
+			val.StatusCode, err = d.ReadUint16()
+		case "header":
+			val.Header, err = CDecodeHeaderMap(d)
+		case "body":
+			val.Body, err = d.ReadByteArray()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 // HttpServer is the contract to be implemented by actor
@@ -230,7 +406,7 @@ func (r *HttpServerReceiver) Dispatch(ctx *actor.Context, svc interface{}, messa
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeHttpRequest(&d)
+			value, err_ := MDecodeHttpRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -242,11 +418,11 @@ func (r *HttpServerReceiver) Dispatch(ctx *actor.Context, svc interface{}, messa
 
 			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.Encode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.Encode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "HttpServer.HandleRequest", Arg: buf}, nil
 		}
 	default:
@@ -269,20 +445,20 @@ func (s *HttpServerSender) HandleRequest(ctx *actor.Context, arg HttpRequest) (*
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "HttpServer.HandleRequest", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeHttpResponse(&d)
+	resp, err_ := MDecodeHttpResponse(&d)
 	if err_ != nil {
 		return nil, err_
 	}
 	return &resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.5

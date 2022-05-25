@@ -284,5 +284,3 @@ map TraceContext {
     key: String,
     value: String,
 }
-
-

@@ -3,6 +3,7 @@ package logging
 
 import (
 	"github.com/wasmcloud/actor-tinygo"           //nolint
+	cbor "github.com/wasmcloud/tinygo-cbor"       //nolint
 	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
@@ -13,19 +14,19 @@ type LogEntry struct {
 	Text string
 }
 
-// Encode serializes a LogEntry using msgpack
-func (o *LogEntry) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a LogEntry using msgpack
+func (o *LogEntry) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
 	encoder.WriteString("level")
 	encoder.WriteString(o.Level)
 	encoder.WriteString("text")
 	encoder.WriteString(o.Text)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a LogEntry using msgpack
-func DecodeLogEntry(d *msgpack.Decoder) (LogEntry, error) {
+// MDecodeLogEntry deserializes a LogEntry using msgpack
+func MDecodeLogEntry(d *msgpack.Decoder) (LogEntry, error) {
 	var val LogEntry
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -53,7 +54,51 @@ func DecodeLogEntry(d *msgpack.Decoder) (LogEntry, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a LogEntry using cbor
+func (o *LogEntry) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(2)
+	encoder.WriteString("level")
+	encoder.WriteString(o.Level)
+	encoder.WriteString("text")
+	encoder.WriteString(o.Text)
+
+	return encoder.CheckError()
+}
+
+// CDecodeLogEntry deserializes a LogEntry using cbor
+func CDecodeLogEntry(d *cbor.Decoder) (LogEntry, error) {
+	var val LogEntry
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "level":
+			val.Level, err = d.ReadString()
+		case "text":
+			val.Text, err = d.ReadString()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 type Logging interface {
@@ -83,7 +128,7 @@ func (r *LoggingReceiver) Dispatch(ctx *actor.Context, svc interface{}, message 
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeLogEntry(&d)
+			value, err_ := MDecodeLogEntry(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -124,15 +169,15 @@ func (s *LoggingSender) WriteLog(ctx *actor.Context, arg LogEntry) error {
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	s.transport.Send(ctx, actor.Message{Method: "Logging.WriteLog", Arg: buf})
 	return nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.5

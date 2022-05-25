@@ -3,6 +3,7 @@ package keyvalue
 
 import (
 	"github.com/wasmcloud/actor-tinygo"           //nolint
+	cbor "github.com/wasmcloud/tinygo-cbor"       //nolint
 	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
@@ -14,19 +15,19 @@ type GetResponse struct {
 	Exists bool
 }
 
-// Encode serializes a GetResponse using msgpack
-func (o *GetResponse) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a GetResponse using msgpack
+func (o *GetResponse) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
 	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
 	encoder.WriteString("exists")
 	encoder.WriteBool(o.Exists)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a GetResponse using msgpack
-func DecodeGetResponse(d *msgpack.Decoder) (GetResponse, error) {
+// MDecodeGetResponse deserializes a GetResponse using msgpack
+func MDecodeGetResponse(d *msgpack.Decoder) (GetResponse, error) {
 	var val GetResponse
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -54,7 +55,51 @@ func DecodeGetResponse(d *msgpack.Decoder) (GetResponse, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a GetResponse using cbor
+func (o *GetResponse) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(2)
+	encoder.WriteString("value")
+	encoder.WriteString(o.Value)
+	encoder.WriteString("exists")
+	encoder.WriteBool(o.Exists)
+
+	return encoder.CheckError()
+}
+
+// CDecodeGetResponse deserializes a GetResponse using cbor
+func CDecodeGetResponse(d *cbor.Decoder) (GetResponse, error) {
+	var val GetResponse
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "value":
+			val.Value, err = d.ReadString()
+		case "exists":
+			val.Exists, err = d.ReadBool()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 type IncrementRequest struct {
@@ -64,19 +109,19 @@ type IncrementRequest struct {
 	Value int32
 }
 
-// Encode serializes a IncrementRequest using msgpack
-func (o *IncrementRequest) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a IncrementRequest using msgpack
+func (o *IncrementRequest) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
 	encoder.WriteString("key")
 	encoder.WriteString(o.Key)
 	encoder.WriteString("value")
 	encoder.WriteInt32(o.Value)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a IncrementRequest using msgpack
-func DecodeIncrementRequest(d *msgpack.Decoder) (IncrementRequest, error) {
+// MDecodeIncrementRequest deserializes a IncrementRequest using msgpack
+func MDecodeIncrementRequest(d *msgpack.Decoder) (IncrementRequest, error) {
 	var val IncrementRequest
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -104,7 +149,51 @@ func DecodeIncrementRequest(d *msgpack.Decoder) (IncrementRequest, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a IncrementRequest using cbor
+func (o *IncrementRequest) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(2)
+	encoder.WriteString("key")
+	encoder.WriteString(o.Key)
+	encoder.WriteString("value")
+	encoder.WriteInt32(o.Value)
+
+	return encoder.CheckError()
+}
+
+// CDecodeIncrementRequest deserializes a IncrementRequest using cbor
+func CDecodeIncrementRequest(d *cbor.Decoder) (IncrementRequest, error) {
+	var val IncrementRequest
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "key":
+			val.Key, err = d.ReadString()
+		case "value":
+			val.Value, err = d.ReadInt32()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 // Parameter to ListAdd operation
@@ -115,19 +204,19 @@ type ListAddRequest struct {
 	Value string
 }
 
-// Encode serializes a ListAddRequest using msgpack
-func (o *ListAddRequest) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a ListAddRequest using msgpack
+func (o *ListAddRequest) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
 	encoder.WriteString("listName")
 	encoder.WriteString(o.ListName)
 	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a ListAddRequest using msgpack
-func DecodeListAddRequest(d *msgpack.Decoder) (ListAddRequest, error) {
+// MDecodeListAddRequest deserializes a ListAddRequest using msgpack
+func MDecodeListAddRequest(d *msgpack.Decoder) (ListAddRequest, error) {
 	var val ListAddRequest
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -155,7 +244,51 @@ func DecodeListAddRequest(d *msgpack.Decoder) (ListAddRequest, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a ListAddRequest using cbor
+func (o *ListAddRequest) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(2)
+	encoder.WriteString("listName")
+	encoder.WriteString(o.ListName)
+	encoder.WriteString("value")
+	encoder.WriteString(o.Value)
+
+	return encoder.CheckError()
+}
+
+// CDecodeListAddRequest deserializes a ListAddRequest using cbor
+func CDecodeListAddRequest(d *cbor.Decoder) (ListAddRequest, error) {
+	var val ListAddRequest
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "listName":
+			val.ListName, err = d.ReadString()
+		case "value":
+			val.Value, err = d.ReadString()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 // Removes an item from the list. If the item occurred more than once,
@@ -167,19 +300,19 @@ type ListDelRequest struct {
 	Value    string
 }
 
-// Encode serializes a ListDelRequest using msgpack
-func (o *ListDelRequest) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a ListDelRequest using msgpack
+func (o *ListDelRequest) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
 	encoder.WriteString("listName")
 	encoder.WriteString(o.ListName)
 	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a ListDelRequest using msgpack
-func DecodeListDelRequest(d *msgpack.Decoder) (ListDelRequest, error) {
+// MDecodeListDelRequest deserializes a ListDelRequest using msgpack
+func MDecodeListDelRequest(d *msgpack.Decoder) (ListDelRequest, error) {
 	var val ListDelRequest
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -207,7 +340,51 @@ func DecodeListDelRequest(d *msgpack.Decoder) (ListDelRequest, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a ListDelRequest using cbor
+func (o *ListDelRequest) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(2)
+	encoder.WriteString("listName")
+	encoder.WriteString(o.ListName)
+	encoder.WriteString("value")
+	encoder.WriteString(o.Value)
+
+	return encoder.CheckError()
+}
+
+// CDecodeListDelRequest deserializes a ListDelRequest using cbor
+func CDecodeListDelRequest(d *cbor.Decoder) (ListDelRequest, error) {
+	var val ListDelRequest
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "listName":
+			val.ListName, err = d.ReadString()
+		case "value":
+			val.Value, err = d.ReadString()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 type ListRangeRequest struct {
@@ -219,8 +396,8 @@ type ListRangeRequest struct {
 	Stop int32
 }
 
-// Encode serializes a ListRangeRequest using msgpack
-func (o *ListRangeRequest) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a ListRangeRequest using msgpack
+func (o *ListRangeRequest) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
 	encoder.WriteString("listName")
 	encoder.WriteString(o.ListName)
@@ -229,11 +406,11 @@ func (o *ListRangeRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteString("stop")
 	encoder.WriteInt32(o.Stop)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a ListRangeRequest using msgpack
-func DecodeListRangeRequest(d *msgpack.Decoder) (ListRangeRequest, error) {
+// MDecodeListRangeRequest deserializes a ListRangeRequest using msgpack
+func MDecodeListRangeRequest(d *msgpack.Decoder) (ListRangeRequest, error) {
 	var val ListRangeRequest
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -263,7 +440,55 @@ func DecodeListRangeRequest(d *msgpack.Decoder) (ListRangeRequest, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a ListRangeRequest using cbor
+func (o *ListRangeRequest) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(3)
+	encoder.WriteString("listName")
+	encoder.WriteString(o.ListName)
+	encoder.WriteString("start")
+	encoder.WriteInt32(o.Start)
+	encoder.WriteString("stop")
+	encoder.WriteInt32(o.Stop)
+
+	return encoder.CheckError()
+}
+
+// CDecodeListRangeRequest deserializes a ListRangeRequest using cbor
+func CDecodeListRangeRequest(d *cbor.Decoder) (ListRangeRequest, error) {
+	var val ListRangeRequest
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "listName":
+			val.ListName, err = d.ReadString()
+		case "start":
+			val.Start, err = d.ReadInt32()
+		case "stop":
+			val.Stop, err = d.ReadInt32()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 type SetAddRequest struct {
@@ -273,19 +498,19 @@ type SetAddRequest struct {
 	Value string
 }
 
-// Encode serializes a SetAddRequest using msgpack
-func (o *SetAddRequest) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a SetAddRequest using msgpack
+func (o *SetAddRequest) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
 	encoder.WriteString("setName")
 	encoder.WriteString(o.SetName)
 	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a SetAddRequest using msgpack
-func DecodeSetAddRequest(d *msgpack.Decoder) (SetAddRequest, error) {
+// MDecodeSetAddRequest deserializes a SetAddRequest using msgpack
+func MDecodeSetAddRequest(d *msgpack.Decoder) (SetAddRequest, error) {
 	var val SetAddRequest
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -313,7 +538,51 @@ func DecodeSetAddRequest(d *msgpack.Decoder) (SetAddRequest, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a SetAddRequest using cbor
+func (o *SetAddRequest) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(2)
+	encoder.WriteString("setName")
+	encoder.WriteString(o.SetName)
+	encoder.WriteString("value")
+	encoder.WriteString(o.Value)
+
+	return encoder.CheckError()
+}
+
+// CDecodeSetAddRequest deserializes a SetAddRequest using cbor
+func CDecodeSetAddRequest(d *cbor.Decoder) (SetAddRequest, error) {
+	var val SetAddRequest
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "setName":
+			val.SetName, err = d.ReadString()
+		case "value":
+			val.Value, err = d.ReadString()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 type SetDelRequest struct {
@@ -321,19 +590,19 @@ type SetDelRequest struct {
 	Value   string
 }
 
-// Encode serializes a SetDelRequest using msgpack
-func (o *SetDelRequest) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a SetDelRequest using msgpack
+func (o *SetDelRequest) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
 	encoder.WriteString("setName")
 	encoder.WriteString(o.SetName)
 	encoder.WriteString("value")
 	encoder.WriteString(o.Value)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a SetDelRequest using msgpack
-func DecodeSetDelRequest(d *msgpack.Decoder) (SetDelRequest, error) {
+// MDecodeSetDelRequest deserializes a SetDelRequest using msgpack
+func MDecodeSetDelRequest(d *msgpack.Decoder) (SetDelRequest, error) {
 	var val SetDelRequest
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -361,7 +630,51 @@ func DecodeSetDelRequest(d *msgpack.Decoder) (SetDelRequest, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a SetDelRequest using cbor
+func (o *SetDelRequest) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(2)
+	encoder.WriteString("setName")
+	encoder.WriteString(o.SetName)
+	encoder.WriteString("value")
+	encoder.WriteString(o.Value)
+
+	return encoder.CheckError()
+}
+
+// CDecodeSetDelRequest deserializes a SetDelRequest using cbor
+func CDecodeSetDelRequest(d *cbor.Decoder) (SetDelRequest, error) {
+	var val SetDelRequest
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "setName":
+			val.SetName, err = d.ReadString()
+		case "value":
+			val.Value, err = d.ReadString()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 type SetRequest struct {
@@ -373,8 +686,8 @@ type SetRequest struct {
 	Expires uint32
 }
 
-// Encode serializes a SetRequest using msgpack
-func (o *SetRequest) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a SetRequest using msgpack
+func (o *SetRequest) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
 	encoder.WriteString("key")
 	encoder.WriteString(o.Key)
@@ -383,11 +696,11 @@ func (o *SetRequest) Encode(encoder msgpack.Writer) error {
 	encoder.WriteString("expires")
 	encoder.WriteUint32(o.Expires)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a SetRequest using msgpack
-func DecodeSetRequest(d *msgpack.Decoder) (SetRequest, error) {
+// MDecodeSetRequest deserializes a SetRequest using msgpack
+func MDecodeSetRequest(d *msgpack.Decoder) (SetRequest, error) {
 	var val SetRequest
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -417,32 +730,115 @@ func DecodeSetRequest(d *msgpack.Decoder) (SetRequest, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a SetRequest using cbor
+func (o *SetRequest) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(3)
+	encoder.WriteString("key")
+	encoder.WriteString(o.Key)
+	encoder.WriteString("value")
+	encoder.WriteString(o.Value)
+	encoder.WriteString("expires")
+	encoder.WriteUint32(o.Expires)
+
+	return encoder.CheckError()
+}
+
+// CDecodeSetRequest deserializes a SetRequest using cbor
+func CDecodeSetRequest(d *cbor.Decoder) (SetRequest, error) {
+	var val SetRequest
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "key":
+			val.Key, err = d.ReadString()
+		case "value":
+			val.Value, err = d.ReadString()
+		case "expires":
+			val.Expires, err = d.ReadUint32()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 // list of strings
 type StringList []string
 
-// Encode serializes a StringList using msgpack
-func (o *StringList) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a StringList using msgpack
+func (o *StringList) MEncode(encoder msgpack.Writer) error {
 
 	encoder.WriteArraySize(uint32(len(*o)))
 	for _, item_o := range *o {
 		encoder.WriteString(item_o)
 	}
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a StringList using msgpack
-func DecodeStringList(d *msgpack.Decoder) (StringList, error) {
+// MDecodeStringList deserializes a StringList using msgpack
+func MDecodeStringList(d *msgpack.Decoder) (StringList, error) {
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
 		return make([]string, 0), err
 	}
 	size, err := d.ReadArraySize()
 	if err != nil {
-		size = 0
+		return make([]string, 0), err
+	}
+	val := make([]string, size)
+	for i := uint32(0); i < size; i++ {
+		item, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		val = append(val, item)
+	}
+	return val, nil
+}
+
+// CEncode serializes a StringList using cbor
+func (o *StringList) CEncode(encoder cbor.Writer) error {
+
+	encoder.WriteArraySize(uint32(len(*o)))
+	for _, item_o := range *o {
+		encoder.WriteString(item_o)
+	}
+
+	return encoder.CheckError()
+}
+
+// CDecodeStringList deserializes a StringList using cbor
+func CDecodeStringList(d *cbor.Decoder) (StringList, error) {
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return make([]string, 0), err
+	}
+	size, indef, err := d.ReadArraySize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite arrays not supported")
+	}
+	if err != nil {
+		return make([]string, 0), err
 	}
 	val := make([]string, size)
 	for i := uint32(0); i < size; i++ {
@@ -525,7 +921,7 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeIncrementRequest(&d)
+			value, err_ := MDecodeIncrementRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -606,18 +1002,18 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 
 			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.Encode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.Encode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "KeyValue.Get", Arg: buf}, nil
 		}
 	case "ListAdd":
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeListAddRequest(&d)
+			value, err_ := MDecodeListAddRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -663,7 +1059,7 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeListDelRequest(&d)
+			value, err_ := MDecodeListDelRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -686,7 +1082,7 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeListRangeRequest(&d)
+			value, err_ := MDecodeListRangeRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -698,18 +1094,18 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 
 			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.Encode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.Encode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "KeyValue.ListRange", Arg: buf}, nil
 		}
 	case "Set":
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeSetRequest(&d)
+			value, err_ := MDecodeSetRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -725,7 +1121,7 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeSetAddRequest(&d)
+			value, err_ := MDecodeSetAddRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -748,7 +1144,7 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeSetDelRequest(&d)
+			value, err_ := MDecodeSetDelRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -771,7 +1167,7 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeStringList(&d)
+			value, err_ := MDecodeStringList(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -783,11 +1179,11 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 
 			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.Encode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.Encode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "KeyValue.SetIntersection", Arg: buf}, nil
 		}
 	case "SetQuery":
@@ -806,18 +1202,18 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 
 			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.Encode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.Encode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "KeyValue.SetQuery", Arg: buf}, nil
 		}
 	case "SetUnion":
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeStringList(&d)
+			value, err_ := MDecodeStringList(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -829,11 +1225,11 @@ func (r *KeyValueReceiver) Dispatch(ctx *actor.Context, svc interface{}, message
 
 			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.Encode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.Encode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "KeyValue.SetUnion", Arg: buf}, nil
 		}
 	case "SetClear":
@@ -886,12 +1282,12 @@ func (s *KeyValueSender) Increment(ctx *actor.Context, arg IncrementRequest) (in
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.Increment", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
@@ -960,7 +1356,7 @@ func (s *KeyValueSender) Get(ctx *actor.Context, arg string) (*GetResponse, erro
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.Get", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeGetResponse(&d)
+	resp, err_ := MDecodeGetResponse(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -972,12 +1368,12 @@ func (s *KeyValueSender) ListAdd(ctx *actor.Context, arg ListAddRequest) (uint32
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.ListAdd", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
@@ -1016,12 +1412,12 @@ func (s *KeyValueSender) ListDel(ctx *actor.Context, arg ListDelRequest) (bool, 
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.ListDel", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
@@ -1040,16 +1436,16 @@ func (s *KeyValueSender) ListRange(ctx *actor.Context, arg ListRangeRequest) (*S
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.ListRange", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeStringList(&d)
+	resp, err_ := MDecodeStringList(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -1063,12 +1459,12 @@ func (s *KeyValueSender) Set(ctx *actor.Context, arg SetRequest) error {
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	s.transport.Send(ctx, actor.Message{Method: "KeyValue.Set", Arg: buf})
 	return nil
@@ -1079,12 +1475,12 @@ func (s *KeyValueSender) SetAdd(ctx *actor.Context, arg SetAddRequest) (uint32, 
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.SetAdd", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
@@ -1100,12 +1496,12 @@ func (s *KeyValueSender) SetDel(ctx *actor.Context, arg SetDelRequest) (uint32, 
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.SetDel", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
@@ -1123,16 +1519,16 @@ func (s *KeyValueSender) SetIntersection(ctx *actor.Context, arg StringList) (*S
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.SetIntersection", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeStringList(&d)
+	resp, err_ := MDecodeStringList(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -1155,7 +1551,7 @@ func (s *KeyValueSender) SetQuery(ctx *actor.Context, arg string) (*StringList, 
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.SetQuery", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeStringList(&d)
+	resp, err_ := MDecodeStringList(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -1169,16 +1565,16 @@ func (s *KeyValueSender) SetUnion(ctx *actor.Context, arg StringList) (*StringLi
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "KeyValue.SetUnion", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeStringList(&d)
+	resp, err_ := MDecodeStringList(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -1208,4 +1604,4 @@ func (s *KeyValueSender) SetClear(ctx *actor.Context, arg string) (bool, error) 
 	return resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
