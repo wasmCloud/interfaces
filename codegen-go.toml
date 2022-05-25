@@ -5,7 +5,7 @@ path = "."
 files = [
     "core/wasmcloud-core.smithy",
     "core/wasmcloud-model.smithy",
-#    "blobstore/blobstore.smithy",
+    "blobstore/blobstore.smithy",
     "factorial/factorial.smithy",
     "keyvalue/keyvalue.smithy",
     "httpclient/httpclient.smithy",
@@ -13,14 +13,16 @@ files = [
     "logging/logging.smithy",
     "messaging/messaging.smithy",
     "numbergen/numbergen.smithy",
+    "sqldb/sqldb.smithy",
     ]
 
 [tinygo]
 output_dir = ""
+formatter = [ "goimports", "-w" ]
 files = [
   { path = "core/tinygo/core.go", package="actor", namespace = "org.wasmcloud.core" },
   { path = "core/tinygo/model.go", package="actor", namespace = "org.wasmcloud.model" },
-#  { path = "blobstore/tinygo/blobstore.go", package="blobstore", namespace = "org.wasmcloud.interface.blobstore" },
+  { path = "blobstore/tinygo/blobstore.go", package="blobstore", namespace = "org.wasmcloud.interface.blobstore" },
   { path = "factorial/tinygo/factorial.go", package="factorial", namespace = "org.wasmcloud.interface.factorial" },
   { path = "httpclient/tinygo/httpclient.go", package="httpclient", namespace = "org.wasmcloud.interface.httpclient" },
   { path = "httpserver/tinygo/httpserver.go", package="httpserver", namespace = "org.wasmcloud.interface.httpserver" },
@@ -28,4 +30,5 @@ files = [
   { path = "logging/tinygo/logging.go", package="logging", namespace = "org.wasmcloud.interface.logging" },
   { path = "messaging/tinygo/messaging.go", package="messaging", namespace = "org.wasmcloud.interface.messaging" },
   { path = "numbergen/tinygo/numbergen.go", package="numbergen", namespace = "org.wasmcloud.interface.numbergen" },
+  { path = "sqldb/tinygo/sqldb.go", package="sqldb", namespace = "org.wasmcloud.interface.sqldb" },
 ]
