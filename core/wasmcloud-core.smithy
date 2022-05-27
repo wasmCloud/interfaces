@@ -175,6 +175,10 @@ structure HostData {
     @serialization(name: "default_rpc_timeout_ms")
     @n(13)
     defaultRpcTimeoutMs: U64,
+
+    @serialization(name: "structured_logging_enabled")
+    @n(14)
+    structuredLoggingEnabled: Boolean,
 }
 
 list ClusterIssuers {
