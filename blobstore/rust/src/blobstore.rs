@@ -615,6 +615,11 @@ pub struct GetObjectRequest {
     #[serde(rename = "rangeEnd")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub range_end: Option<u64>,
+    /// Requests that the reply should be send asynchronously to the ReceiveChunk
+    /// service instead of as a reply to the GetObject call. Defaults to false.
+    #[serde(rename = "asyncReply")]
+    #[serde(default)]
+    pub async_reply: bool,
 }
 
 // Encode GetObjectRequest as CBOR and append to output stream
@@ -624,7 +629,7 @@ pub fn encode_get_object_request<W: wasmbus_rpc::cbor::Write>(
     mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
     val: &GetObjectRequest,
 ) -> RpcResult<()> {
-    e.array(4)?;
+    e.array(5)?;
     encode_object_id(e, &val.object_id)?;
     encode_container_id(e, &val.container_id)?;
     if let Some(val) = val.range_start.as_ref() {
@@ -637,6 +642,7 @@ pub fn encode_get_object_request<W: wasmbus_rpc::cbor::Write>(
     } else {
         e.null()?;
     }
+    e.bool(val.async_reply)?;
     Ok(())
 }
 
@@ -650,6 +656,7 @@ pub fn decode_get_object_request(
         let mut container_id: Option<ContainerId> = None;
         let mut range_start: Option<Option<u64>> = Some(None);
         let mut range_end: Option<Option<u64>> = Some(None);
+        let mut async_reply: Option<bool> = None;
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -696,7 +703,7 @@ pub fn decode_get_object_request(
                             Some(Some(d.u64()?))
                         }
                     }
-
+                    4 => async_reply = Some(d.bool()?),
                     _ => d.skip()?,
                 }
             }
@@ -736,6 +743,7 @@ pub fn decode_get_object_request(
                             Some(Some(d.u64()?))
                         }
                     }
+                    "asyncReply" => async_reply = Some(d.bool()?),
                     _ => d.skip()?,
                 }
             }
@@ -758,6 +766,14 @@ pub fn decode_get_object_request(
             },
             range_start: range_start.unwrap(),
             range_end: range_end.unwrap(),
+
+            async_reply: if let Some(__x) = async_reply {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field GetObjectRequest.async_reply (#4)".to_string(),
+                ));
+            },
         }
     };
     Ok(__result)

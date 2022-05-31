@@ -380,6 +380,12 @@ structure GetObjectRequest {
     /// Range values are inclusive.
     @n(3)
     rangeEnd: U64,
+
+    /// Requests that the reply should be send asynchronously to the ReceiveChunk
+    /// service instead of as a reply to the GetObject call. Defaults to false.
+    @n(4)
+    asyncReply: Boolean,
+
 }
 
 /// Response to GetObject
