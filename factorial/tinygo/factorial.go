@@ -4,6 +4,7 @@ package factorial
 import (
 	"github.com/wasmcloud/actor-tinygo"           //nolint
 	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
+	//nolint
 )
 
 // The Factorial service has a single method, calculate, which
@@ -106,4 +107,4 @@ func (s *FactorialSender) Calculate(ctx *actor.Context, arg uint32) (uint64, err
 	return resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.5

@@ -3,6 +3,7 @@ package numbergen
 
 import (
 	"github.com/wasmcloud/actor-tinygo"           //nolint
+	cbor "github.com/wasmcloud/tinygo-cbor"       //nolint
 	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
@@ -14,19 +15,19 @@ type RangeLimit struct {
 	Max uint32
 }
 
-// Encode serializes a RangeLimit using msgpack
-func (o *RangeLimit) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a RangeLimit using msgpack
+func (o *RangeLimit) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(2)
 	encoder.WriteString("min")
 	encoder.WriteUint32(o.Min)
 	encoder.WriteString("max")
 	encoder.WriteUint32(o.Max)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a RangeLimit using msgpack
-func DecodeRangeLimit(d *msgpack.Decoder) (RangeLimit, error) {
+// MDecodeRangeLimit deserializes a RangeLimit using msgpack
+func MDecodeRangeLimit(d *msgpack.Decoder) (RangeLimit, error) {
 	var val RangeLimit
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -54,7 +55,51 @@ func DecodeRangeLimit(d *msgpack.Decoder) (RangeLimit, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a RangeLimit using cbor
+func (o *RangeLimit) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(2)
+	encoder.WriteString("min")
+	encoder.WriteUint32(o.Min)
+	encoder.WriteString("max")
+	encoder.WriteUint32(o.Max)
+
+	return encoder.CheckError()
+}
+
+// CDecodeRangeLimit deserializes a RangeLimit using cbor
+func CDecodeRangeLimit(d *cbor.Decoder) (RangeLimit, error) {
+	var val RangeLimit
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "min":
+			val.Min, err = d.ReadUint32()
+		case "max":
+			val.Max, err = d.ReadUint32()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 type NumberGen interface {
@@ -106,7 +151,7 @@ func (r *NumberGenReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeRangeLimit(&d)
+			value, err_ := MDecodeRangeLimit(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -184,12 +229,12 @@ func (s *NumberGenSender) RandomInRange(ctx *actor.Context, arg RangeLimit) (uin
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "NumberGen.RandomInRange", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
@@ -212,4 +257,4 @@ func (s *NumberGenSender) Random32(ctx *actor.Context) (uint32, error) {
 	return resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.5

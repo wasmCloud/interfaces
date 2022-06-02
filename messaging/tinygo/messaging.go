@@ -3,6 +3,7 @@ package messaging
 
 import (
 	"github.com/wasmcloud/actor-tinygo"           //nolint
+	cbor "github.com/wasmcloud/tinygo-cbor"       //nolint
 	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
@@ -16,8 +17,8 @@ type PubMessage struct {
 	Body []byte
 }
 
-// Encode serializes a PubMessage using msgpack
-func (o *PubMessage) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a PubMessage using msgpack
+func (o *PubMessage) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
 	encoder.WriteString("subject")
 	encoder.WriteString(o.Subject)
@@ -26,11 +27,11 @@ func (o *PubMessage) Encode(encoder msgpack.Writer) error {
 	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a PubMessage using msgpack
-func DecodePubMessage(d *msgpack.Decoder) (PubMessage, error) {
+// MDecodePubMessage deserializes a PubMessage using msgpack
+func MDecodePubMessage(d *msgpack.Decoder) (PubMessage, error) {
 	var val PubMessage
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -60,7 +61,55 @@ func DecodePubMessage(d *msgpack.Decoder) (PubMessage, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a PubMessage using cbor
+func (o *PubMessage) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(3)
+	encoder.WriteString("subject")
+	encoder.WriteString(o.Subject)
+	encoder.WriteString("replyTo")
+	encoder.WriteString(o.ReplyTo)
+	encoder.WriteString("body")
+	encoder.WriteByteArray(o.Body)
+
+	return encoder.CheckError()
+}
+
+// CDecodePubMessage deserializes a PubMessage using cbor
+func CDecodePubMessage(d *cbor.Decoder) (PubMessage, error) {
+	var val PubMessage
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "subject":
+			val.Subject, err = d.ReadString()
+		case "replyTo":
+			val.ReplyTo, err = d.ReadString()
+		case "body":
+			val.Body, err = d.ReadByteArray()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 // Reply received from a Request operation
@@ -73,8 +122,8 @@ type ReplyMessage struct {
 	Body []byte
 }
 
-// Encode serializes a ReplyMessage using msgpack
-func (o *ReplyMessage) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a ReplyMessage using msgpack
+func (o *ReplyMessage) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
 	encoder.WriteString("subject")
 	encoder.WriteString(o.Subject)
@@ -83,11 +132,11 @@ func (o *ReplyMessage) Encode(encoder msgpack.Writer) error {
 	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a ReplyMessage using msgpack
-func DecodeReplyMessage(d *msgpack.Decoder) (ReplyMessage, error) {
+// MDecodeReplyMessage deserializes a ReplyMessage using msgpack
+func MDecodeReplyMessage(d *msgpack.Decoder) (ReplyMessage, error) {
 	var val ReplyMessage
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -117,7 +166,55 @@ func DecodeReplyMessage(d *msgpack.Decoder) (ReplyMessage, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a ReplyMessage using cbor
+func (o *ReplyMessage) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(3)
+	encoder.WriteString("subject")
+	encoder.WriteString(o.Subject)
+	encoder.WriteString("replyTo")
+	encoder.WriteString(o.ReplyTo)
+	encoder.WriteString("body")
+	encoder.WriteByteArray(o.Body)
+
+	return encoder.CheckError()
+}
+
+// CDecodeReplyMessage deserializes a ReplyMessage using cbor
+func CDecodeReplyMessage(d *cbor.Decoder) (ReplyMessage, error) {
+	var val ReplyMessage
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "subject":
+			val.Subject, err = d.ReadString()
+		case "replyTo":
+			val.ReplyTo, err = d.ReadString()
+		case "body":
+			val.Body, err = d.ReadByteArray()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 // Message sent as part of a request, with timeout
@@ -130,8 +227,8 @@ type RequestMessage struct {
 	TimeoutMs uint32
 }
 
-// Encode serializes a RequestMessage using msgpack
-func (o *RequestMessage) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a RequestMessage using msgpack
+func (o *RequestMessage) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
 	encoder.WriteString("subject")
 	encoder.WriteString(o.Subject)
@@ -140,11 +237,11 @@ func (o *RequestMessage) Encode(encoder msgpack.Writer) error {
 	encoder.WriteString("timeoutMs")
 	encoder.WriteUint32(o.TimeoutMs)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a RequestMessage using msgpack
-func DecodeRequestMessage(d *msgpack.Decoder) (RequestMessage, error) {
+// MDecodeRequestMessage deserializes a RequestMessage using msgpack
+func MDecodeRequestMessage(d *msgpack.Decoder) (RequestMessage, error) {
 	var val RequestMessage
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -174,7 +271,55 @@ func DecodeRequestMessage(d *msgpack.Decoder) (RequestMessage, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a RequestMessage using cbor
+func (o *RequestMessage) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(3)
+	encoder.WriteString("subject")
+	encoder.WriteString(o.Subject)
+	encoder.WriteString("body")
+	encoder.WriteByteArray(o.Body)
+	encoder.WriteString("timeoutMs")
+	encoder.WriteUint32(o.TimeoutMs)
+
+	return encoder.CheckError()
+}
+
+// CDecodeRequestMessage deserializes a RequestMessage using cbor
+func CDecodeRequestMessage(d *cbor.Decoder) (RequestMessage, error) {
+	var val RequestMessage
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "subject":
+			val.Subject, err = d.ReadString()
+		case "body":
+			val.Body, err = d.ReadByteArray()
+		case "timeoutMs":
+			val.TimeoutMs, err = d.ReadUint32()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 // Message received as part of a subscription
@@ -187,8 +332,8 @@ type SubMessage struct {
 	Body []byte
 }
 
-// Encode serializes a SubMessage using msgpack
-func (o *SubMessage) Encode(encoder msgpack.Writer) error {
+// MEncode serializes a SubMessage using msgpack
+func (o *SubMessage) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteMapSize(3)
 	encoder.WriteString("subject")
 	encoder.WriteString(o.Subject)
@@ -197,11 +342,11 @@ func (o *SubMessage) Encode(encoder msgpack.Writer) error {
 	encoder.WriteString("body")
 	encoder.WriteByteArray(o.Body)
 
-	return nil
+	return encoder.CheckError()
 }
 
-// Decode deserializes a SubMessage using msgpack
-func DecodeSubMessage(d *msgpack.Decoder) (SubMessage, error) {
+// MDecodeSubMessage deserializes a SubMessage using msgpack
+func MDecodeSubMessage(d *msgpack.Decoder) (SubMessage, error) {
 	var val SubMessage
 	isNil, err := d.IsNextNil()
 	if err != nil || isNil {
@@ -231,7 +376,55 @@ func DecodeSubMessage(d *msgpack.Decoder) (SubMessage, error) {
 		}
 	}
 	return val, nil
+}
 
+// CEncode serializes a SubMessage using cbor
+func (o *SubMessage) CEncode(encoder cbor.Writer) error {
+	encoder.WriteMapSize(3)
+	encoder.WriteString("subject")
+	encoder.WriteString(o.Subject)
+	encoder.WriteString("replyTo")
+	encoder.WriteString(o.ReplyTo)
+	encoder.WriteString("body")
+	encoder.WriteByteArray(o.Body)
+
+	return encoder.CheckError()
+}
+
+// CDecodeSubMessage deserializes a SubMessage using cbor
+func CDecodeSubMessage(d *cbor.Decoder) (SubMessage, error) {
+	var val SubMessage
+	isNil, err := d.IsNextNil()
+	if err != nil || isNil {
+		return val, err
+	}
+	size, indef, err := d.ReadMapSize()
+	if err != nil && indef {
+		err = cbor.NewReadError("indefinite maps not supported")
+	}
+	if err != nil {
+		return val, err
+	}
+	for i := uint32(0); i < size; i++ {
+		field, err := d.ReadString()
+		if err != nil {
+			return val, err
+		}
+		switch field {
+		case "subject":
+			val.Subject, err = d.ReadString()
+		case "replyTo":
+			val.ReplyTo, err = d.ReadString()
+		case "body":
+			val.Body, err = d.ReadByteArray()
+		default:
+			err = d.Skip()
+		}
+		if err != nil {
+			return val, err
+		}
+	}
+	return val, nil
 }
 
 // The MessageSubscriber interface describes
@@ -265,7 +458,7 @@ func (r *MessageSubscriberReceiver) Dispatch(ctx *actor.Context, svc interface{}
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeSubMessage(&d)
+			value, err_ := MDecodeSubMessage(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -300,12 +493,12 @@ func (s *MessageSubscriberSender) HandleMessage(ctx *actor.Context, arg SubMessa
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	s.transport.Send(ctx, actor.Message{Method: "MessageSubscriber.HandleMessage", Arg: buf})
 	return nil
@@ -347,7 +540,7 @@ func (r *MessagingReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodePubMessage(&d)
+			value, err_ := MDecodePubMessage(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -363,7 +556,7 @@ func (r *MessagingReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 		{
 
 			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := DecodeRequestMessage(&d)
+			value, err_ := MDecodeRequestMessage(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -375,11 +568,11 @@ func (r *MessagingReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 
 			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.Encode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
 			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.Encode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "Messaging.Request", Arg: buf}, nil
 		}
 	default:
@@ -415,12 +608,12 @@ func (s *MessagingSender) Publish(ctx *actor.Context, arg PubMessage) error {
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	s.transport.Send(ctx, actor.Message{Method: "Messaging.Publish", Arg: buf})
 	return nil
@@ -432,20 +625,20 @@ func (s *MessagingSender) Request(ctx *actor.Context, arg RequestMessage) (*Repl
 
 	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.Encode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
 	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.Encode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Messaging.Request", Arg: buf})
 	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := DecodeReplyMessage(&d)
+	resp, err_ := MDecodeReplyMessage(&d)
 	if err_ != nil {
 		return nil, err_
 	}
 	return &resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.4
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
