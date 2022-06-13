@@ -535,19 +535,54 @@ structure Host {
     @required    
     @serialization(name: "uptime_seconds")
     uptimeSeconds: U64
+
+    /// Human-friendly uptime description
+    @serialization(name: "uptime_human")
+    uptimeHuman: String,
+
+    /// Hash map of label-value pairs for this host
+    labels: CtlKVList,
+
+    /// Current wasmCloud Host software version
+    version: String,
+
+    /// Comma-delimited list of valid cluster issuer public keys as known
+    /// to this host
+    @serialization(name: "cluster_issuers")
+    clusterIssuers: String,
+
+    /// JetStream domain (if applicable) in use by this host
+    @serialization(name: "js_domain")
+    jsDomain: String,
+
+    /// NATS server host used for the control interface
+    @serialization(name: "ctl_host")
+    ctlHost: String,
+
+    /// NATS server host used for provider RPC
+    @serialization(name: "prov_rpc_host")
+    provRpcHost: String,
+
+    /// NATS server host used for regular RPC
+    @serialization(name: "rpc_host")
+    rpcHost: String,
+
+    /// Lattice prefix/ID used by the host
+    @serialization(name: "lattice_prefix")
+    latticePrefix: String
 }
 
 /// A response containing the full list of known claims within the lattice
 structure GetClaimsResponse {
     @required
-    claims: ClaimsList
+    claims: CtlKVList
 }
 
-list ClaimsList {
-    member: ClaimsMap,
+list CtlKVList {
+    member: KeyValueMap,
 }
 
-map ClaimsMap {
+map KeyValueMap {
     key: String,
     value: String,
 }
@@ -583,7 +618,7 @@ structure RegistryCredential {
     /// If supplied, token authentication will be used for the registry
     token: String,
     /// If supplied, username and password will be used for HTTP Basic authentication
-    username: String,
+    userName: String,
     password: String
 }
 
