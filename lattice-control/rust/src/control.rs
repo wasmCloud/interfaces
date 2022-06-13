@@ -2154,9 +2154,8 @@ pub struct RegistryCredential {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
     /// If supplied, username and password will be used for HTTP Basic authentication
-    #[serde(rename = "userName")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user_name: Option<String>,
+    pub username: Option<String>,
 }
 
 // Encode RegistryCredential as CBOR and append to output stream
@@ -2182,8 +2181,8 @@ where
     } else {
         e.null()?;
     }
-    if let Some(val) = val.user_name.as_ref() {
-        e.str("userName")?;
+    if let Some(val) = val.username.as_ref() {
+        e.str("username")?;
         e.str(val)?;
     } else {
         e.null()?;
@@ -2199,7 +2198,7 @@ pub fn decode_registry_credential(
     let __result = {
         let mut password: Option<Option<String>> = Some(None);
         let mut token: Option<Option<String>> = Some(None);
-        let mut user_name: Option<Option<String>> = Some(None);
+        let mut username: Option<Option<String>> = Some(None);
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -2231,7 +2230,7 @@ pub fn decode_registry_credential(
                         }
                     }
                     2 => {
-                        user_name = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                        username = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -2262,8 +2261,8 @@ pub fn decode_registry_credential(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    "userName" => {
-                        user_name = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                    "username" => {
+                        username = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
                         } else {
@@ -2277,7 +2276,7 @@ pub fn decode_registry_credential(
         RegistryCredential {
             password: password.unwrap(),
             token: token.unwrap(),
-            user_name: user_name.unwrap(),
+            username: username.unwrap(),
         }
     };
     Ok(__result)
