@@ -19,10 +19,9 @@ async-trait = "0.1"
 data-encoding = "2.3.1"
 futures = "0.3"
 log = "0.4.14"
-#ring = "0.16.20"
 rmp-serde = "1.1.0"
 serde = { version = "1.0.118", features = ["derive"] }
-wasmbus-rpc = "0.8.5"
+wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "7a6522e5333e72a423d3aaac89f5060514d0d333" }
 
 [build-dependencies]
-weld-codegen = "0.4.3"
+weld-codegen = { git = "https://github.com/wasmcloud/weld", rev = "7a6522e5333e72a423d3aaac89f5060514d0d333" }

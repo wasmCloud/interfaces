@@ -23,11 +23,11 @@ serde = { version = "1.0" , features = ["derive"] }
 serde_json = "1.0"
 serde_bytes = "0.11"
 log = "0.4"
-wasmbus-rpc = "0.8.5"
+wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "7a6522e5333e72a423d3aaac89f5060514d0d333" }
 
 [dev-dependencies]
 base64 = "0.13"
 
 # build-dependencies needed for build.rs
 [build-dependencies]
-weld-codegen = "0.4.3"
+weld-codegen = { git = "https://github.com/wasmcloud/weld", rev = "7a6522e5333e72a423d3aaac89f5060514d0d333" }
