@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-httpserver"
-version = "0.5.0"
+version = "0.5.1"
 description = "interface for actors to receive http requests (wasmcloud:httpserver)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"

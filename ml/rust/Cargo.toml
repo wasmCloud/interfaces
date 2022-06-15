@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud_interface_mlinference"
-version = "0.1.0"
+version = "0.1.1"
 description = "Interface library for the MlInference capability"
 authors = [ "dev@example.com" ]
 edition = "2021"

@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-factorial"
-version = "0.4.1"
+version = "0.4.2"
 description = "Interface library for the wasmcloud factorial capability, wasmcloud:example:factorial"
 homepage = "https://wasmcloud.dev"
 repository = "https://github.com/wasmcloud/interfaces"
