@@ -181,6 +181,118 @@ pub fn decode_increment_request(
     };
     Ok(__result)
 }
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct KeysRequest {
+    /// search for only keys that match a particular glob expression
+    #[serde(rename = "globExpression")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub glob_expression: Option<String>,
+    /// optional configuration
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub config: Option<String>,
+}
+
+// Encode KeysRequest as CBOR and append to output stream
+#[doc(hidden)]
+pub fn encode_keys_request<W: wasmbus_rpc::cbor::Write>(
+    e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &KeysRequest,
+) -> RpcResult<()> {
+    e.array(2)?;
+    if let Some(val) = val.glob_expression.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.config.as_ref() {
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    Ok(())
+}
+
+// Decode KeysRequest from cbor input stream
+#[doc(hidden)]
+pub fn decode_keys_request(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<KeysRequest, RpcError> {
+    let __result = {
+        let mut glob_expression: Option<Option<String>> = Some(None);
+        let mut config: Option<Option<String>> = Some(None);
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct KeysRequest, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.array()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct KeysRequest: indefinite array not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => {
+                        glob_expression = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    1 => {
+                        config = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.map()?.ok_or_else(|| {
+                RpcError::Deser(
+                    "decoding struct KeysRequest: indefinite map not supported".to_string(),
+                )
+            })?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "globExpression" => {
+                        glob_expression = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "config" => {
+                        config = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    _ => d.skip()?,
+                }
+            }
+        }
+        KeysRequest {
+            glob_expression: glob_expression.unwrap(),
+            config: config.unwrap(),
+        }
+    };
+    Ok(__result)
+}
 /// Parameter to ListAdd operation
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ListAddRequest {
@@ -816,6 +928,8 @@ pub trait KeyValue {
         ctx: &Context,
         arg: &TS,
     ) -> RpcResult<bool>;
+    /// fetches a list of keys present in the kv store
+    async fn keys(&self, ctx: &Context, arg: &KeysRequest) -> RpcResult<StringList>;
 }
 
 /// KeyValueReceiver receives messages defined in the KeyValue service trait
@@ -975,6 +1089,16 @@ pub trait KeyValueReceiver: MessageDispatch + KeyValue {
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
                 Ok(Message {
                     method: "KeyValue.SetClear",
+                    arg: Cow::Owned(buf),
+                })
+            }
+            "Keys" => {
+                let value: KeysRequest = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'KeysRequest': {}", e)))?;
+                let resp = KeyValue::keys(self, ctx, &value).await?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
+                Ok(Message {
+                    method: "KeyValue.Keys",
                     arg: Cow::Owned(buf),
                 })
             }
@@ -1361,6 +1485,26 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> KeyValue for KeyValue
 
         let value: bool = wasmbus_rpc::common::deserialize(&resp)
             .map_err(|e| RpcError::Deser(format!("'{}': Boolean", e)))?;
+        Ok(value)
+    }
+    #[allow(unused)]
+    /// fetches a list of keys present in the kv store
+    async fn keys(&self, ctx: &Context, arg: &KeysRequest) -> RpcResult<StringList> {
+        let buf = wasmbus_rpc::common::serialize(arg)?;
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "KeyValue.Keys",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        let value: StringList = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': StringList", e)))?;
         Ok(value)
     }
 }

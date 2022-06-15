@@ -26,7 +26,8 @@ service KeyValue {
   operations: [
     Increment, Contains, Del, Get,
     ListAdd, ListClear, ListDel, ListRange,
-    Set, , SetAdd, SetDel, SetIntersection, SetQuery, SetUnion, SetClear,
+    Set, SetAdd, SetDel, SetIntersection, SetQuery, SetUnion, SetClear,
+    Keys
   ]
 }
 
@@ -249,3 +250,18 @@ operation SetClear {
     output: Boolean
 }
 
+/// fetches a list of keys present in the kv store
+@readonly
+operation Keys {
+  input: KeysRequest,
+  output: StringList,
+}
+
+structure KeysRequest {
+  /// search for only keys that match a particular glob expression
+  @n(0)
+  globExpression: String
+  /// optional configuration
+  @n(1)
+  config: String
+}
