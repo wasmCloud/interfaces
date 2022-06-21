@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-sqldb"
-version = "0.5.1"
+version = "0.6.0-alpha-1.0" # was 0.5.0
 description = "Interface for wasmCloud actors to connect to a relational database using the capability 'wasmcloud:sqldb'"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
@@ -25,13 +25,12 @@ futures = "0.3"
 serde = { version = "1.0" , features = ["derive"] }
 serde_json = "1.0"
 serde_bytes = "0.11"
-wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "7a6522e5333e72a423d3aaac89f5060514d0d333" }
 minicbor = { version = "0.17", features = ["derive", "std", "half"] }
+wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "d9c4dd571925c66462c196134a66f799a2e4c7fc" }
 
 [dev-dependencies]
 base64 = "0.13"
 
 # build-dependencies needed for build.rs
 [build-dependencies]
-weld-codegen = { git = "https://github.com/wasmcloud/weld", rev = "7a6522e5333e72a423d3aaac89f5060514d0d333" }
-
+weld-codegen = { git = "https://github.com/wasmcloud/weld", rev = "38eb105b135d615ab0910a05a9e7d5e821e85176" }

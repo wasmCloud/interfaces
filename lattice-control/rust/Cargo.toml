@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-lattice-control"
-version = "0.11.1"
+version = "0.12.0-alpha-1.0" # was 0.11.0
 edition = "2021"
 homepage = "https://wasmcloud.dev"
 repository = "https://github.com/wasmCloud/interfaces"
@@ -21,7 +21,7 @@ futures = "0.3"
 log = "0.4.14"
 rmp-serde = "1.1.0"
 serde = { version = "1.0.118", features = ["derive"] }
-wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "7a6522e5333e72a423d3aaac89f5060514d0d333" }
+wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "d9c4dd571925c66462c196134a66f799a2e4c7fc" }
 
 [build-dependencies]
-weld-codegen = { git = "https://github.com/wasmcloud/weld", rev = "7a6522e5333e72a423d3aaac89f5060514d0d333" }
+weld-codegen = { git = "https://github.com/wasmcloud/weld", rev = "38eb105b135d615ab0910a05a9e7d5e821e85176" }

@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::{borrow::Borrow, borrow::Cow, io::Write, string::ToString};
 #[allow(unused_imports)]
 use wasmbus_rpc::{
-    //cbor::*,
+    cbor::*,
     common::{
         deserialize, message_format, serialize, Context, Message, MessageDispatch, MessageFormat,
         SendOpts, Transport,
