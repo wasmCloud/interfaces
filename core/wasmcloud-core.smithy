@@ -176,9 +176,10 @@ structure HostData {
     @n(13)
     defaultRpcTimeoutMs: U64,
 
-    @serialization(name: "structured_logging_enabled")
+    /// True if structured logging is enabled for the host. Providers should use the same setting as the host.
+    @serialization(name: "structured_logging")
     @n(14)
-    structuredLoggingEnabled: Boolean,
+    structuredLogging: Boolean,
 }
 
 list ClusterIssuers {
