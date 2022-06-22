@@ -21,7 +21,7 @@ futures = "0.3"
 log = "0.4.14"
 rmp-serde = "1.1.0"
 serde = { version = "1.0.118", features = ["derive"] }
-wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "6da17f739b0ad0f1a58df2061eedd0d2f92baee0" }
+wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "81e16d7aeb5839d1929827291718b8d037f15d54" }
 
 [build-dependencies]
 weld-codegen = { git = "https://github.com/wasmcloud/weld", rev = "38eb105b135d615ab0910a05a9e7d5e821e85176" }
