@@ -15,7 +15,7 @@ serde_json ="1.0"
 serde = {version = "1.0", features = ["derive"]}
 regex = "1"
 
-wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "3029ca06bae2c08237563e39988988a32ceee01d" }
+wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "249102567eb50fddaf3a35c2546afbdb321e8b16" }
 wasmcloud-interface-numbergen = { path = "../../../numbergen/rust" }
 wasmcloud-interface-logging = { path = "../../../logging/rust" }
 wasmcloud-test-util = { path = "../../../../wasmcloud-test/wasmcloud-test-util" }
