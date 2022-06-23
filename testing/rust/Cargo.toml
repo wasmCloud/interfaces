@@ -24,7 +24,7 @@ serde = { version = "1.0" , features = ["derive"] }
 serde_json = "1.0"
 serde_bytes = "0.11"
 rmp-serde = "0.15.4"
-wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "89de35130b2379e144a5d7867a9b7bd9590d6b1f" }
+wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev = "3029ca06bae2c08237563e39988988a32ceee01d" }
 
 [dev-dependencies]
 base64 = "0.13"
