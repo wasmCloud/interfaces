@@ -7,7 +7,7 @@
 metadata package = [
     {
         namespace: "org.wasmcloud.lattice.control",
-        crate: "lattice-control-interface"
+        crate: "wasmcloud_interface_lattice_control"
      }
 ]
 

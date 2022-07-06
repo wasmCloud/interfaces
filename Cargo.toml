@@ -9,6 +9,7 @@ members = [
     "keyvalue/rust",
     "logging/rust",
     "messaging/rust",
+    "ml/rust",
     "numbergen/rust",
     "sqldb/rust",
     "lattice-control/rust",
