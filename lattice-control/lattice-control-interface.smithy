@@ -541,7 +541,7 @@ structure Host {
     uptimeHuman: String,
 
     /// Hash map of label-value pairs for this host
-    labels: CtlKVList,
+    labels: KeyValueMap,
 
     /// Current wasmCloud Host software version
     version: String,

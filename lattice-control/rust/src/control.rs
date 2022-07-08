@@ -989,7 +989,7 @@ pub struct Host {
     pub js_domain: Option<String>,
     /// Hash map of label-value pairs for this host
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub labels: Option<CtlKVList>,
+    pub labels: Option<KeyValueMap>,
     /// Lattice prefix/ID used by the host
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub lattice_prefix: Option<String>,
@@ -1043,7 +1043,7 @@ where
     }
     if let Some(val) = val.labels.as_ref() {
         e.str("labels")?;
-        encode_ctl_kv_list(e, val)?;
+        encode_key_value_map(e, val)?;
     } else {
         e.null()?;
     }
@@ -1090,7 +1090,7 @@ pub fn decode_host(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Host, RpcEr
         let mut ctl_host: Option<Option<String>> = Some(None);
         let mut id: Option<String> = None;
         let mut js_domain: Option<Option<String>> = Some(None);
-        let mut labels: Option<Option<CtlKVList>> = Some(None);
+        let mut labels: Option<Option<KeyValueMap>> = Some(None);
         let mut lattice_prefix: Option<Option<String>> = Some(None);
         let mut prov_rpc_host: Option<Option<String>> = Some(None);
         let mut rpc_host: Option<Option<String>> = Some(None);
@@ -1141,8 +1141,11 @@ pub fn decode_host(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Host, RpcEr
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(decode_ctl_kv_list(d).map_err(|e| {
-                                format!("decoding 'org.wasmcloud.lattice.control#CtlKVList': {}", e)
+                            Some(Some(decode_key_value_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#KeyValueMap': {}",
+                                    e
+                                )
                             })?))
                         }
                     }
@@ -1225,8 +1228,11 @@ pub fn decode_host(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Host, RpcEr
                             d.skip()?;
                             Some(None)
                         } else {
-                            Some(Some(decode_ctl_kv_list(d).map_err(|e| {
-                                format!("decoding 'org.wasmcloud.lattice.control#CtlKVList': {}", e)
+                            Some(Some(decode_key_value_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#KeyValueMap': {}",
+                                    e
+                                )
                             })?))
                         }
                     }
