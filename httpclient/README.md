@@ -14,4 +14,4 @@ The following is a list of implementations of the `wasmcloud:httpclient` contrac
 
 ## Example Usage (🦀 Rust)
 
-## Example Usage (<img alt="gopher" src="https://i.imgur.com/fl5JozD.png" height="25px"> TinyGo)
+

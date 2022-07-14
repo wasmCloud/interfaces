@@ -53,5 +53,5 @@ async fn upload_bytes(ctx: &Context, image_bytes: &[u8]) -> Result<PutObjectResp
 }
 ```
 
-## Example Usage (<img alt="gopher" src="https://i.imgur.com/fl5JozD.png" height="25px"> TinyGo)
+
 Coming Soon

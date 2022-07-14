@@ -9,4 +9,3 @@ There are no external implementations for this provider as they are built direct
 
 ## Example Usage (🦀 Rust)
 
-## Example Usage (<img alt="gopher" src="https://i.imgur.com/fl5JozD.png" height="25px"> TinyGo)
