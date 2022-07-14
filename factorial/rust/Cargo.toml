@@ -7,6 +7,7 @@ repository = "https://github.com/wasmcloud/interfaces"
 authors = [ "wasmCloud team" ]
 edition = "2021"
 license = "Apache-2.0"
+readme = "../README.md"
 
 # when publishing to crates.io, freeze src by omitting build.rs
 exclude = [ "build.rs" ]

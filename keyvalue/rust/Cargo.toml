@@ -9,6 +9,7 @@ categories = [ "api-bindings","database","wasm" ]
 authors = [ "wasmcloud Team" ]
 edition = "2021"
 license = "Apache-2.0"
+readme = "../README.md"
 exclude = [ "build.rs" ]
 
 [features]
