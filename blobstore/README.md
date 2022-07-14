@@ -49,4 +49,5 @@ async fn upload_bytes(ctx: &Context, image_bytes: &[u8]) -> Result<PutObjectResp
 }
 ```
 
-# <img alt="gopher" src="https://emojis.slackmojis.com/emojis/images/1643515422/14426/gopher.png?1643515422" height="25px"> wasmCloud Blobstore Interface (`wasmcloud:blobstore`)
+## Example Usage (<img alt="gopher" src="https://i.imgur.com/fl5JozD.png" height="25px"> TinyGo)
+Coming Soon
