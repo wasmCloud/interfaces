@@ -52,6 +52,3 @@ async fn upload_bytes(ctx: &Context, image_bytes: &[u8]) -> Result<PutObjectResp
         .await
 }
 ```
-
-
-Coming Soon
