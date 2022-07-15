@@ -15,5 +15,17 @@ The following is a list of implementations of the `wasmcloud:example:factorial` 
 | [Factorial](https://github.com/wasmCloud/examples/tree/main/provider/factorial) | wasmCloud | wasmCloud example implementation of the Factorial interface
 
 ## Example Usage (🦀 Rust)
+Calculate a factorial, handling the error case
+```rust
+use wasmbus_rpc::actor::prelude::Context;
+use wasmcloud_interface_factorial::{Factorial, FactorialSender};
 
-
+async fn factorial(ctx: &Context, n: u32) -> u64 {
+    let factorial = FactorialSender::new();
+    match factorial.calculate(ctx, &n).await {
+        Ok(num) => num,
+        // 0 is not a possible factorial so it's obvious that an error occurred
+        Err(_e) => 0,
+    }
+}
+```

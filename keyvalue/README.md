@@ -14,4 +14,25 @@ The following is a list of implementations of the `wasmcloud:keyvalue` contract.
 | [Vault](https://github.com/wasmCloud/capability-providers/tree/main/kv-vault) | wasmCloud | wasmCloud key-value provider for the Hashicorp [Vault](https://www.vaultproject.io/docs/secrets/kv/kv-v2) secrets engine.
 
 ## Example Usage (🦀 Rust)
+Check if a value exists in the kvstore
+```rust
+use wasmbus_rpc::actor::prelude::Context;
+use wasmcloud_interface_keyvalue::{KeyValue, KeyValueSender};
 
+async fn key_exists(ctx: &Context, key: &str) -> bool {
+    KeyValueSender::new().contains(ctx, key).await.is_ok()
+}
+```
+
+Increment a numeric value
+```rust
+use wasmbus_rpc::actor::prelude::*;
+use wasmcloud_interface_keyvalue::{IncrementRequest, KeyValue, KeyValueSender};
+/// increment the counter by the amount, returning the new value
+async fn increment_counter(ctx: &Context, key: String, value: i32) -> RpcResult<i32> {
+    let new_val = KeyValueSender::new()
+        .increment(ctx, &IncrementRequest { key, value })
+        .await?;
+    Ok(new_val)
+}
+```

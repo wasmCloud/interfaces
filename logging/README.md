@@ -9,3 +9,19 @@ There are no external implementations for this provider as they are built direct
 
 ## Example Usage (🦀 Rust)
 
+Logging at all available levels:
+```rust
+use wasmbus_rpc::actor::prelude::RpcResult;
+use wasmcloud_interface_logging::{debug, error, info, warn};
+
+// Note: The function you're logging in _must_ be async. This is due to the
+// way our logging macros work and is a known limitation of actor logging
+async fn log_to_all() -> RpcResult<()> {
+    debug!("Watch out for moths");
+    info!("This is an info level log!");
+    warn!("Some viewers may find the following log disturbing");
+    error!("I can't let you do that, Dave");
+
+    Ok(())
+}
+```

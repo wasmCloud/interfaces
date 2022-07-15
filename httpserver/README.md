@@ -19,4 +19,22 @@ The following is a list of implementations of the `wasmcloud:httpserver` contrac
 
 
 ## Example Usage (🦀 Rust)
+Implementing the `HttpServer.HandleRequest` operation
+```rust
+use wasmbus_rpc::actor::prelude::*;
+use wasmcloud_interface_httpserver::{HttpRequest, HttpResponse, HttpServer, HttpServerReceiver};
 
+#[derive(Debug, Default, Actor, HealthResponder)]
+#[services(Actor, HttpServer)]
+struct HelloActor {}
+
+#[async_trait]
+impl HttpServer for HelloActor {
+    async fn handle_request(&self, _ctx: &Context, _req: &HttpRequest) -> RpcResult<HttpResponse> {
+        Ok(HttpResponse {
+            body: "Hello World".as_bytes().to_owned(),
+            ..Default::default()
+        })
+    }
+}
+```
