@@ -1,5 +1,4 @@
 [![crates.io](https://img.shields.io/crates/v/wasmcloud-interface-lattice-control.svg)](https://crates.io/crates/wasmcloud-interface-lattice-control)&nbsp;
-<!-- [![TinyGo Version](https://img.shields.io/github/go-mod/go-version/wasmcloud/interfaces?label=TinyGo&filename=lattice-control%2Ftinygo%2Fgo.mod)](https://pkg.go.dev/github.com/wasmcloud/interfaces/lattice-control/tinygo) -->
 # wasmCloud Lattice Control Interface
 The lattice control interface is a smithy-defined interface contract that is expected to be consumed in one of two different ways:
 
