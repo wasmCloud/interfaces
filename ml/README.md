@@ -1,6 +1,3 @@
-# Interface for the Machine Learning Mlinference service, wasmcloud:mlinference
-
-## Build the Interface
-
-* from `interface/ml` execute `make`
-
+[![crates.io](https://img.shields.io/crates/v/wasmcloud-interface-mlinference.svg)](https://crates.io/crates/wasmcloud-interface-mlinference)&nbsp;
+# wasmCloud Machine Learning Inference Interface
+This is the interface for the `wasmcloud:mlinference` contract.
