@@ -1,10 +1,10 @@
 [package]
 name = "wasmcloud-interface-lattice-control"
-version = "0.12.1"
+version = "0.12.2"
 edition = "2021"
 homepage = "https://wasmcloud.dev"
 repository = "https://github.com/wasmCloud/interfaces"
-description = "This library allows different types of consumers to interact with the lattice control interface."
+description = "This library allows different types of consumers to interact with the lattice control interface over wasmcloud:latticecontrol"
 license = "Apache-2.0"
 documentation = "https://docs.rs/wasmcloud-interface-lattice-control"
 readme = "../README.md"

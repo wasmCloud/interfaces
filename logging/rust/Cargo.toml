@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-logging"
-version = "0.6.0"
+version = "0.6.1"
 description = "interface for logging capability provider (wasmcloud:builtin:logging)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
