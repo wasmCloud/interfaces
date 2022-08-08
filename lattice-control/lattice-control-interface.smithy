@@ -37,7 +37,9 @@ service LatticeController {
                  GetHostInventory, GetClaims, ScaleActor,
                  StartActor, AdvertiseLink, RemoveLink,
                  GetLinks, UpdateActor, StartProvider,
-                 StopProvider, StopActor, StopHost, SetRegistryCredentials]
+                 StopProvider, StopActor, StopHost, 
+                 SetLatticeCredentials,
+                 SetRegistryCredentials]
 }
 
 /// Seek out a list of suitable hosts for a capability provider given
@@ -149,6 +151,39 @@ operation SetRegistryCredentials {
     input: RegistryCredentialMap
 }
 
+/// Instructs the provider to store the NATS credentials/URL for a given lattice. This is
+/// designed to allow a single capability provider (or multiple instances of the same) to manage
+/// multiple lattices, reducing overhead and making it easier to support secure multi-tenancy of
+/// lattices.
+operation SetLatticeCredentials {
+    input: SetLatticeCredentialsRequest
+    output: CtlOperationAck
+}
+
+/// Represents a request to set/store the credentials that correspond to a given lattice ID. 
+structure SetLatticeCredentialsRequest {
+    /// The ID of the lattice for which these credentials will be used
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
+    /// If supplied, contains the user JWT to be used for authenticating against NATS to allow
+    /// access to the indicated lattice. If not supplied, the capability provider will assume/set
+    /// anonymous access for this lattice.
+    @serialization(name: "user_jwt")
+    userJwt: String,
+
+    /// If userJwt is supplied, user seed must also be supplied and is the seed key used for user
+    /// authentication against NATS for this lattice.
+    @serialization(name: "user_seed")
+    userSeed: String,
+
+    /// If natsUrl is supplied, then the capability provider will use this URL (and port) for 
+    /// establishing a connection for the given lattice.
+    @serialization(name: "nats_url")
+    natsUrl: String,
+}
+
 list ProviderAuctionAcks {
     member: ProviderAuctionAck
 }
@@ -165,6 +200,10 @@ list Hosts {
 /// provider's unique identity (reference + link name) is used to rule
 /// out sites on which the provider is already running.
 structure ProviderAuctionRequest {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
 
     /// The reference for the provider. Can be any one of the accepted 
     /// forms of uniquely identifying a provider
@@ -213,6 +252,11 @@ structure ProviderAuctionAck {
 
 /// A request to locate suitable hosts for a given actor
 structure ActorAuctionRequest {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
     /// The reference for this actor. Can be any one of the acceptable forms
     /// of uniquely identifying an actor.
     @required    
@@ -240,7 +284,7 @@ structure ActorAuctionAck {
 
 /// Describes the known contents of a given host at the time of
 /// a query
-structure HostInventory {
+structure HostInventory {    
 
     /// The host's unique ID
     @required    
@@ -348,6 +392,11 @@ structure ProviderDescription {
 /// A command sent to a specific host instructing it to start the actor
 /// indicated by the reference.
 structure StartActorCommand {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,    
+
     /// Reference for the actor. Can be any of the acceptable forms of unique identification
     @required    
     @serialization(name: "actor_ref")
@@ -371,6 +420,11 @@ structure StartActorCommand {
 /// A command sent to a host requesting a capability provider be started with the 
 /// given link name and optional configuration.
 structure StartProviderCommand {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
     /// The host ID on which to start the provider
     @required
     @serialization(name: "host_id")
@@ -398,6 +452,11 @@ structure StartProviderCommand {
 }
 
 structure ScaleActorCommand {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
     /// Reference for the actor. Can be any of the acceptable forms of unique identification
     @required
     @serialization(name: "actor_ref")
@@ -425,6 +484,11 @@ structure ScaleActorCommand {
 /// A command sent to a host to request that instances of a given actor
 /// be terminated on that host
 structure StopActorCommand {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
     /// The ID of the target host
     @required  
     @serialization(name: "host_id")  
@@ -449,6 +513,11 @@ structure StopActorCommand {
 
 /// A request to stop the given provider on the indicated host
 structure StopProviderCommand {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
     /// Host ID on which to stop the provider
     @required    
     @serialization(name: "host_id")
@@ -477,6 +546,11 @@ structure StopProviderCommand {
 
 /// A command sent to request that the given host purge and stop
 structure StopHostCommand {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
     /// The ID of the target host
     @required  
     @serialization(name: "host_id")  
@@ -490,6 +564,11 @@ structure StopHostCommand {
 /// on the indicated actor by supplying a new image reference. Note that
 /// live updates are only possible through image references
 structure UpdateActorCommand {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
     /// The host ID of the host to perform the live update
     @required   
     @serialization(name: "host_id") 
@@ -590,6 +669,11 @@ map KeyValueMap {
 /// A request to remove a link definition and detach the relevant actor
 /// from the given provider
 structure RemoveLinkDefinitionRequest {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
      /// The actor's public key. This cannot be an image reference
     @required    
     @serialization(name: "actor_id")

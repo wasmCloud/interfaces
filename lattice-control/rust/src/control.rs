@@ -173,6 +173,9 @@ pub struct ActorAuctionRequest {
     pub actor_ref: String,
     /// The set of constraints to which any candidate host must conform
     pub constraints: ConstraintMap,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(default)]
+    pub lattice_id: String,
 }
 
 // Encode ActorAuctionRequest as CBOR and append to output stream
@@ -185,11 +188,13 @@ pub fn encode_actor_auction_request<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(2)?;
+    e.map(3)?;
     e.str("actorRef")?;
     e.str(&val.actor_ref)?;
     e.str("constraints")?;
     encode_constraint_map(e, &val.constraints)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
     Ok(())
 }
 
@@ -201,6 +206,7 @@ pub fn decode_actor_auction_request(
     let __result = {
         let mut actor_ref: Option<String> = None;
         let mut constraints: Option<ConstraintMap> = None;
+        let mut lattice_id: Option<String> = None;
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -224,6 +230,7 @@ pub fn decode_actor_auction_request(
                             )
                         })?)
                     }
+                    2 => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -240,6 +247,7 @@ pub fn decode_actor_auction_request(
                             )
                         })?)
                     }
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -258,6 +266,14 @@ pub fn decode_actor_auction_request(
             } else {
                 return Err(RpcError::Deser(
                     "missing field ActorAuctionRequest.constraints (#1)".to_string(),
+                ));
+            },
+
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ActorAuctionRequest.lattice_id (#2)".to_string(),
                 ));
             },
         }
@@ -1829,6 +1845,9 @@ pub fn decode_provider_auction_acks(
 pub struct ProviderAuctionRequest {
     /// The set of constraints to which a suitable target host must conform
     pub constraints: ConstraintMap,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(default)]
+    pub lattice_id: String,
     /// The link name of the provider
     #[serde(default)]
     pub link_name: String,
@@ -1848,9 +1867,11 @@ pub fn encode_provider_auction_request<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(3)?;
+    e.map(4)?;
     e.str("constraints")?;
     encode_constraint_map(e, &val.constraints)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
     e.str("linkName")?;
     e.str(&val.link_name)?;
     e.str("providerRef")?;
@@ -1865,6 +1886,7 @@ pub fn decode_provider_auction_request(
 ) -> Result<ProviderAuctionRequest, RpcError> {
     let __result = {
         let mut constraints: Option<ConstraintMap> = None;
+        let mut lattice_id: Option<String> = None;
         let mut link_name: Option<String> = None;
         let mut provider_ref: Option<String> = None;
 
@@ -1889,8 +1911,9 @@ pub fn decode_provider_auction_request(
                             )
                         })?)
                     }
-                    1 => link_name = Some(d.str()?.to_string()),
-                    2 => provider_ref = Some(d.str()?.to_string()),
+                    1 => lattice_id = Some(d.str()?.to_string()),
+                    2 => link_name = Some(d.str()?.to_string()),
+                    3 => provider_ref = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -1906,6 +1929,7 @@ pub fn decode_provider_auction_request(
                             )
                         })?)
                     }
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     "linkName" => link_name = Some(d.str()?.to_string()),
                     "providerRef" => provider_ref = Some(d.str()?.to_string()),
                     _ => d.skip()?,
@@ -1921,11 +1945,19 @@ pub fn decode_provider_auction_request(
                 ));
             },
 
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ProviderAuctionRequest.lattice_id (#1)".to_string(),
+                ));
+            },
+
             link_name: if let Some(__x) = link_name {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ProviderAuctionRequest.link_name (#1)".to_string(),
+                    "missing field ProviderAuctionRequest.link_name (#2)".to_string(),
                 ));
             },
 
@@ -1933,7 +1965,7 @@ pub fn decode_provider_auction_request(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ProviderAuctionRequest.provider_ref (#2)".to_string(),
+                    "missing field ProviderAuctionRequest.provider_ref (#3)".to_string(),
                 ));
             },
         }
@@ -2343,6 +2375,9 @@ pub struct RemoveLinkDefinitionRequest {
     /// The provider contract
     #[serde(default)]
     pub contract_id: String,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(default)]
+    pub lattice_id: String,
     /// The provider's link name
     #[serde(default)]
     pub link_name: String,
@@ -2358,11 +2393,13 @@ pub fn encode_remove_link_definition_request<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(3)?;
+    e.map(4)?;
     e.str("actorId")?;
     e.str(&val.actor_id)?;
     e.str("contractId")?;
     e.str(&val.contract_id)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
     e.str("linkName")?;
     e.str(&val.link_name)?;
     Ok(())
@@ -2376,6 +2413,7 @@ pub fn decode_remove_link_definition_request(
     let __result = {
         let mut actor_id: Option<String> = None;
         let mut contract_id: Option<String> = None;
+        let mut lattice_id: Option<String> = None;
         let mut link_name: Option<String> = None;
 
         let is_array = match d.datatype()? {
@@ -2394,7 +2432,8 @@ pub fn decode_remove_link_definition_request(
                 match __i {
                     0 => actor_id = Some(d.str()?.to_string()),
                     1 => contract_id = Some(d.str()?.to_string()),
-                    2 => link_name = Some(d.str()?.to_string()),
+                    2 => lattice_id = Some(d.str()?.to_string()),
+                    3 => link_name = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -2404,6 +2443,7 @@ pub fn decode_remove_link_definition_request(
                 match d.str()? {
                     "actorId" => actor_id = Some(d.str()?.to_string()),
                     "contractId" => contract_id = Some(d.str()?.to_string()),
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     "linkName" => link_name = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
@@ -2426,11 +2466,19 @@ pub fn decode_remove_link_definition_request(
                 ));
             },
 
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field RemoveLinkDefinitionRequest.lattice_id (#2)".to_string(),
+                ));
+            },
+
             link_name: if let Some(__x) = link_name {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field RemoveLinkDefinitionRequest.link_name (#2)".to_string(),
+                    "missing field RemoveLinkDefinitionRequest.link_name (#3)".to_string(),
                 ));
             },
         }
@@ -2455,6 +2503,9 @@ pub struct ScaleActorCommand {
     /// Host ID on which to scale this actor
     #[serde(default)]
     pub host_id: String,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(default)]
+    pub lattice_id: String,
 }
 
 // Encode ScaleActorCommand as CBOR and append to output stream
@@ -2467,7 +2518,7 @@ pub fn encode_scale_actor_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(5)?;
+    e.map(6)?;
     e.str("actorId")?;
     e.str(&val.actor_id)?;
     e.str("actorRef")?;
@@ -2482,6 +2533,8 @@ where
     e.u16(val.count)?;
     e.str("hostId")?;
     e.str(&val.host_id)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
     Ok(())
 }
 
@@ -2496,6 +2549,7 @@ pub fn decode_scale_actor_command(
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
         let mut count: Option<u16> = None;
         let mut host_id: Option<String> = None;
+        let mut lattice_id: Option<String> = None;
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -2527,6 +2581,7 @@ pub fn decode_scale_actor_command(
                     }
                     3 => count = Some(d.u16()?),
                     4 => host_id = Some(d.str()?.to_string()),
+                    5 => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -2551,6 +2606,7 @@ pub fn decode_scale_actor_command(
                     }
                     "count" => count = Some(d.u16()?),
                     "hostId" => host_id = Some(d.str()?.to_string()),
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -2588,6 +2644,171 @@ pub fn decode_scale_actor_command(
                     "missing field ScaleActorCommand.host_id (#4)".to_string(),
                 ));
             },
+
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field ScaleActorCommand.lattice_id (#5)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
+/// Represents a request to set/store the credentials that correspond to a given lattice ID.
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SetLatticeCredentialsRequest {
+    /// The ID of the lattice for which these credentials will be used
+    #[serde(default)]
+    pub lattice_id: String,
+    /// If natsUrl is supplied, then the capability provider will use this URL (and port) for
+    /// establishing a connection for the given lattice.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nats_url: Option<String>,
+    /// If supplied, contains the user JWT to be used for authenticating against NATS to allow
+    /// access to the indicated lattice. If not supplied, the capability provider will assume/set
+    /// anonymous access for this lattice.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_jwt: Option<String>,
+    /// If userJwt is supplied, user seed must also be supplied and is the seed key used for user
+    /// authentication against NATS for this lattice.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_seed: Option<String>,
+}
+
+// Encode SetLatticeCredentialsRequest as CBOR and append to output stream
+#[doc(hidden)]
+#[allow(unused_mut)]
+pub fn encode_set_lattice_credentials_request<W: wasmbus_rpc::cbor::Write>(
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &SetLatticeCredentialsRequest,
+) -> RpcResult<()>
+where
+    <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
+{
+    e.map(4)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
+    if let Some(val) = val.nats_url.as_ref() {
+        e.str("natsUrl")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.user_jwt.as_ref() {
+        e.str("userJwt")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.user_seed.as_ref() {
+        e.str("userSeed")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
+    Ok(())
+}
+
+// Decode SetLatticeCredentialsRequest from cbor input stream
+#[doc(hidden)]
+pub fn decode_set_lattice_credentials_request(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<SetLatticeCredentialsRequest, RpcError> {
+    let __result = {
+        let mut lattice_id: Option<String> = None;
+        let mut nats_url: Option<Option<String>> = Some(None);
+        let mut user_jwt: Option<Option<String>> = Some(None);
+        let mut user_seed: Option<Option<String>> = Some(None);
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct SetLatticeCredentialsRequest, expected array or map"
+                        .to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.fixed_array()?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => lattice_id = Some(d.str()?.to_string()),
+                    1 => {
+                        nats_url = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    2 => {
+                        user_jwt = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    3 => {
+                        user_seed = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.fixed_map()?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
+                    "natsUrl" => {
+                        nats_url = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "userJwt" => {
+                        user_jwt = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    "userSeed" => {
+                        user_seed = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    _ => d.skip()?,
+                }
+            }
+        }
+        SetLatticeCredentialsRequest {
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field SetLatticeCredentialsRequest.lattice_id (#0)".to_string(),
+                ));
+            },
+            nats_url: nats_url.unwrap(),
+            user_jwt: user_jwt.unwrap(),
+            user_seed: user_seed.unwrap(),
         }
     };
     Ok(__result)
@@ -2610,6 +2831,9 @@ pub struct StartActorCommand {
     /// Host ID on which this actor should start
     #[serde(default)]
     pub host_id: String,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(default)]
+    pub lattice_id: String,
 }
 
 // Encode StartActorCommand as CBOR and append to output stream
@@ -2622,7 +2846,7 @@ pub fn encode_start_actor_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(4)?;
+    e.map(5)?;
     e.str("actorRef")?;
     e.str(&val.actor_ref)?;
     if let Some(val) = val.annotations.as_ref() {
@@ -2635,6 +2859,8 @@ where
     e.u16(val.count)?;
     e.str("hostId")?;
     e.str(&val.host_id)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
     Ok(())
 }
 
@@ -2648,6 +2874,7 @@ pub fn decode_start_actor_command(
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
         let mut count: Option<u16> = None;
         let mut host_id: Option<String> = None;
+        let mut lattice_id: Option<String> = None;
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -2678,6 +2905,7 @@ pub fn decode_start_actor_command(
                     }
                     2 => count = Some(d.u16()?),
                     3 => host_id = Some(d.str()?.to_string()),
+                    4 => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -2701,6 +2929,7 @@ pub fn decode_start_actor_command(
                     }
                     "count" => count = Some(d.u16()?),
                     "hostId" => host_id = Some(d.str()?.to_string()),
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -2730,6 +2959,14 @@ pub fn decode_start_actor_command(
                     "missing field StartActorCommand.host_id (#3)".to_string(),
                 ));
             },
+
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field StartActorCommand.lattice_id (#4)".to_string(),
+                ));
+            },
         }
     };
     Ok(__result)
@@ -2750,6 +2987,9 @@ pub struct StartProviderCommand {
     /// The host ID on which to start the provider
     #[serde(default)]
     pub host_id: String,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(default)]
+    pub lattice_id: String,
     /// The link name of the provider to be started
     #[serde(default)]
     pub link_name: String,
@@ -2768,7 +3008,7 @@ pub fn encode_start_provider_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(5)?;
+    e.map(6)?;
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
         encode_annotation_map(e, val)?;
@@ -2783,6 +3023,8 @@ where
     }
     e.str("hostId")?;
     e.str(&val.host_id)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
     e.str("linkName")?;
     e.str(&val.link_name)?;
     e.str("providerRef")?;
@@ -2799,6 +3041,7 @@ pub fn decode_start_provider_command(
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
         let mut configuration: Option<Option<ConfigurationString>> = Some(None);
         let mut host_id: Option<String> = None;
+        let mut lattice_id: Option<String> = None;
         let mut link_name: Option<String> = None;
         let mut provider_ref: Option<String> = None;
 
@@ -2837,8 +3080,9 @@ pub fn decode_start_provider_command(
                         }
                     }
                     2 => host_id = Some(d.str()?.to_string()),
-                    3 => link_name = Some(d.str()?.to_string()),
-                    4 => provider_ref = Some(d.str()?.to_string()),
+                    3 => lattice_id = Some(d.str()?.to_string()),
+                    4 => link_name = Some(d.str()?.to_string()),
+                    5 => provider_ref = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -2868,6 +3112,7 @@ pub fn decode_start_provider_command(
                         }
                     }
                     "hostId" => host_id = Some(d.str()?.to_string()),
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     "linkName" => link_name = Some(d.str()?.to_string()),
                     "providerRef" => provider_ref = Some(d.str()?.to_string()),
                     _ => d.skip()?,
@@ -2886,11 +3131,19 @@ pub fn decode_start_provider_command(
                 ));
             },
 
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field StartProviderCommand.lattice_id (#3)".to_string(),
+                ));
+            },
+
             link_name: if let Some(__x) = link_name {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StartProviderCommand.link_name (#3)".to_string(),
+                    "missing field StartProviderCommand.link_name (#4)".to_string(),
                 ));
             },
 
@@ -2898,7 +3151,7 @@ pub fn decode_start_provider_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StartProviderCommand.provider_ref (#4)".to_string(),
+                    "missing field StartProviderCommand.provider_ref (#5)".to_string(),
                 ));
             },
         }
@@ -2925,6 +3178,9 @@ pub struct StopActorCommand {
     /// The ID of the target host
     #[serde(default)]
     pub host_id: String,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(default)]
+    pub lattice_id: String,
 }
 
 // Encode StopActorCommand as CBOR and append to output stream
@@ -2937,7 +3193,7 @@ pub fn encode_stop_actor_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(4)?;
+    e.map(5)?;
     e.str("actorRef")?;
     e.str(&val.actor_ref)?;
     if let Some(val) = val.annotations.as_ref() {
@@ -2950,6 +3206,8 @@ where
     e.u16(val.count)?;
     e.str("hostId")?;
     e.str(&val.host_id)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
     Ok(())
 }
 
@@ -2963,6 +3221,7 @@ pub fn decode_stop_actor_command(
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
         let mut count: Option<u16> = None;
         let mut host_id: Option<String> = None;
+        let mut lattice_id: Option<String> = None;
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -2993,6 +3252,7 @@ pub fn decode_stop_actor_command(
                     }
                     2 => count = Some(d.u16()?),
                     3 => host_id = Some(d.str()?.to_string()),
+                    4 => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -3016,6 +3276,7 @@ pub fn decode_stop_actor_command(
                     }
                     "count" => count = Some(d.u16()?),
                     "hostId" => host_id = Some(d.str()?.to_string()),
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -3045,6 +3306,14 @@ pub fn decode_stop_actor_command(
                     "missing field StopActorCommand.host_id (#3)".to_string(),
                 ));
             },
+
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field StopActorCommand.lattice_id (#4)".to_string(),
+                ));
+            },
         }
     };
     Ok(__result)
@@ -3055,6 +3324,9 @@ pub struct StopHostCommand {
     /// The ID of the target host
     #[serde(default)]
     pub host_id: String,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(default)]
+    pub lattice_id: String,
     /// An optional timeout, in seconds
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub timeout: Option<u64>,
@@ -3070,9 +3342,11 @@ pub fn encode_stop_host_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(2)?;
+    e.map(3)?;
     e.str("hostId")?;
     e.str(&val.host_id)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
     if let Some(val) = val.timeout.as_ref() {
         e.str("timeout")?;
         e.u64(*val)?;
@@ -3089,6 +3363,7 @@ pub fn decode_stop_host_command(
 ) -> Result<StopHostCommand, RpcError> {
     let __result = {
         let mut host_id: Option<String> = None;
+        let mut lattice_id: Option<String> = None;
         let mut timeout: Option<Option<u64>> = Some(None);
 
         let is_array = match d.datatype()? {
@@ -3105,7 +3380,8 @@ pub fn decode_stop_host_command(
             for __i in 0..(len as usize) {
                 match __i {
                     0 => host_id = Some(d.str()?.to_string()),
-                    1 => {
+                    1 => lattice_id = Some(d.str()?.to_string()),
+                    2 => {
                         timeout = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -3122,6 +3398,7 @@ pub fn decode_stop_host_command(
             for __i in 0..(len as usize) {
                 match d.str()? {
                     "hostId" => host_id = Some(d.str()?.to_string()),
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     "timeout" => {
                         timeout = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
@@ -3142,6 +3419,14 @@ pub fn decode_stop_host_command(
                     "missing field StopHostCommand.host_id (#0)".to_string(),
                 ));
             },
+
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field StopHostCommand.lattice_id (#1)".to_string(),
+                ));
+            },
             timeout: timeout.unwrap(),
         }
     };
@@ -3160,6 +3445,9 @@ pub struct StopProviderCommand {
     /// Host ID on which to stop the provider
     #[serde(default)]
     pub host_id: String,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(default)]
+    pub lattice_id: String,
     /// Link name for this provider
     #[serde(default)]
     pub link_name: String,
@@ -3179,7 +3467,7 @@ pub fn encode_stop_provider_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(5)?;
+    e.map(6)?;
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
         encode_annotation_map(e, val)?;
@@ -3190,6 +3478,8 @@ where
     e.str(&val.contract_id)?;
     e.str("hostId")?;
     e.str(&val.host_id)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
     e.str("linkName")?;
     e.str(&val.link_name)?;
     e.str("providerRef")?;
@@ -3206,6 +3496,7 @@ pub fn decode_stop_provider_command(
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
         let mut contract_id: Option<String> = None;
         let mut host_id: Option<String> = None;
+        let mut lattice_id: Option<String> = None;
         let mut link_name: Option<String> = None;
         let mut provider_ref: Option<String> = None;
 
@@ -3237,8 +3528,9 @@ pub fn decode_stop_provider_command(
                     }
                     1 => contract_id = Some(d.str()?.to_string()),
                     2 => host_id = Some(d.str()?.to_string()),
-                    3 => link_name = Some(d.str()?.to_string()),
-                    4 => provider_ref = Some(d.str()?.to_string()),
+                    3 => lattice_id = Some(d.str()?.to_string()),
+                    4 => link_name = Some(d.str()?.to_string()),
+                    5 => provider_ref = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -3261,6 +3553,7 @@ pub fn decode_stop_provider_command(
                     }
                     "contractId" => contract_id = Some(d.str()?.to_string()),
                     "hostId" => host_id = Some(d.str()?.to_string()),
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     "linkName" => link_name = Some(d.str()?.to_string()),
                     "providerRef" => provider_ref = Some(d.str()?.to_string()),
                     _ => d.skip()?,
@@ -3286,11 +3579,19 @@ pub fn decode_stop_provider_command(
                 ));
             },
 
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field StopProviderCommand.lattice_id (#3)".to_string(),
+                ));
+            },
+
             link_name: if let Some(__x) = link_name {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopProviderCommand.link_name (#3)".to_string(),
+                    "missing field StopProviderCommand.link_name (#4)".to_string(),
                 ));
             },
 
@@ -3298,7 +3599,7 @@ pub fn decode_stop_provider_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopProviderCommand.provider_ref (#4)".to_string(),
+                    "missing field StopProviderCommand.provider_ref (#5)".to_string(),
                 ));
             },
         }
@@ -3321,6 +3622,9 @@ pub struct UpdateActorCommand {
     /// The host ID of the host to perform the live update
     #[serde(default)]
     pub host_id: String,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(default)]
+    pub lattice_id: String,
     /// The new image reference of the upgraded version of this actor
     #[serde(default)]
     pub new_actor_ref: String,
@@ -3336,7 +3640,7 @@ pub fn encode_update_actor_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(4)?;
+    e.map(5)?;
     e.str("actorId")?;
     e.str(&val.actor_id)?;
     if let Some(val) = val.annotations.as_ref() {
@@ -3347,6 +3651,8 @@ where
     }
     e.str("hostId")?;
     e.str(&val.host_id)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
     e.str("newActorRef")?;
     e.str(&val.new_actor_ref)?;
     Ok(())
@@ -3361,6 +3667,7 @@ pub fn decode_update_actor_command(
         let mut actor_id: Option<String> = None;
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
         let mut host_id: Option<String> = None;
+        let mut lattice_id: Option<String> = None;
         let mut new_actor_ref: Option<String> = None;
 
         let is_array = match d.datatype()? {
@@ -3391,7 +3698,8 @@ pub fn decode_update_actor_command(
                         }
                     }
                     2 => host_id = Some(d.str()?.to_string()),
-                    3 => new_actor_ref = Some(d.str()?.to_string()),
+                    3 => lattice_id = Some(d.str()?.to_string()),
+                    4 => new_actor_ref = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -3414,6 +3722,7 @@ pub fn decode_update_actor_command(
                         }
                     }
                     "hostId" => host_id = Some(d.str()?.to_string()),
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     "newActorRef" => new_actor_ref = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
@@ -3437,11 +3746,19 @@ pub fn decode_update_actor_command(
                 ));
             },
 
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field UpdateActorCommand.lattice_id (#3)".to_string(),
+                ));
+            },
+
             new_actor_ref: if let Some(__x) = new_actor_ref {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field UpdateActorCommand.new_actor_ref (#3)".to_string(),
+                    "missing field UpdateActorCommand.new_actor_ref (#4)".to_string(),
                 ));
             },
         }
@@ -3543,6 +3860,15 @@ pub trait LatticeController {
         -> RpcResult<CtlOperationAck>;
     /// Requests that the given host be stopped
     async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<CtlOperationAck>;
+    /// Instructs the provider to store the NATS credentials/URL for a given lattice. This is
+    /// designed to allow a single capability provider (or multiple instances of the same) to manage
+    /// multiple lattices, reducing overhead and making it easier to support secure multi-tenancy of
+    /// lattices.
+    async fn set_lattice_credentials(
+        &self,
+        ctx: &Context,
+        arg: &SetLatticeCredentialsRequest,
+    ) -> RpcResult<CtlOperationAck>;
     /// Instructs all listening hosts to use the enclosed credential map for
     /// authentication to secure artifact (OCI/bindle) registries. Any host that
     /// receives this message will _delete_ its previous credential map and replace
@@ -3740,6 +4066,20 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
 
                 Ok(Message {
                     method: "LatticeController.StopHost",
+                    arg: Cow::Owned(buf),
+                })
+            }
+            "SetLatticeCredentials" => {
+                let value: SetLatticeCredentialsRequest =
+                    wasmbus_rpc::common::deserialize(&message.arg).map_err(|e| {
+                        RpcError::Deser(format!("'SetLatticeCredentialsRequest': {}", e))
+                    })?;
+
+                let resp = LatticeController::set_lattice_credentials(self, ctx, &value).await?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
+
+                Ok(Message {
+                    method: "LatticeController.SetLatticeCredentials",
                     arg: Cow::Owned(buf),
                 })
             }
@@ -4170,6 +4510,34 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
                 ctx,
                 Message {
                     method: "LatticeController.StopHost",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        let value: CtlOperationAck = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': CtlOperationAck", e)))?;
+        Ok(value)
+    }
+    #[allow(unused)]
+    /// Instructs the provider to store the NATS credentials/URL for a given lattice. This is
+    /// designed to allow a single capability provider (or multiple instances of the same) to manage
+    /// multiple lattices, reducing overhead and making it easier to support secure multi-tenancy of
+    /// lattices.
+    async fn set_lattice_credentials(
+        &self,
+        ctx: &Context,
+        arg: &SetLatticeCredentialsRequest,
+    ) -> RpcResult<CtlOperationAck> {
+        let buf = wasmbus_rpc::common::serialize(arg)?;
+
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "LatticeController.SetLatticeCredentials",
                     arg: Cow::Borrowed(&buf),
                 },
                 None,
