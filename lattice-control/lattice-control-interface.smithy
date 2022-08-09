@@ -161,6 +161,7 @@ operation SetLatticeCredentials {
     output: CtlOperationAck
 }
 
+/// A request to advertise/publish a link definition on a given lattice.
 structure AdvertiseLinkRequest {
     /// The ID of the lattice for this request
     @required
@@ -171,6 +172,7 @@ structure AdvertiseLinkRequest {
     link: LinkDefinition
 }
 
+/// A request to obtain claims from a given lattice
 structure GetClaimsRequest {
     /// The ID of the lattice for this request
     @required
@@ -178,6 +180,7 @@ structure GetClaimsRequest {
     latticeId: String,
 }
 
+/// A request to query the inventory of a given host within a given lattice
 structure GetHostInventoryRequest {
     /// The ID of the lattice for this request
     @required
@@ -190,6 +193,7 @@ structure GetHostInventoryRequest {
     hostId: String
 }
 
+/// A request to obtain the list of hosts responding within a given lattice
 structure GetHostsRequest {
     /// The ID of the lattice for which these credentials will be used
     @required

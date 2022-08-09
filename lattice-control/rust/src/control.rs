@@ -670,6 +670,7 @@ pub fn decode_actor_instances(
     };
     Ok(__result)
 }
+/// A request to advertise/publish a link definition on a given lattice.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct AdvertiseLinkRequest {
     /// The ID of the lattice for this request
@@ -1003,6 +1004,7 @@ pub fn decode_ctl_operation_ack(
     };
     Ok(__result)
 }
+/// A request to obtain claims from a given lattice
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetClaimsRequest {
     /// The ID of the lattice for this request
@@ -1148,6 +1150,7 @@ pub fn decode_get_claims_response(
     };
     Ok(__result)
 }
+/// A request to query the inventory of a given host within a given lattice
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetHostInventoryRequest {
     /// The public key of the host being targeted for this request
@@ -1233,6 +1236,7 @@ pub fn decode_get_host_inventory_request(
     };
     Ok(__result)
 }
+/// A request to obtain the list of hosts responding within a given lattice
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetHostsRequest {
     /// The ID of the lattice for which these credentials will be used
