@@ -61,25 +61,27 @@ operation AuctionActor {
 /// a "gather" operation and so can be influenced by short timeouts,
 /// network partition events, etc.
 operation GetHosts {
+    input: GetHostsRequest
     output: Hosts
 }
 
 /// Queries for the contents of a host given the supplied 56-character unique ID
 operation GetHostInventory {
-    input: String
+    input: GetHostInventoryRequest
     output: HostInventory
 }
 
 /// Queries the lattice for the list of known/cached claims by taking the response
 /// from the first host that answers the query.
 operation GetClaims {    
+    input: GetClaimsRequest
     output: GetClaimsResponse
 }
 
 /// Publish a link definition into the lattice, allowing it to be cached and
 /// delivered to the appropriate capability provider instances
 operation AdvertiseLink {
-    input: LinkDefinition
+    input: AdvertiseLinkRequest
     output: CtlOperationAck
 }
 
@@ -133,10 +135,9 @@ operation StopProvider {
 /// Requests that an actor be stopped on the given host
 operation StopActor {
     input: StopActorCommand
-    output: CtlOperationAck    
+    output: CtlOperationAck
 }
 
-/// Requests that the given host be stopped
 operation StopHost {
     input: StopHostCommand
     output: CtlOperationAck
@@ -158,6 +159,42 @@ operation SetRegistryCredentials {
 operation SetLatticeCredentials {
     input: SetLatticeCredentialsRequest
     output: CtlOperationAck
+}
+
+structure AdvertiseLinkRequest {
+    /// The ID of the lattice for this request
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
+    @required
+    link: LinkDefinition
+}
+
+structure GetClaimsRequest {
+    /// The ID of the lattice for this request
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+}
+
+structure GetHostInventoryRequest {
+    /// The ID of the lattice for this request
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
+
+    /// The public key of the host being targeted for this request
+    @required
+    @serialization(name: "host_id")
+    hostId: String
+}
+
+structure GetHostsRequest {
+    /// The ID of the lattice for which these credentials will be used
+    @required
+    @serialization(name: "lattice_id")
+    latticeId: String,
 }
 
 /// Represents a request to set/store the credentials that correspond to a given lattice ID. 

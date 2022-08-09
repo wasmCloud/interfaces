@@ -670,6 +670,97 @@ pub fn decode_actor_instances(
     };
     Ok(__result)
 }
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct AdvertiseLinkRequest {
+    /// The ID of the lattice for this request
+    #[serde(default)]
+    pub lattice_id: String,
+    pub link: wasmbus_rpc::core::LinkDefinition,
+}
+
+// Encode AdvertiseLinkRequest as CBOR and append to output stream
+#[doc(hidden)]
+#[allow(unused_mut)]
+pub fn encode_advertise_link_request<W: wasmbus_rpc::cbor::Write>(
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &AdvertiseLinkRequest,
+) -> RpcResult<()>
+where
+    <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
+{
+    e.map(2)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
+    e.str("link")?;
+    wasmbus_rpc::core::encode_link_definition(e, &val.link)?;
+    Ok(())
+}
+
+// Decode AdvertiseLinkRequest from cbor input stream
+#[doc(hidden)]
+pub fn decode_advertise_link_request(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<AdvertiseLinkRequest, RpcError> {
+    let __result = {
+        let mut lattice_id: Option<String> = None;
+        let mut link: Option<wasmbus_rpc::core::LinkDefinition> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct AdvertiseLinkRequest, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.fixed_array()?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => lattice_id = Some(d.str()?.to_string()),
+                    1 => {
+                        link = Some(wasmbus_rpc::core::decode_link_definition(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.core#LinkDefinition': {}", e)
+                        })?)
+                    }
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.fixed_map()?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
+                    "link" => {
+                        link = Some(wasmbus_rpc::core::decode_link_definition(d).map_err(|e| {
+                            format!("decoding 'org.wasmcloud.core#LinkDefinition': {}", e)
+                        })?)
+                    }
+                    _ => d.skip()?,
+                }
+            }
+        }
+        AdvertiseLinkRequest {
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field AdvertiseLinkRequest.lattice_id (#0)".to_string(),
+                ));
+            },
+
+            link: if let Some(__x) = link {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field AdvertiseLinkRequest.link (#1)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 pub type AnnotationMap = std::collections::HashMap<String, String>;
 
 // Encode AnnotationMap as CBOR and append to output stream
@@ -912,6 +1003,75 @@ pub fn decode_ctl_operation_ack(
     };
     Ok(__result)
 }
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct GetClaimsRequest {
+    /// The ID of the lattice for this request
+    #[serde(default)]
+    pub lattice_id: String,
+}
+
+// Encode GetClaimsRequest as CBOR and append to output stream
+#[doc(hidden)]
+#[allow(unused_mut)]
+pub fn encode_get_claims_request<W: wasmbus_rpc::cbor::Write>(
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &GetClaimsRequest,
+) -> RpcResult<()>
+where
+    <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
+{
+    e.map(1)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
+    Ok(())
+}
+
+// Decode GetClaimsRequest from cbor input stream
+#[doc(hidden)]
+pub fn decode_get_claims_request(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<GetClaimsRequest, RpcError> {
+    let __result = {
+        let mut lattice_id: Option<String> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct GetClaimsRequest, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.fixed_array()?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => lattice_id = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.fixed_map()?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        GetClaimsRequest {
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field GetClaimsRequest.lattice_id (#0)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// A response containing the full list of known claims within the lattice
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetClaimsResponse {
@@ -982,6 +1142,160 @@ pub fn decode_get_claims_response(
             } else {
                 return Err(RpcError::Deser(
                     "missing field GetClaimsResponse.claims (#0)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct GetHostInventoryRequest {
+    /// The public key of the host being targeted for this request
+    #[serde(default)]
+    pub host_id: String,
+    /// The ID of the lattice for this request
+    #[serde(default)]
+    pub lattice_id: String,
+}
+
+// Encode GetHostInventoryRequest as CBOR and append to output stream
+#[doc(hidden)]
+#[allow(unused_mut)]
+pub fn encode_get_host_inventory_request<W: wasmbus_rpc::cbor::Write>(
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &GetHostInventoryRequest,
+) -> RpcResult<()>
+where
+    <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
+{
+    e.map(2)?;
+    e.str("hostId")?;
+    e.str(&val.host_id)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
+    Ok(())
+}
+
+// Decode GetHostInventoryRequest from cbor input stream
+#[doc(hidden)]
+pub fn decode_get_host_inventory_request(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<GetHostInventoryRequest, RpcError> {
+    let __result = {
+        let mut host_id: Option<String> = None;
+        let mut lattice_id: Option<String> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct GetHostInventoryRequest, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.fixed_array()?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => host_id = Some(d.str()?.to_string()),
+                    1 => lattice_id = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.fixed_map()?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "hostId" => host_id = Some(d.str()?.to_string()),
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        GetHostInventoryRequest {
+            host_id: if let Some(__x) = host_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field GetHostInventoryRequest.host_id (#0)".to_string(),
+                ));
+            },
+
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field GetHostInventoryRequest.lattice_id (#1)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct GetHostsRequest {
+    /// The ID of the lattice for which these credentials will be used
+    #[serde(default)]
+    pub lattice_id: String,
+}
+
+// Encode GetHostsRequest as CBOR and append to output stream
+#[doc(hidden)]
+#[allow(unused_mut)]
+pub fn encode_get_hosts_request<W: wasmbus_rpc::cbor::Write>(
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &GetHostsRequest,
+) -> RpcResult<()>
+where
+    <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
+{
+    e.map(1)?;
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
+    Ok(())
+}
+
+// Decode GetHostsRequest from cbor input stream
+#[doc(hidden)]
+pub fn decode_get_hosts_request(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<GetHostsRequest, RpcError> {
+    let __result = {
+        let mut lattice_id: Option<String> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct GetHostsRequest, expected array or map".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.fixed_array()?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => lattice_id = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.fixed_map()?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        GetHostsRequest {
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field GetHostsRequest.lattice_id (#0)".to_string(),
                 ));
             },
         }
@@ -3795,16 +4109,20 @@ pub trait LatticeController {
     /// Queries the list of hosts currently visible to the lattice. This is
     /// a "gather" operation and so can be influenced by short timeouts,
     /// network partition events, etc.
-    async fn get_hosts(&self, ctx: &Context) -> RpcResult<Hosts>;
+    async fn get_hosts(&self, ctx: &Context, arg: &GetHostsRequest) -> RpcResult<Hosts>;
     /// Queries for the contents of a host given the supplied 56-character unique ID
-    async fn get_host_inventory<TS: ToString + ?Sized + std::marker::Sync>(
+    async fn get_host_inventory(
         &self,
         ctx: &Context,
-        arg: &TS,
+        arg: &GetHostInventoryRequest,
     ) -> RpcResult<HostInventory>;
     /// Queries the lattice for the list of known/cached claims by taking the response
     /// from the first host that answers the query.
-    async fn get_claims(&self, ctx: &Context) -> RpcResult<GetClaimsResponse>;
+    async fn get_claims(
+        &self,
+        ctx: &Context,
+        arg: &GetClaimsRequest,
+    ) -> RpcResult<GetClaimsResponse>;
     /// Instructs a given host to scale the indicated actor
     async fn scale_actor(
         &self,
@@ -3822,7 +4140,7 @@ pub trait LatticeController {
     async fn advertise_link(
         &self,
         ctx: &Context,
-        arg: &wasmbus_rpc::core::LinkDefinition,
+        arg: &AdvertiseLinkRequest,
     ) -> RpcResult<CtlOperationAck>;
     /// Requests the removal of a link definition. The definition will be removed
     /// from the cache and the relevant capability providers will be given a chance
@@ -3858,7 +4176,6 @@ pub trait LatticeController {
     /// Requests that an actor be stopped on the given host
     async fn stop_actor(&self, ctx: &Context, arg: &StopActorCommand)
         -> RpcResult<CtlOperationAck>;
-    /// Requests that the given host be stopped
     async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<CtlOperationAck>;
     /// Instructs the provider to store the NATS credentials/URL for a given lattice. This is
     /// designed to allow a single capability provider (or multiple instances of the same) to manage
@@ -3920,7 +4237,10 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                 })
             }
             "GetHosts" => {
-                let resp = LatticeController::get_hosts(self, ctx).await?;
+                let value: GetHostsRequest = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'GetHostsRequest': {}", e)))?;
+
+                let resp = LatticeController::get_hosts(self, ctx, &value).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
 
                 Ok(Message {
@@ -3929,8 +4249,8 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                 })
             }
             "GetHostInventory" => {
-                let value: String = wasmbus_rpc::common::deserialize(&message.arg)
-                    .map_err(|e| RpcError::Deser(format!("'String': {}", e)))?;
+                let value: GetHostInventoryRequest = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'GetHostInventoryRequest': {}", e)))?;
 
                 let resp = LatticeController::get_host_inventory(self, ctx, &value).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
@@ -3941,7 +4261,10 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                 })
             }
             "GetClaims" => {
-                let resp = LatticeController::get_claims(self, ctx).await?;
+                let value: GetClaimsRequest = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'GetClaimsRequest': {}", e)))?;
+
+                let resp = LatticeController::get_claims(self, ctx, &value).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
 
                 Ok(Message {
@@ -3974,9 +4297,8 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                 })
             }
             "AdvertiseLink" => {
-                let value: wasmbus_rpc::core::LinkDefinition =
-                    wasmbus_rpc::common::deserialize(&message.arg)
-                        .map_err(|e| RpcError::Deser(format!("'LinkDefinition': {}", e)))?;
+                let value: AdvertiseLinkRequest = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'AdvertiseLinkRequest': {}", e)))?;
 
                 let resp = LatticeController::advertise_link(self, ctx, &value).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
@@ -4209,8 +4531,9 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
     /// Queries the list of hosts currently visible to the lattice. This is
     /// a "gather" operation and so can be influenced by short timeouts,
     /// network partition events, etc.
-    async fn get_hosts(&self, ctx: &Context) -> RpcResult<Hosts> {
-        let buf = *b"";
+    async fn get_hosts(&self, ctx: &Context, arg: &GetHostsRequest) -> RpcResult<Hosts> {
+        let buf = wasmbus_rpc::common::serialize(arg)?;
+
         let resp = self
             .transport
             .send(
@@ -4229,12 +4552,12 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
     }
     #[allow(unused)]
     /// Queries for the contents of a host given the supplied 56-character unique ID
-    async fn get_host_inventory<TS: ToString + ?Sized + std::marker::Sync>(
+    async fn get_host_inventory(
         &self,
         ctx: &Context,
-        arg: &TS,
+        arg: &GetHostInventoryRequest,
     ) -> RpcResult<HostInventory> {
-        let buf = wasmbus_rpc::common::serialize(&arg.to_string())?;
+        let buf = wasmbus_rpc::common::serialize(arg)?;
 
         let resp = self
             .transport
@@ -4255,8 +4578,13 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
     #[allow(unused)]
     /// Queries the lattice for the list of known/cached claims by taking the response
     /// from the first host that answers the query.
-    async fn get_claims(&self, ctx: &Context) -> RpcResult<GetClaimsResponse> {
-        let buf = *b"";
+    async fn get_claims(
+        &self,
+        ctx: &Context,
+        arg: &GetClaimsRequest,
+    ) -> RpcResult<GetClaimsResponse> {
+        let buf = wasmbus_rpc::common::serialize(arg)?;
+
         let resp = self
             .transport
             .send(
@@ -4329,7 +4657,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
     async fn advertise_link(
         &self,
         ctx: &Context,
-        arg: &wasmbus_rpc::core::LinkDefinition,
+        arg: &AdvertiseLinkRequest,
     ) -> RpcResult<CtlOperationAck> {
         let buf = wasmbus_rpc::common::serialize(arg)?;
 
@@ -4500,7 +4828,6 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         Ok(value)
     }
     #[allow(unused)]
-    /// Requests that the given host be stopped
     async fn stop_host(&self, ctx: &Context, arg: &StopHostCommand) -> RpcResult<CtlOperationAck> {
         let buf = wasmbus_rpc::common::serialize(arg)?;
 
