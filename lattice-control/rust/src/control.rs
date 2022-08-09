@@ -26,9 +26,11 @@ pub const SMITHY_VERSION: &str = "1.0";
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ActorAuctionAck {
     /// The original actor reference used for the auction
+    #[serde(rename = "actorRef")]
     #[serde(default)]
     pub actor_ref: String,
     /// The host ID of the "bidder" for this auction.
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
 }
@@ -169,11 +171,13 @@ pub fn decode_actor_auction_acks(
 pub struct ActorAuctionRequest {
     /// The reference for this actor. Can be any one of the acceptable forms
     /// of uniquely identifying an actor.
+    #[serde(rename = "actorRef")]
     #[serde(default)]
     pub actor_ref: String,
     /// The set of constraints to which any candidate host must conform
     pub constraints: ConstraintMap,
     /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
 }
@@ -287,6 +291,7 @@ pub struct ActorDescription {
     #[serde(default)]
     pub id: String,
     /// Image reference for this actor, if applicable
+    #[serde(rename = "imageRef")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub image_ref: Option<String>,
     /// The individual instances of this actor that are running
@@ -497,6 +502,7 @@ pub struct ActorInstance {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub annotations: Option<AnnotationMap>,
     /// This instance's unique ID (guid)
+    #[serde(rename = "instanceId")]
     #[serde(default)]
     pub instance_id: String,
     /// The revision number for this actor instance
@@ -674,6 +680,7 @@ pub fn decode_actor_instances(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct AdvertiseLinkRequest {
     /// The ID of the lattice for this request
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
     pub link: wasmbus_rpc::core::LinkDefinition,
@@ -1008,6 +1015,7 @@ pub fn decode_ctl_operation_ack(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetClaimsRequest {
     /// The ID of the lattice for this request
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
 }
@@ -1154,9 +1162,11 @@ pub fn decode_get_claims_response(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetHostInventoryRequest {
     /// The public key of the host being targeted for this request
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
     /// The ID of the lattice for this request
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
 }
@@ -1240,6 +1250,7 @@ pub fn decode_get_host_inventory_request(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GetHostsRequest {
     /// The ID of the lattice for which these credentials will be used
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
 }
@@ -1311,32 +1322,40 @@ pub fn decode_get_hosts_request(
 pub struct Host {
     /// Comma-delimited list of valid cluster issuer public keys as known
     /// to this host
+    #[serde(rename = "clusterIssuers")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cluster_issuers: Option<String>,
     /// NATS server host used for the control interface
+    #[serde(rename = "ctlHost")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ctl_host: Option<String>,
     #[serde(default)]
     pub id: String,
     /// JetStream domain (if applicable) in use by this host
+    #[serde(rename = "jsDomain")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub js_domain: Option<String>,
     /// Hash map of label-value pairs for this host
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub labels: Option<KeyValueMap>,
     /// Lattice prefix/ID used by the host
+    #[serde(rename = "latticePrefix")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub lattice_prefix: Option<String>,
     /// NATS server host used for provider RPC
+    #[serde(rename = "provRpcHost")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub prov_rpc_host: Option<String>,
     /// NATS server host used for regular RPC
+    #[serde(rename = "rpcHost")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rpc_host: Option<String>,
     /// Human-friendly uptime description
+    #[serde(rename = "uptimeHuman")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub uptime_human: Option<String>,
     /// uptime in seconds
+    #[serde(rename = "uptimeSeconds")]
     #[serde(default)]
     pub uptime_seconds: u64,
     /// Current wasmCloud Host software version
@@ -1650,6 +1669,7 @@ pub struct HostInventory {
     /// Actors running on this host.
     pub actors: ActorDescriptions,
     /// The host's unique ID
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
     /// The host's labels
@@ -2002,12 +2022,15 @@ pub fn decode_link_definition_list(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ProviderAuctionAck {
     /// The host ID of the "bidder" for this auction
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
     /// The link name provided for the auction
+    #[serde(rename = "linkName")]
     #[serde(default)]
     pub link_name: String,
     /// The original provider ref provided for the auction
+    #[serde(rename = "providerRef")]
     #[serde(default)]
     pub provider_ref: String,
 }
@@ -2164,13 +2187,16 @@ pub struct ProviderAuctionRequest {
     /// The set of constraints to which a suitable target host must conform
     pub constraints: ConstraintMap,
     /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
     /// The link name of the provider
+    #[serde(rename = "linkName")]
     #[serde(default)]
     pub link_name: String,
     /// The reference for the provider. Can be any one of the accepted
     /// forms of uniquely identifying a provider
+    #[serde(rename = "providerRef")]
     #[serde(default)]
     pub provider_ref: String,
 }
@@ -2297,9 +2323,11 @@ pub struct ProviderDescription {
     #[serde(default)]
     pub id: String,
     /// Image reference for this provider, if applicable
+    #[serde(rename = "imageRef")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub image_ref: Option<String>,
     /// Provider's link name
+    #[serde(rename = "linkName")]
     #[serde(default)]
     pub link_name: String,
     /// Name of the provider, if one exists
@@ -2688,15 +2716,19 @@ pub fn decode_registry_credential_map(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct RemoveLinkDefinitionRequest {
     /// The actor's public key. This cannot be an image reference
+    #[serde(rename = "actorId")]
     #[serde(default)]
     pub actor_id: String,
     /// The provider contract
+    #[serde(rename = "contractId")]
     #[serde(default)]
     pub contract_id: String,
     /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
     /// The provider's link name
+    #[serde(rename = "linkName")]
     #[serde(default)]
     pub link_name: String,
 }
@@ -2806,9 +2838,11 @@ pub fn decode_remove_link_definition_request(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ScaleActorCommand {
     /// Public Key ID of the actor to scale
+    #[serde(rename = "actorId")]
     #[serde(default)]
     pub actor_id: String,
     /// Reference for the actor. Can be any of the acceptable forms of unique identification
+    #[serde(rename = "actorRef")]
     #[serde(default)]
     pub actor_ref: String,
     /// Optional set of annotations used to describe the nature of this actor scale command. For
@@ -2819,9 +2853,11 @@ pub struct ScaleActorCommand {
     #[serde(default)]
     pub count: u16,
     /// Host ID on which to scale this actor
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
     /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
 }
@@ -2978,19 +3014,23 @@ pub fn decode_scale_actor_command(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SetLatticeCredentialsRequest {
     /// The ID of the lattice for which these credentials will be used
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
     /// If natsUrl is supplied, then the capability provider will use this URL (and port) for
     /// establishing a connection for the given lattice.
+    #[serde(rename = "natsUrl")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub nats_url: Option<String>,
     /// If supplied, contains the user JWT to be used for authenticating against NATS to allow
     /// access to the indicated lattice. If not supplied, the capability provider will assume/set
     /// anonymous access for this lattice.
+    #[serde(rename = "userJwt")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_jwt: Option<String>,
     /// If userJwt is supplied, user seed must also be supplied and is the seed key used for user
     /// authentication against NATS for this lattice.
+    #[serde(rename = "userSeed")]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub user_seed: Option<String>,
 }
@@ -3136,6 +3176,7 @@ pub fn decode_set_lattice_credentials_request(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StartActorCommand {
     /// Reference for the actor. Can be any of the acceptable forms of unique identification
+    #[serde(rename = "actorRef")]
     #[serde(default)]
     pub actor_ref: String,
     /// Optional set of annotations used to describe the nature of this actor start command. For
@@ -3147,9 +3188,11 @@ pub struct StartActorCommand {
     #[serde(default)]
     pub count: u16,
     /// Host ID on which this actor should start
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
     /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
 }
@@ -3303,15 +3346,19 @@ pub struct StartProviderCommand {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub configuration: Option<ConfigurationString>,
     /// The host ID on which to start the provider
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
     /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
     /// The link name of the provider to be started
+    #[serde(rename = "linkName")]
     #[serde(default)]
     pub link_name: String,
     /// The image reference of the provider to be started
+    #[serde(rename = "providerRef")]
     #[serde(default)]
     pub provider_ref: String,
 }
@@ -3482,6 +3529,7 @@ pub fn decode_start_provider_command(
 pub struct StopActorCommand {
     /// Reference for this actor. Can be any of the means of uniquely identifying
     /// an actor
+    #[serde(rename = "actorRef")]
     #[serde(default)]
     pub actor_ref: String,
     /// Optional set of annotations used to describe the nature of this
@@ -3494,9 +3542,11 @@ pub struct StopActorCommand {
     #[serde(default)]
     pub count: u16,
     /// The ID of the target host
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
     /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
 }
@@ -3640,9 +3690,11 @@ pub fn decode_stop_actor_command(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StopHostCommand {
     /// The ID of the target host
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
     /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
     /// An optional timeout, in seconds
@@ -3758,19 +3810,24 @@ pub struct StopProviderCommand {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub annotations: Option<AnnotationMap>,
     /// Contract ID of the capability provider
+    #[serde(rename = "contractId")]
     #[serde(default)]
     pub contract_id: String,
     /// Host ID on which to stop the provider
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
     /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
     /// Link name for this provider
+    #[serde(rename = "linkName")]
     #[serde(default)]
     pub link_name: String,
     /// Reference for the capability provider. Can be any of the forms of
     /// uniquely identifying a provider
+    #[serde(rename = "providerRef")]
     #[serde(default)]
     pub provider_ref: String,
 }
@@ -3930,6 +3987,7 @@ pub fn decode_stop_provider_command(
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct UpdateActorCommand {
     /// The actor's 56-character unique ID
+    #[serde(rename = "actorId")]
     #[serde(default)]
     pub actor_id: String,
     /// Optional set of annotations used to describe the nature of this
@@ -3938,12 +3996,15 @@ pub struct UpdateActorCommand {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub annotations: Option<AnnotationMap>,
     /// The host ID of the host to perform the live update
+    #[serde(rename = "hostId")]
     #[serde(default)]
     pub host_id: String,
     /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
     #[serde(default)]
     pub lattice_id: String,
     /// The new image reference of the upgraded version of this actor
+    #[serde(rename = "newActorRef")]
     #[serde(default)]
     pub new_actor_ref: String,
 }
