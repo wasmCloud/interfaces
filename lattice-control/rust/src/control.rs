@@ -3175,7 +3175,7 @@ pub fn decode_set_lattice_credentials_request(
 /// indicated by the reference.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StartActorCommand {
-    /// Reference for the actor. Can be any of the acceptable forms of unique identification
+    /// Reference for the actor. This can be either a bindle or OCI reference
     #[serde(rename = "actorRef")]
     #[serde(default)]
     pub actor_ref: String,
@@ -3527,11 +3527,10 @@ pub fn decode_start_provider_command(
 /// be terminated on that host
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StopActorCommand {
-    /// Reference for this actor. Can be any of the means of uniquely identifying
-    /// an actor
-    #[serde(rename = "actorRef")]
+    /// The public key of the actor to stop
+    #[serde(rename = "actorId")]
     #[serde(default)]
-    pub actor_ref: String,
+    pub actor_id: String,
     /// Optional set of annotations used to describe the nature of this
     /// stop request. If supplied, the only instances of this actor with these
     /// annotations will be stopped
@@ -3562,8 +3561,8 @@ where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
     e.map(5)?;
-    e.str("actorRef")?;
-    e.str(&val.actor_ref)?;
+    e.str("actorId")?;
+    e.str(&val.actor_id)?;
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
         encode_annotation_map(e, val)?;
@@ -3585,7 +3584,7 @@ pub fn decode_stop_actor_command(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
 ) -> Result<StopActorCommand, RpcError> {
     let __result = {
-        let mut actor_ref: Option<String> = None;
+        let mut actor_id: Option<String> = None;
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
         let mut count: Option<u16> = None;
         let mut host_id: Option<String> = None;
@@ -3604,7 +3603,7 @@ pub fn decode_stop_actor_command(
             let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
-                    0 => actor_ref = Some(d.str()?.to_string()),
+                    0 => actor_id = Some(d.str()?.to_string()),
                     1 => {
                         annotations = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
@@ -3628,7 +3627,7 @@ pub fn decode_stop_actor_command(
             let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
-                    "actorRef" => actor_ref = Some(d.str()?.to_string()),
+                    "actorId" => actor_id = Some(d.str()?.to_string()),
                     "annotations" => {
                         annotations = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
@@ -3650,11 +3649,11 @@ pub fn decode_stop_actor_command(
             }
         }
         StopActorCommand {
-            actor_ref: if let Some(__x) = actor_ref {
+            actor_id: if let Some(__x) = actor_id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopActorCommand.actor_ref (#0)".to_string(),
+                    "missing field StopActorCommand.actor_id (#0)".to_string(),
                 ));
             },
             annotations: annotations.unwrap(),
@@ -3825,11 +3824,10 @@ pub struct StopProviderCommand {
     #[serde(rename = "linkName")]
     #[serde(default)]
     pub link_name: String,
-    /// Reference for the capability provider. Can be any of the forms of
-    /// uniquely identifying a provider
-    #[serde(rename = "providerRef")]
+    /// The public key of the capability provider to stop
+    #[serde(rename = "providerId")]
     #[serde(default)]
-    pub provider_ref: String,
+    pub provider_id: String,
 }
 
 // Encode StopProviderCommand as CBOR and append to output stream
@@ -3857,8 +3855,8 @@ where
     e.str(&val.lattice_id)?;
     e.str("linkName")?;
     e.str(&val.link_name)?;
-    e.str("providerRef")?;
-    e.str(&val.provider_ref)?;
+    e.str("providerId")?;
+    e.str(&val.provider_id)?;
     Ok(())
 }
 
@@ -3873,7 +3871,7 @@ pub fn decode_stop_provider_command(
         let mut host_id: Option<String> = None;
         let mut lattice_id: Option<String> = None;
         let mut link_name: Option<String> = None;
-        let mut provider_ref: Option<String> = None;
+        let mut provider_id: Option<String> = None;
 
         let is_array = match d.datatype()? {
             wasmbus_rpc::cbor::Type::Array => true,
@@ -3905,7 +3903,7 @@ pub fn decode_stop_provider_command(
                     2 => host_id = Some(d.str()?.to_string()),
                     3 => lattice_id = Some(d.str()?.to_string()),
                     4 => link_name = Some(d.str()?.to_string()),
-                    5 => provider_ref = Some(d.str()?.to_string()),
+                    5 => provider_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -3930,7 +3928,7 @@ pub fn decode_stop_provider_command(
                     "hostId" => host_id = Some(d.str()?.to_string()),
                     "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     "linkName" => link_name = Some(d.str()?.to_string()),
-                    "providerRef" => provider_ref = Some(d.str()?.to_string()),
+                    "providerId" => provider_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -3970,11 +3968,11 @@ pub fn decode_stop_provider_command(
                 ));
             },
 
-            provider_ref: if let Some(__x) = provider_ref {
+            provider_id: if let Some(__x) = provider_id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopProviderCommand.provider_ref (#5)".to_string(),
+                    "missing field StopProviderCommand.provider_id (#5)".to_string(),
                 ));
             },
         }
@@ -4173,8 +4171,13 @@ pub trait LatticeController {
     ) -> RpcResult<ActorAuctionAcks>;
     /// Queries the list of hosts currently visible to the lattice. This is
     /// a "gather" operation and so can be influenced by short timeouts,
-    /// network partition events, etc.
-    async fn get_hosts(&self, ctx: &Context, arg: &GetHostsRequest) -> RpcResult<Hosts>;
+    /// network partition events, etc. The sole input to this query is the
+    /// lattice ID on which the request takes place.
+    async fn get_hosts<TS: ToString + ?Sized + std::marker::Sync>(
+        &self,
+        ctx: &Context,
+        arg: &TS,
+    ) -> RpcResult<Hosts>;
     /// Queries for the contents of a host given the supplied 56-character unique ID
     async fn get_host_inventory(
         &self,
@@ -4182,11 +4185,12 @@ pub trait LatticeController {
         arg: &GetHostInventoryRequest,
     ) -> RpcResult<HostInventory>;
     /// Queries the lattice for the list of known/cached claims by taking the response
-    /// from the first host that answers the query.
-    async fn get_claims(
+    /// from the first host that answers the query. The sole input to this request is
+    /// the lattice ID on which the request takes place.
+    async fn get_claims<TS: ToString + ?Sized + std::marker::Sync>(
         &self,
         ctx: &Context,
-        arg: &GetClaimsRequest,
+        arg: &TS,
     ) -> RpcResult<GetClaimsResponse>;
     /// Instructs a given host to scale the indicated actor
     async fn scale_actor(
@@ -4302,8 +4306,8 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                 })
             }
             "GetHosts" => {
-                let value: GetHostsRequest = wasmbus_rpc::common::deserialize(&message.arg)
-                    .map_err(|e| RpcError::Deser(format!("'GetHostsRequest': {}", e)))?;
+                let value: String = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'String': {}", e)))?;
 
                 let resp = LatticeController::get_hosts(self, ctx, &value).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
@@ -4326,8 +4330,8 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                 })
             }
             "GetClaims" => {
-                let value: GetClaimsRequest = wasmbus_rpc::common::deserialize(&message.arg)
-                    .map_err(|e| RpcError::Deser(format!("'GetClaimsRequest': {}", e)))?;
+                let value: String = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'String': {}", e)))?;
 
                 let resp = LatticeController::get_claims(self, ctx, &value).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
@@ -4595,9 +4599,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
     #[allow(unused)]
     /// Queries the list of hosts currently visible to the lattice. This is
     /// a "gather" operation and so can be influenced by short timeouts,
-    /// network partition events, etc.
-    async fn get_hosts(&self, ctx: &Context, arg: &GetHostsRequest) -> RpcResult<Hosts> {
-        let buf = wasmbus_rpc::common::serialize(arg)?;
+    /// network partition events, etc. The sole input to this query is the
+    /// lattice ID on which the request takes place.
+    async fn get_hosts<TS: ToString + ?Sized + std::marker::Sync>(
+        &self,
+        ctx: &Context,
+        arg: &TS,
+    ) -> RpcResult<Hosts> {
+        let buf = wasmbus_rpc::common::serialize(&arg.to_string())?;
 
         let resp = self
             .transport
@@ -4642,13 +4651,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
     }
     #[allow(unused)]
     /// Queries the lattice for the list of known/cached claims by taking the response
-    /// from the first host that answers the query.
-    async fn get_claims(
+    /// from the first host that answers the query. The sole input to this request is
+    /// the lattice ID on which the request takes place.
+    async fn get_claims<TS: ToString + ?Sized + std::marker::Sync>(
         &self,
         ctx: &Context,
-        arg: &GetClaimsRequest,
+        arg: &TS,
     ) -> RpcResult<GetClaimsResponse> {
-        let buf = wasmbus_rpc::common::serialize(arg)?;
+        let buf = wasmbus_rpc::common::serialize(&arg.to_string())?;
 
         let resp = self
             .transport

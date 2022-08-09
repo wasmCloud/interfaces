@@ -58,9 +58,10 @@ operation AuctionActor {
 
 /// Queries the list of hosts currently visible to the lattice. This is
 /// a "gather" operation and so can be influenced by short timeouts,
-/// network partition events, etc.
+/// network partition events, etc. The sole input to this query is the 
+/// lattice ID on which the request takes place.
 operation GetHosts {
-    input: GetHostsRequest
+    input: String
     output: Hosts
 }
 
@@ -71,9 +72,10 @@ operation GetHostInventory {
 }
 
 /// Queries the lattice for the list of known/cached claims by taking the response
-/// from the first host that answers the query.
+/// from the first host that answers the query. The sole input to this request is
+/// the lattice ID on which the request takes place.
 operation GetClaims {    
-    input: GetClaimsRequest
+    input: String
     output: GetClaimsResponse
 }
 
@@ -401,7 +403,7 @@ structure StartActorCommand {
     @required    
     latticeId: String,    
 
-    /// Reference for the actor. Can be any of the acceptable forms of unique identification
+    /// Reference for the actor. This can be either a bindle or OCI reference
     @required        
     actorRef: String,
 
@@ -486,10 +488,9 @@ structure StopActorCommand {
     @required      
     hostId: String,
 
-    /// Reference for this actor. Can be any of the means of uniquely identifying
-    /// an actor
+    /// The public key of the actor to stop
     @required        
-    actorRef: String,
+    actorId: String,
 
     /// The number of actors to stop
     /// A zero value means stop all actors
@@ -512,10 +513,9 @@ structure StopProviderCommand {
     @required        
     hostId: String,
 
-    /// Reference for the capability provider. Can be any of the forms of 
-    /// uniquely identifying a provider
+    /// The public key of the capability provider to stop
     @required        
-    providerRef: String,
+    providerId: String,
 
     /// Link name for this provider
     @required        
