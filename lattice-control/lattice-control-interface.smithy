@@ -114,10 +114,11 @@ operation UpdateActor {
     output: CtlOperationAck
 }
 
-/// Queries all current link definitions in the lattice. The first host
+/// Queries all current link definitions in the specified lattice. The first host
 /// that receives this response will reply with the contents of the distributed
 /// cache
 operation GetLinks {
+    input: String
     output: LinkDefinitionList
 }
 
@@ -150,7 +151,7 @@ operation StopHost {
 /// it with the enclosed. The credential map for a lattice can be purged by sending
 /// this message with an empty map
 operation SetRegistryCredentials {
-    input: RegistryCredentialMap
+    input: SetRegistryCredentialsRequest
 }
 
 /// Instructs the provider to store the NATS credentials/URL for a given lattice. This is
@@ -656,6 +657,14 @@ structure RemoveLinkDefinitionRequest {
     /// The provider's link name
     @required        
     linkName: String,
+}
+
+structure SetRegistryCredentialsRequest {
+    /// The ID of the lattice on which this request will be performed
+    @required
+    latticeId: String
+
+    credentials: RegistryCredentialMap
 }
 
 /// A set of credentials to be used for fetching from specific registries
