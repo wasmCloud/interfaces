@@ -936,6 +936,19 @@ pub struct CtlOperationAck {
     pub error: String,
 }
 
+impl CtlOperationAck {
+    fn ok() -> CtlOperationAck {
+        CtlOperationAck {
+            accepted: true,
+            error: "".to_string()
+        }
+    }
+
+    fn nack(msg: &str) -> CtlOperationAck {
+        CtlOperationAck { accepted: false, error: msg.to_string() }
+    }
+}
+
 // Encode CtlOperationAck as CBOR and append to output stream
 #[doc(hidden)]
 #[allow(unused_mut)]
@@ -3171,6 +3184,104 @@ pub fn decode_set_lattice_credentials_request(
     };
     Ok(__result)
 }
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SetRegistryCredentialsRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub credentials: Option<RegistryCredentialMap>,
+    /// The ID of the lattice on which this request will be performed
+    #[serde(rename = "latticeId")]
+    #[serde(default)]
+    pub lattice_id: String,
+}
+
+// Encode SetRegistryCredentialsRequest as CBOR and append to output stream
+#[doc(hidden)]
+#[allow(unused_mut)]
+pub fn encode_set_registry_credentials_request<W: wasmbus_rpc::cbor::Write>(
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &SetRegistryCredentialsRequest,
+) -> RpcResult<()>
+where
+    <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
+{
+    e.map(2)?;
+    if let Some(val) = val.credentials.as_ref() {
+        e.str("credentials")?;
+        encode_registry_credential_map(e, val)?;
+    } else {
+        e.null()?;
+    }
+    e.str("latticeId")?;
+    e.str(&val.lattice_id)?;
+    Ok(())
+}
+
+// Decode SetRegistryCredentialsRequest from cbor input stream
+#[doc(hidden)]
+pub fn decode_set_registry_credentials_request(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<SetRegistryCredentialsRequest, RpcError> {
+    let __result = {
+        let mut credentials: Option<Option<RegistryCredentialMap>> = Some(None);
+        let mut lattice_id: Option<String> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            wasmbus_rpc::cbor::Type::Map => false,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct SetRegistryCredentialsRequest, expected array or map"
+                        .to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.fixed_array()?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 => {
+                        credentials = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some( decode_registry_credential_map(d).map_err(|e| format!("decoding 'org.wasmcloud.lattice.control#RegistryCredentialMap': {}", e))? ))
+                        }
+                    }
+                    1 => lattice_id = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        } else {
+            let len = d.fixed_map()?;
+            for __i in 0..(len as usize) {
+                match d.str()? {
+                    "credentials" => {
+                        credentials = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some( decode_registry_credential_map(d).map_err(|e| format!("decoding 'org.wasmcloud.lattice.control#RegistryCredentialMap': {}", e))? ))
+                        }
+                    }
+                    "latticeId" => lattice_id = Some(d.str()?.to_string()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        SetRegistryCredentialsRequest {
+            credentials: credentials.unwrap(),
+
+            lattice_id: if let Some(__x) = lattice_id {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field SetRegistryCredentialsRequest.lattice_id (#1)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
 /// A command sent to a specific host instructing it to start the actor
 /// indicated by the reference.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -4219,10 +4330,14 @@ pub trait LatticeController {
         ctx: &Context,
         arg: &RemoveLinkDefinitionRequest,
     ) -> RpcResult<CtlOperationAck>;
-    /// Queries all current link definitions in the lattice. The first host
+    /// Queries all current link definitions in the specified lattice. The first host
     /// that receives this response will reply with the contents of the distributed
     /// cache
-    async fn get_links(&self, ctx: &Context) -> RpcResult<LinkDefinitionList>;
+    async fn get_links<TS: ToString + ?Sized + std::marker::Sync>(
+        &self,
+        ctx: &Context,
+        arg: &TS,
+    ) -> RpcResult<LinkDefinitionList>;
     /// Requests that a specific host perform a live update on the indicated
     /// actor
     async fn update_actor(
@@ -4263,7 +4378,7 @@ pub trait LatticeController {
     async fn set_registry_credentials(
         &self,
         ctx: &Context,
-        arg: &RegistryCredentialMap,
+        arg: &SetRegistryCredentialsRequest,
     ) -> RpcResult<()>;
 }
 
@@ -4392,7 +4507,10 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                 })
             }
             "GetLinks" => {
-                let resp = LatticeController::get_links(self, ctx).await?;
+                let value: String = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'String': {}", e)))?;
+
+                let resp = LatticeController::get_links(self, ctx, &value).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
 
                 Ok(Message {
@@ -4475,9 +4593,10 @@ pub trait LatticeControllerReceiver: MessageDispatch + LatticeController {
                 })
             }
             "SetRegistryCredentials" => {
-                let value: RegistryCredentialMap =
-                    wasmbus_rpc::common::deserialize(&message.arg)
-                        .map_err(|e| RpcError::Deser(format!("'RegistryCredentialMap': {}", e)))?;
+                let value: SetRegistryCredentialsRequest =
+                    wasmbus_rpc::common::deserialize(&message.arg).map_err(|e| {
+                        RpcError::Deser(format!("'SetRegistryCredentialsRequest': {}", e))
+                    })?;
 
                 let _resp = LatticeController::set_registry_credentials(self, ctx, &value).await?;
                 let buf = Vec::new();
@@ -4780,11 +4899,16 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
         Ok(value)
     }
     #[allow(unused)]
-    /// Queries all current link definitions in the lattice. The first host
+    /// Queries all current link definitions in the specified lattice. The first host
     /// that receives this response will reply with the contents of the distributed
     /// cache
-    async fn get_links(&self, ctx: &Context) -> RpcResult<LinkDefinitionList> {
-        let buf = *b"";
+    async fn get_links<TS: ToString + ?Sized + std::marker::Sync>(
+        &self,
+        ctx: &Context,
+        arg: &TS,
+    ) -> RpcResult<LinkDefinitionList> {
+        let buf = wasmbus_rpc::common::serialize(&arg.to_string())?;
+
         let resp = self
             .transport
             .send(
@@ -4959,7 +5083,7 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> LatticeController
     async fn set_registry_credentials(
         &self,
         ctx: &Context,
-        arg: &RegistryCredentialMap,
+        arg: &SetRegistryCredentialsRequest,
     ) -> RpcResult<()> {
         let buf = wasmbus_rpc::common::serialize(arg)?;
 
