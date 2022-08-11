@@ -940,12 +940,15 @@ impl CtlOperationAck {
     fn ok() -> CtlOperationAck {
         CtlOperationAck {
             accepted: true,
-            error: "".to_string()
+            error: "".to_string(),
         }
     }
 
     fn nack(msg: &str) -> CtlOperationAck {
-        CtlOperationAck { accepted: false, error: msg.to_string() }
+        CtlOperationAck {
+            accepted: false,
+            error: msg.to_string(),
+        }
     }
 }
 
