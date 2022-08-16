@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-httpserver"
-version = "0.6.1"
+version = "0.7.0"
 description = "interface for actors to receive http requests (wasmcloud:httpserver)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
@@ -23,11 +23,11 @@ async-trait = "0.1"
 serde = { version = "1.0" , features = ["derive"] }
 serde_json = "1.0"
 serde_bytes = "0.11"
-wasmbus-rpc = "0.9"
+wasmbus-rpc = "0.10.0"
 
 [dev-dependencies]
 base64 = "0.13"
 
 # dependencies for build.rs
 [build-dependencies]
-weld-codegen = "0.4.6"
+weld-codegen = "0.5.0"
