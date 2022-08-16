@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-blobstore"
-version = "0.3.1"
+version = "0.3.2"
 description = "Interface for accessing an object store over the wasmcloud:blobstore contract"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
