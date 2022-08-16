@@ -3,7 +3,7 @@ use wasmcloud_interface_logging::{debug, error, info, warn};
 use wasmcloud_interface_numbergen::{generate_guid, random_32, random_in_range};
 use wasmcloud_test_util::{
     check, check_eq, run_selected,
-    testing::{TestOptions, TestResult, Testing, TestingReceiver},
+    testing::{TestOptions, TestResult, Testing, TestingReceiver },
 };
 
 #[derive(Debug, Default, Actor, HealthResponder)]
@@ -23,6 +23,8 @@ impl Testing for NumbergenTestActor {
         );
         Ok(results)
     }
+
+    async fn foo(&self, _ctx: &Context) -> RpcResult<wasmcloud_test_util::testing::SampleUnion> { Err(RpcError::NotImplemented) }
 }
 
 /// test uuid generation

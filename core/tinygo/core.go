@@ -368,11 +368,13 @@ type HostData struct {
 	ConfigJson string
 	// Host-wide default RPC timeout for rpc messages, in milliseconds.  Defaults to 2000.
 	DefaultRpcTimeoutMs uint64
+	// True if structured logging is enabled for the host. Providers should use the same setting as the host.
+	StructuredLogging bool
 }
 
 // MEncode serializes a HostData using msgpack
 func (o *HostData) MEncode(encoder msgpack.Writer) error {
-	encoder.WriteMapSize(14)
+	encoder.WriteMapSize(15)
 	encoder.WriteString("host_id")
 	encoder.WriteString(o.HostId)
 	encoder.WriteString("lattice_rpc_prefix")
@@ -401,6 +403,8 @@ func (o *HostData) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteString(o.ConfigJson)
 	encoder.WriteString("default_rpc_timeout_ms")
 	encoder.WriteUint64(o.DefaultRpcTimeoutMs)
+	encoder.WriteString("structured_logging")
+	encoder.WriteBool(o.StructuredLogging)
 
 	return encoder.CheckError()
 }
@@ -450,6 +454,8 @@ func MDecodeHostData(d *msgpack.Decoder) (HostData, error) {
 			val.ConfigJson, err = d.ReadString()
 		case "default_rpc_timeout_ms":
 			val.DefaultRpcTimeoutMs, err = d.ReadUint64()
+		case "structured_logging":
+			val.StructuredLogging, err = d.ReadBool()
 		default:
 			err = d.Skip()
 		}
@@ -462,7 +468,7 @@ func MDecodeHostData(d *msgpack.Decoder) (HostData, error) {
 
 // CEncode serializes a HostData using cbor
 func (o *HostData) CEncode(encoder cbor.Writer) error {
-	encoder.WriteMapSize(14)
+	encoder.WriteMapSize(15)
 	encoder.WriteString("host_id")
 	encoder.WriteString(o.HostId)
 	encoder.WriteString("lattice_rpc_prefix")
@@ -491,6 +497,8 @@ func (o *HostData) CEncode(encoder cbor.Writer) error {
 	encoder.WriteString(o.ConfigJson)
 	encoder.WriteString("default_rpc_timeout_ms")
 	encoder.WriteUint64(o.DefaultRpcTimeoutMs)
+	encoder.WriteString("structured_logging")
+	encoder.WriteBool(o.StructuredLogging)
 
 	return encoder.CheckError()
 }
@@ -543,6 +551,8 @@ func CDecodeHostData(d *cbor.Decoder) (HostData, error) {
 			val.ConfigJson, err = d.ReadString()
 		case "default_rpc_timeout_ms":
 			val.DefaultRpcTimeoutMs, err = d.ReadUint64()
+		case "structured_logging":
+			val.StructuredLogging, err = d.ReadBool()
 		default:
 			err = d.Skip()
 		}
@@ -1363,4 +1373,4 @@ func (s *ActorSender) HealthRequest(ctx *Context, arg HealthCheckRequest) (*Heal
 	return &resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.0
