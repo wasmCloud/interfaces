@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-keyvalue"
-version = "0.7.2"
+version = "0.8.0"
 description = "Interface for wasmCloud actors to access Key-Value stores (wasmcloud:keyvalue)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
