@@ -10,7 +10,7 @@ The following is a list of implementations of the `wasmcloud:blobstore` contract
 | Name | Vendor | Description |
 | :--- | :---: | :--- |
 | [blobstore-s3](https://github.com/wasmCloud/capability-providers/tree/main/blobstore-s3) | wasmCloud | An AWS S3 implementation of a blobstore that manages S3 buckets and objects
-| ⚠️ WIP: [blobstore-fs](https://github.com/wasmCloud/capability-providers/pull/154) | wasmCloud | An implementation that manages folders and files on a filesystem
+| [blobstore-fs](https://github.com/wasmCloud/capability-providers/tree/main/blobstore-fs) | wasmCloud | An implementation that manages folders and files on a filesystem
 
 ## Example Usage (🦀 Rust)
 Create a container in a blobstore:
