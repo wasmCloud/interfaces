@@ -2319,6 +2319,10 @@ pub fn decode_provider_auction_request(
 /// A summary description of a capability provider within a host inventory
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ProviderDescription {
+    /// The annotations that were used in the start request that produced
+    /// this provider instance
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub annotations: Option<AnnotationMap>,
     /// Provider's unique 56-character ID
     #[serde(default)]
     pub id: String,
@@ -2348,7 +2352,13 @@ pub fn encode_provider_description<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(5)?;
+    e.map(6)?;
+    if let Some(val) = val.annotations.as_ref() {
+        e.str("annotations")?;
+        encode_annotation_map(e, val)?;
+    } else {
+        e.null()?;
+    }
     e.str("id")?;
     e.str(&val.id)?;
     if let Some(val) = val.image_ref.as_ref() {
@@ -2376,6 +2386,7 @@ pub fn decode_provider_description(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
 ) -> Result<ProviderDescription, RpcError> {
     let __result = {
+        let mut annotations: Option<Option<AnnotationMap>> = Some(None);
         let mut id: Option<String> = None;
         let mut image_ref: Option<Option<String>> = Some(None);
         let mut link_name: Option<String> = None;
@@ -2395,8 +2406,21 @@ pub fn decode_provider_description(
             let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
-                    0 => id = Some(d.str()?.to_string()),
-                    1 => {
+                    0 => {
+                        annotations = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
+                        }
+                    }
+                    1 => id = Some(d.str()?.to_string()),
+                    2 => {
                         image_ref = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -2404,8 +2428,8 @@ pub fn decode_provider_description(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    2 => link_name = Some(d.str()?.to_string()),
-                    3 => {
+                    3 => link_name = Some(d.str()?.to_string()),
+                    4 => {
                         name = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -2413,7 +2437,7 @@ pub fn decode_provider_description(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    4 => revision = Some(d.i32()?),
+                    5 => revision = Some(d.i32()?),
                     _ => d.skip()?,
                 }
             }
@@ -2421,6 +2445,19 @@ pub fn decode_provider_description(
             let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
+                    "annotations" => {
+                        annotations = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(decode_annotation_map(d).map_err(|e| {
+                                format!(
+                                    "decoding 'org.wasmcloud.lattice.control#AnnotationMap': {}",
+                                    e
+                                )
+                            })?))
+                        }
+                    }
                     "id" => id = Some(d.str()?.to_string()),
                     "imageRef" => {
                         image_ref = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
@@ -2445,11 +2482,13 @@ pub fn decode_provider_description(
             }
         }
         ProviderDescription {
+            annotations: annotations.unwrap(),
+
             id: if let Some(__x) = id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ProviderDescription.id (#0)".to_string(),
+                    "missing field ProviderDescription.id (#1)".to_string(),
                 ));
             },
             image_ref: image_ref.unwrap(),
@@ -2458,7 +2497,7 @@ pub fn decode_provider_description(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ProviderDescription.link_name (#2)".to_string(),
+                    "missing field ProviderDescription.link_name (#3)".to_string(),
                 ));
             },
             name: name.unwrap(),
@@ -2467,7 +2506,7 @@ pub fn decode_provider_description(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ProviderDescription.revision (#4)".to_string(),
+                    "missing field ProviderDescription.revision (#5)".to_string(),
                 ));
             },
         }
