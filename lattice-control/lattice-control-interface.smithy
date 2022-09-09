@@ -394,6 +394,10 @@ structure ProviderDescription {
     /// The revision of the provider
     @required
     revision: I32,
+
+    /// The annotations that were used in the start request that produced
+    /// this provider instance
+    annotations: AnnotationMap
 }
 
 
