@@ -65,5 +65,8 @@ structure RegistryCredential {
     token: String,
     /// If supplied, username and password will be used for HTTP Basic authentication
     username: String,
-    password: String
+    password: String,
+    /// The type of the registry (either "oci" or "bindle")
+    @required
+    registryType: String
 }
