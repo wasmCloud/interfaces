@@ -1,12 +1,12 @@
 // wasmcloud-model.smithy
 // Base types and traits used for wasmcloud models
-//
 
 // Tell the code generator how to reference symbols defined in this namespace
 metadata package = [ {
     namespace: "org.wasmcloud.model",
     crate: "wasmbus_rpc::model",
-    py_module: "wasmbus_rpc.model"
+    py_module: "wasmbus_rpc.model",
+    doc: "wasmcloud core data models for messaging and code generation"
 } ]
 
 namespace org.wasmcloud.model
@@ -90,7 +90,7 @@ float F32
 double F64
 
 /// Rust codegen traits
-@trait(selector: "structure")
+@trait(selector: "*")
 structure codegenRust {
 
     /// if true, disables deriving 'Default' trait
@@ -101,6 +101,10 @@ structure codegenRust {
 
     /// adds `[#non_exhaustive]` attribute to a struct declaration
     nonExhaustive: Boolean,
+
+    /// if true, do not generate code for this item.
+    /// This trait can be used if an item needs to be hand-generated
+    skip: Boolean,
 }
 
 /// indicates that a trait or class extends one or more bases
@@ -110,6 +114,7 @@ structure extends {
 }
 
 /// list of identifiers
+/// This declaration supports code generations and is not part of an actor or provider sdk
 list IdentifierList {
     member: String,
 }
@@ -138,6 +143,7 @@ structure wasmbus {
 structure wasmbusData {}
 
 /// Capability contract id, e.g. 'wasmcloud:httpserver'
+/// This declaration supports code generations and is not part of an actor or provider sdk
 @nonEmptyString
 string CapabilityContractId
 
@@ -162,3 +168,6 @@ list rename {
     member: renameItem
 }
 
+/// Unit type
+@codegenRust(skip:true)
+structure Unit {}

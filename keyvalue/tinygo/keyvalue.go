@@ -10,9 +10,9 @@ import (
 // Response to get request
 type GetResponse struct {
 	// the value, if it existed
-	Value string
+	Value string `json:"value"`
 	// whether or not the value existed
-	Exists bool
+	Exists bool `json:"exists"`
 }
 
 // MEncode serializes a GetResponse using msgpack
@@ -104,9 +104,9 @@ func CDecodeGetResponse(d *cbor.Decoder) (GetResponse, error) {
 
 type IncrementRequest struct {
 	// name of value to increment
-	Key string
+	Key string `json:"key"`
 	// amount to add to value
-	Value int32
+	Value int32 `json:"value"`
 }
 
 // MEncode serializes a IncrementRequest using msgpack
@@ -199,9 +199,9 @@ func CDecodeIncrementRequest(d *cbor.Decoder) (IncrementRequest, error) {
 // Parameter to ListAdd operation
 type ListAddRequest struct {
 	// name of the list to modify
-	ListName string
+	ListName string `json:"listName"`
 	// value to append to the list
-	Value string
+	Value string `json:"value"`
 }
 
 // MEncode serializes a ListAddRequest using msgpack
@@ -296,8 +296,8 @@ func CDecodeListAddRequest(d *cbor.Decoder) (ListAddRequest, error) {
 // Returns true if the item was found.
 type ListDelRequest struct {
 	// name of list to modify
-	ListName string
-	Value    string
+	ListName string `json:"listName"`
+	Value    string `json:"value"`
 }
 
 // MEncode serializes a ListDelRequest using msgpack
@@ -389,11 +389,11 @@ func CDecodeListDelRequest(d *cbor.Decoder) (ListDelRequest, error) {
 
 type ListRangeRequest struct {
 	// name of list
-	ListName string
+	ListName string `json:"listName"`
 	// start index of the range, 0-based, inclusive.
-	Start int32
+	Start int32 `json:"start"`
 	// end index of the range, 0-based, inclusive.
-	Stop int32
+	Stop int32 `json:"stop"`
 }
 
 // MEncode serializes a ListRangeRequest using msgpack
@@ -493,9 +493,9 @@ func CDecodeListRangeRequest(d *cbor.Decoder) (ListRangeRequest, error) {
 
 type SetAddRequest struct {
 	// name of the set
-	SetName string
+	SetName string `json:"setName"`
 	// value to add to the set
-	Value string
+	Value string `json:"value"`
 }
 
 // MEncode serializes a SetAddRequest using msgpack
@@ -586,8 +586,8 @@ func CDecodeSetAddRequest(d *cbor.Decoder) (SetAddRequest, error) {
 }
 
 type SetDelRequest struct {
-	SetName string
-	Value   string
+	SetName string `json:"setName"`
+	Value   string `json:"value"`
 }
 
 // MEncode serializes a SetDelRequest using msgpack
@@ -679,11 +679,11 @@ func CDecodeSetDelRequest(d *cbor.Decoder) (SetDelRequest, error) {
 
 type SetRequest struct {
 	// the key name to change (or create)
-	Key string
+	Key string `json:"key"`
 	// the new value
-	Value string
+	Value string `json:"value"`
 	// expiration time in seconds 0 for no expiration
-	Expires uint32
+	Expires uint32 `json:"expires"`
 }
 
 // MEncode serializes a SetRequest using msgpack
@@ -1604,4 +1604,4 @@ func (s *KeyValueSender) SetClear(ctx *actor.Context, arg string) (bool, error) 
 	return resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1

@@ -11,14 +11,14 @@ import (
 // is the last in a stream. The `offset` field indicates the 0-based offset
 // from the start of the file for this chunk.
 type Chunk struct {
-	ObjectId    ObjectId
-	ContainerId ContainerId
+	ObjectId    ObjectId    `json:"objectId"`
+	ContainerId ContainerId `json:"containerId"`
 	// bytes in this chunk
-	Bytes []byte
+	Bytes []byte `json:"bytes"`
 	// The byte offset within the object for this chunk
-	Offset uint64
+	Offset uint64 `json:"offset"`
 	// true if this is the last chunk
-	IsLast bool
+	IsLast bool `json:"isLast"`
 }
 
 // MEncode serializes a Chunk using msgpack
@@ -135,7 +135,7 @@ func CDecodeChunk(d *cbor.Decoder) (Chunk, error) {
 // Response from actor after receiving a download chunk.
 type ChunkResponse struct {
 	// If set and `true`, the sender will stop sending chunks,
-	CancelDownload bool
+	CancelDownload bool `json:"cancelDownload"`
 }
 
 // MEncode serializes a ChunkResponse using msgpack
@@ -323,9 +323,9 @@ func CDecodeContainerIds(d *cbor.Decoder) (ContainerIds, error) {
 // Metadata for a container.
 type ContainerMetadata struct {
 	// Container name
-	ContainerId ContainerId
+	ContainerId ContainerId `json:"containerId"`
 	// Creation date, if available
-	CreatedAt *actor.Timestamp
+	CreatedAt *actor.Timestamp `json:"createdAt"`
 }
 
 // MEncode serializes a ContainerMetadata using msgpack
@@ -433,8 +433,8 @@ func CDecodeContainerMetadata(d *cbor.Decoder) (ContainerMetadata, error) {
 
 // Combination of container id and object id
 type ContainerObject struct {
-	ContainerId ContainerId
-	ObjectId    ObjectId
+	ContainerId ContainerId `json:"containerId"`
+	ObjectId    ObjectId    `json:"objectId"`
 }
 
 // MEncode serializes a ContainerObject using msgpack
@@ -597,18 +597,18 @@ func CDecodeContainersInfo(d *cbor.Decoder) (ContainersInfo, error) {
 // Parameter to GetObject
 type GetObjectRequest struct {
 	// object to download
-	ObjectId ObjectId
+	ObjectId ObjectId `json:"objectId"`
 	// object's container
-	ContainerId ContainerId
+	ContainerId ContainerId `json:"containerId"`
 	// Requested start of object to retrieve.
 	// The first byte is at offset 0. Range values are inclusive.
 	// If rangeStart is beyond the end of the file,
 	// an empty chunk will be returned with isLast == true
-	RangeStart uint64
+	RangeStart uint64 `json:"rangeStart"`
 	// Requested end of object to retrieve. Defaults to the object's size.
 	// It is not an error for rangeEnd to be greater than the object size.
 	// Range values are inclusive.
-	RangeEnd uint64
+	RangeEnd uint64 `json:"rangeEnd"`
 }
 
 // MEncode serializes a GetObjectRequest using msgpack
@@ -717,19 +717,19 @@ func CDecodeGetObjectRequest(d *cbor.Decoder) (GetObjectRequest, error) {
 // Response to GetObject
 type GetObjectResponse struct {
 	// indication whether the request was successful
-	Success bool
+	Success bool `json:"success"`
 	// If success is false, this may contain an error
-	Error string
+	Error string `json:"error"`
 	// The provider may begin the download by returning a first chunk
-	InitialChunk *Chunk
+	InitialChunk *Chunk `json:"initialChunk"`
 	// Length of the content. (for multi-part downloads, this may not
 	// be the same as the length of the initial chunk)
-	ContentLength uint64
+	ContentLength uint64 `json:"contentLength"`
 	// A standard MIME type describing the format of the object data.
-	ContentType string
+	ContentType string `json:"contentType"`
 	// Specifies what content encodings have been applied to the object
 	// and thus what decoding mechanisms must be applied to obtain the media-type
-	ContentEncoding string
+	ContentEncoding string `json:"contentEncoding"`
 }
 
 // MEncode serializes a GetObjectResponse using msgpack
@@ -869,11 +869,11 @@ func CDecodeGetObjectResponse(d *cbor.Decoder) (GetObjectResponse, error) {
 
 // Result of input item
 type ItemResult struct {
-	Key string
+	Key string `json:"key"`
 	// whether the item succeeded or failed
-	Success bool
+	Success bool `json:"success"`
 	// optional error message for failures
-	Error string
+	Error string `json:"error"`
 }
 
 // MEncode serializes a ItemResult using msgpack
@@ -974,25 +974,25 @@ func CDecodeItemResult(d *cbor.Decoder) (ItemResult, error) {
 // Parameter to list_objects.
 type ListObjectsRequest struct {
 	// Name of the container to search
-	ContainerId string
+	ContainerId string `json:"containerId"`
 	// Request object names starting with this value. (Optional)
-	StartWith string
+	StartWith string `json:"startWith"`
 	// Continuation token passed in ListObjectsResponse.
 	// If set, `startWith` is ignored. (Optional)
-	Continuation string
+	Continuation string `json:"continuation"`
 	// Last item to return (inclusive terminator) (Optional)
-	EndWith string
+	EndWith string `json:"endWith"`
 	// Optionally, stop returning items before returning this value.
 	// (exclusive terminator)
 	// If startFrom is "a" and endBefore is "b", and items are ordered
 	// alphabetically, then only items beginning with "a" would be returned.
 	// (Optional)
-	EndBefore string
+	EndBefore string `json:"endBefore"`
 	// maximum number of items to return. If not specified, provider
 	// will return an initial set of up to 1000 items. if maxItems > 1000,
 	// the provider implementation may return fewer items than requested.
 	// (Optional)
-	MaxItems uint32
+	MaxItems uint32 `json:"maxItems"`
 }
 
 // MEncode serializes a ListObjectsRequest using msgpack
@@ -1120,15 +1120,15 @@ func CDecodeListObjectsRequest(d *cbor.Decoder) (ListObjectsRequest, error) {
 // request using the `continuation` token.
 type ListObjectsResponse struct {
 	// set of objects returned
-	Objects ObjectsInfo
+	Objects ObjectsInfo `json:"objects"`
 	// Indicates if the item list is complete, or the last item
 	// in a multi-part response.
-	IsLast bool
+	IsLast bool `json:"isLast"`
 	// If `isLast` is false, this value can be used in the `continuation` field
 	// of a `ListObjectsRequest`.
 	// Clients should not attempt to interpret this field: it may or may not
 	// be a real key or object name, and may be obfuscated by the provider.
-	Continuation string
+	Continuation string `json:"continuation"`
 }
 
 // MEncode serializes a ListObjectsResponse using msgpack
@@ -1403,25 +1403,25 @@ type ObjectMetadata struct {
 	// Object identifier that is unique within its container.
 	// Naming of objects is determined by the capability provider.
 	// An object id could be a path, hash of object contents, or some other unique identifier.
-	ObjectId ObjectId
+	ObjectId ObjectId `json:"objectId"`
 	// container of the object
-	ContainerId ContainerId
+	ContainerId ContainerId `json:"containerId"`
 	// size of the object in bytes
-	ContentLength uint64
+	ContentLength uint64 `json:"contentLength"`
 	// date object was last modified
-	LastModified *actor.Timestamp
+	LastModified *actor.Timestamp `json:"lastModified"`
 	// A MIME type of the object
 	// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
 	// Provider implementations _may_ return None for this field for metadata
 	// returned from ListObjects
-	ContentType string
+	ContentType string `json:"contentType"`
 	// Specifies what content encodings have been applied to the object
 	// and thus what decoding mechanisms must be applied to obtain the media-type
 	// referenced by the contentType field. For more information,
 	// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11.
 	// Provider implementations _may_ return None for this field for metadata
 	// returned from ListObjects
-	ContentEncoding string
+	ContentEncoding string `json:"contentEncoding"`
 }
 
 // MEncode serializes a ObjectMetadata using msgpack
@@ -1633,12 +1633,12 @@ func CDecodeObjectsInfo(d *cbor.Decoder) (ObjectsInfo, error) {
 type PutChunkRequest struct {
 	// upload chunk from the file.
 	// if chunk.isLast is set, this will be the last chunk uploaded
-	Chunk Chunk
+	Chunk Chunk `json:"chunk"`
 	// This value should be set to the `streamId` returned from the initial PutObject.
-	StreamId string
+	StreamId string `json:"streamId"`
 	// If set, the receiving provider should cancel the upload process
 	// and remove the file.
-	CancelAndRemove bool
+	CancelAndRemove bool `json:"cancelAndRemove"`
 }
 
 // MEncode serializes a PutChunkRequest using msgpack
@@ -1739,15 +1739,15 @@ func CDecodePutChunkRequest(d *cbor.Decoder) (PutChunkRequest, error) {
 // Parameter for PutObject operation
 type PutObjectRequest struct {
 	// File path and initial data
-	Chunk Chunk
+	Chunk Chunk `json:"chunk"`
 	// A MIME type of the object
 	// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
-	ContentType string
+	ContentType string `json:"contentType"`
 	// Specifies what content encodings have been applied to the object
 	// and thus what decoding mechanisms must be applied to obtain the media-type
 	// referenced by the contentType field. For more information,
 	// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11.
-	ContentEncoding string
+	ContentEncoding string `json:"contentEncoding"`
 }
 
 // MEncode serializes a PutObjectRequest using msgpack
@@ -1849,7 +1849,7 @@ func CDecodePutObjectRequest(d *cbor.Decoder) (PutObjectRequest, error) {
 type PutObjectResponse struct {
 	// If this is a multipart upload, `streamId` must be returned
 	// with subsequent PutChunk requests
-	StreamId string
+	StreamId string `json:"streamId"`
 }
 
 // MEncode serializes a PutObjectResponse using msgpack
@@ -1934,9 +1934,9 @@ func CDecodePutObjectResponse(d *cbor.Decoder) (PutObjectResponse, error) {
 // parameter to removeObjects
 type RemoveObjectsRequest struct {
 	// name of container
-	ContainerId ContainerId
+	ContainerId ContainerId `json:"containerId"`
 	// list of object names to be removed
-	Objects ObjectIds
+	Objects ObjectIds `json:"objects"`
 }
 
 // MEncode serializes a RemoveObjectsRequest using msgpack
@@ -2715,4 +2715,4 @@ func (s *ChunkReceiverSender) ReceiveChunk(ctx *actor.Context, arg Chunk) (*Chun
 	return &resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1

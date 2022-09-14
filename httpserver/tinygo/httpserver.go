@@ -152,15 +152,15 @@ func CDecodeHeaderValues(d *cbor.Decoder) (HeaderValues, error) {
 // HttpRequest contains data sent to actor about the http request
 type HttpRequest struct {
 	// HTTP method. One of: GET,POST,PUT,DELETE,HEAD,OPTIONS,CONNECT,PATCH,TRACE
-	Method string
+	Method string `json:"method"`
 	// full request path
-	Path string
+	Path string `json:"path"`
 	// query string. May be an empty string if there were no query parameters.
-	QueryString string
+	QueryString string `json:"queryString"`
 	// map of request headers (string key, string value)
-	Header HeaderMap
+	Header HeaderMap `json:"header"`
 	// Request body as a byte array. May be empty.
-	Body []byte
+	Body []byte `json:"body"`
 }
 
 // MEncode serializes a HttpRequest using msgpack
@@ -278,11 +278,11 @@ func CDecodeHttpRequest(d *cbor.Decoder) (HttpRequest, error) {
 type HttpResponse struct {
 	// statusCode is a three-digit number, usually in the range 100-599,
 	// A value of 200 indicates success.
-	StatusCode uint16
+	StatusCode uint16 `json:"statusCode"`
 	// Map of headers (string keys, list of values)
-	Header HeaderMap
+	Header HeaderMap `json:"header"`
 	// Body of response as a byte array. May be an empty array.
-	Body []byte
+	Body []byte `json:"body"`
 }
 
 // MEncode serializes a HttpResponse using msgpack
@@ -461,4 +461,4 @@ func (s *HttpServerSender) HandleRequest(ctx *actor.Context, arg HttpRequest) (*
 	return &resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1

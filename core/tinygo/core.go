@@ -255,9 +255,9 @@ func CDecodeHealthCheckRequest(d *cbor.Decoder) (HealthCheckRequest, error) {
 // Return value from actors and providers for health check status
 type HealthCheckResponse struct {
 	// A flag that indicates the the actor is healthy
-	Healthy bool
+	Healthy bool `json:"healthy"`
 	// A message containing additional information about the actors health
-	Message string
+	Message string `json:"message"`
 }
 
 // MEncode serializes a HealthCheckResponse using msgpack
@@ -349,27 +349,27 @@ func CDecodeHealthCheckResponse(d *cbor.Decoder) (HealthCheckResponse, error) {
 
 // initialization data for a capability provider
 type HostData struct {
-	HostId             string
-	LatticeRpcPrefix   string
-	LinkName           string
-	LatticeRpcUserJwt  string
-	LatticeRpcUserSeed string
-	LatticeRpcUrl      string
-	ProviderKey        string
-	InvocationSeed     string
-	EnvValues          HostEnvValues
-	InstanceId         string
+	HostId             string        `json:"host_id"`
+	LatticeRpcPrefix   string        `json:"lattice_rpc_prefix"`
+	LinkName           string        `json:"link_name"`
+	LatticeRpcUserJwt  string        `json:"lattice_rpc_user_jwt"`
+	LatticeRpcUserSeed string        `json:"lattice_rpc_user_seed"`
+	LatticeRpcUrl      string        `json:"lattice_rpc_url"`
+	ProviderKey        string        `json:"provider_key"`
+	InvocationSeed     string        `json:"invocation_seed"`
+	EnvValues          HostEnvValues `json:"env_values"`
+	InstanceId         string        `json:"instance_id"`
 	// initial list of links for provider
-	LinkDefinitions ActorLinks
+	LinkDefinitions ActorLinks `json:"link_definitions"`
 	// list of cluster issuers
-	ClusterIssuers ClusterIssuers
+	ClusterIssuers ClusterIssuers `json:"cluster_issuers"`
 	// Optional configuration JSON sent to a given link name of a provider
 	// without an actor context
-	ConfigJson string
+	ConfigJson string `json:"config_json"`
 	// Host-wide default RPC timeout for rpc messages, in milliseconds.  Defaults to 2000.
-	DefaultRpcTimeoutMs uint64
+	DefaultRpcTimeoutMs uint64 `json:"default_rpc_timeout_ms"`
 	// True if structured logging is enabled for the host. Providers should use the same setting as the host.
-	StructuredLogging bool
+	StructuredLogging bool `json:"structured_logging"`
 }
 
 // MEncode serializes a HostData using msgpack
@@ -637,17 +637,17 @@ func CDecodeHostEnvValues(d *cbor.Decoder) (HostEnvValues, error) {
 
 // RPC message to capability provider
 type Invocation struct {
-	Origin        WasmCloudEntity
-	Target        WasmCloudEntity
-	Operation     string
-	Msg           []byte
-	Id            string
-	EncodedClaims string
-	HostId        string
+	Origin        WasmCloudEntity `json:"origin"`
+	Target        WasmCloudEntity `json:"target"`
+	Operation     string          `json:"operation"`
+	Msg           []byte          `json:"msg"`
+	Id            string          `json:"id"`
+	EncodedClaims string          `json:"encoded_claims"`
+	HostId        string          `json:"host_id"`
 	// total message size (optional)
-	ContentLength uint64
+	ContentLength uint64 `json:"content_length"`
 	// Open Telemetry tracing support
-	TraceContext *TraceContext
+	TraceContext *TraceContext `json:"traceContext"`
 }
 
 // MEncode serializes a Invocation using msgpack
@@ -812,13 +812,13 @@ func CDecodeInvocation(d *cbor.Decoder) (Invocation, error) {
 // Response to an invocation
 type InvocationResponse struct {
 	// serialize response message
-	Msg []byte
+	Msg []byte `json:"msg"`
 	// id connecting this response to the invocation
-	InvocationId string
+	InvocationId string `json:"invocation_id"`
 	// optional error message
-	Error string
+	Error string `json:"error"`
 	// total message size (optional)
-	ContentLength uint64
+	ContentLength uint64 `json:"content_length"`
 }
 
 // MEncode serializes a InvocationResponse using msgpack
@@ -927,14 +927,14 @@ func CDecodeInvocationResponse(d *cbor.Decoder) (InvocationResponse, error) {
 // Link definition for binding actor to provider
 type LinkDefinition struct {
 	// actor public key
-	ActorId string
+	ActorId string `json:"actor_id"`
 	// provider public key
-	ProviderId string
+	ProviderId string `json:"provider_id"`
 	// link name
-	LinkName string
+	LinkName string `json:"link_name"`
 	// contract id
-	ContractId string
-	Values     LinkSettings
+	ContractId string       `json:"contract_id"`
+	Values     LinkSettings `json:"values"`
 }
 
 // MEncode serializes a LinkDefinition using msgpack
@@ -1193,9 +1193,9 @@ func CDecodeTraceContext(d *cbor.Decoder) (TraceContext, error) {
 }
 
 type WasmCloudEntity struct {
-	PublicKey  string
-	LinkName   string
-	ContractId CapabilityContractId
+	PublicKey  string               `json:"public_key"`
+	LinkName   string               `json:"link_name"`
+	ContractId CapabilityContractId `json:"contract_id"`
 }
 
 // MEncode serializes a WasmCloudEntity using msgpack
@@ -1373,4 +1373,4 @@ func (s *ActorSender) HealthRequest(ctx *Context, arg HealthCheckRequest) (*Heal
 	return &resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.5.0
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1

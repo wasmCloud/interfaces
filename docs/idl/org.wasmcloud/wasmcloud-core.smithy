@@ -7,6 +7,7 @@ metadata package = [ {
     namespace: "org.wasmcloud.core",
     crate: "wasmbus_rpc::core",
     py_module: "wasmbus_rpc.core",
+    doc: "wasmcloud platform core data structures",
 } ]
 
 namespace org.wasmcloud.core
@@ -32,6 +33,7 @@ service Actor {
 
 /// Link definition for binding actor to provider
 @wasmbusData
+@codegenRust(nonExhaustive: true)
 structure LinkDefinition {
     /// actor public key
     @required
@@ -169,10 +171,15 @@ structure HostData {
     @n(12)
     configJson: String
 
-    /// Optional. Default RPC timeout in milliseconds. Default = 2000
-    @serialization(name:"default_rpc_timeout_ms")
+    /// Host-wide default RPC timeout for rpc messages, in milliseconds.  Defaults to 2000.
+    @serialization(name: "default_rpc_timeout_ms")
     @n(13)
-    defaultRpcTimeoutMs: U32,
+    defaultRpcTimeoutMs: U64,
+
+    /// True if structured logging is enabled for the host. Providers should use the same setting as the host.
+    @serialization(name: "structured_logging")
+    @n(14)
+    structuredLogging: Boolean,
 }
 
 list ClusterIssuers {
@@ -226,6 +233,10 @@ structure Invocation {
     @n(7)
     @serialization(name: "content_length")
     contentLength: U64,
+
+    /// Open Telemetry tracing support
+    @n(8)
+    traceContext: TraceContext,
 }
 
 @wasmbusData
@@ -273,3 +284,8 @@ structure InvocationResponse {
     contentLength: U64,
 }
 
+/// Environment settings for initializing a capability provider
+map TraceContext {
+    key: String,
+    value: String,
+}

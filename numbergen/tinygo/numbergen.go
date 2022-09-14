@@ -11,8 +11,8 @@ import (
 // Example:
 // random_in_range(RangeLimit{0,4}) returns one the values, 0, 1, 2, 3, or 4.
 type RangeLimit struct {
-	Min uint32
-	Max uint32
+	Min uint32 `json:"min"`
+	Max uint32 `json:"max"`
 }
 
 // MEncode serializes a RangeLimit using msgpack
@@ -257,4 +257,4 @@ func (s *NumberGenSender) Random32(ctx *actor.Context) (uint32, error) {
 	return resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1

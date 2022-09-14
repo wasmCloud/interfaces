@@ -152,12 +152,12 @@ func CDecodeHeaderValues(d *cbor.Decoder) (HeaderValues, error) {
 // http request to be sent through the provider
 type HttpRequest struct {
 	// http method, defaults to "GET"
-	Method string
-	Url    string
+	Method string `json:"method"`
+	Url    string `json:"url"`
 	// optional headers. defaults to empty
-	Headers HeaderMap
+	Headers HeaderMap `json:"headers"`
 	// request body, defaults to empty
-	Body []byte
+	Body []byte `json:"body"`
 }
 
 // MEncode serializes a HttpRequest using msgpack
@@ -266,7 +266,7 @@ func CDecodeHttpRequest(d *cbor.Decoder) (HttpRequest, error) {
 // response from the http request
 type HttpResponse struct {
 	// response status code
-	StatusCode uint16
+	StatusCode uint16 `json:"statusCode"`
 	// Case is not guaranteed to be normalized, so
 	// actors checking response headers need to do their own
 	// case conversion.
@@ -276,9 +276,9 @@ type HttpResponse struct {
 	// .map(|(k,_)| k.to_ascii_lowercase())
 	// .find(|(k,_)| k == "content-type")
 	// .map(|(_,v)| v);
-	Header HeaderMap
+	Header HeaderMap `json:"header"`
 	// response body
-	Body []byte
+	Body []byte `json:"body"`
 }
 
 // MEncode serializes a HttpResponse using msgpack
@@ -472,4 +472,4 @@ func (s *HttpClientSender) Request(ctx *actor.Context, arg HttpRequest) (*HttpRe
 	return &resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1

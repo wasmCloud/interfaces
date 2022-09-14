@@ -9,9 +9,9 @@ import (
 
 type LogEntry struct {
 	// severity level: debug,info,warn,error
-	Level string
+	Level string `json:"level"`
 	// message to log
-	Text string
+	Text string `json:"text"`
 }
 
 // MEncode serializes a LogEntry using msgpack
@@ -180,4 +180,4 @@ func (s *LoggingSender) WriteLog(ctx *actor.Context, arg LogEntry) error {
 	return nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1

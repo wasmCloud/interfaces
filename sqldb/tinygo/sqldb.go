@@ -10,11 +10,11 @@ import (
 // Metadata about a Column in the result set
 type Column struct {
 	// column ordinal
-	Ordinal uint32
+	Ordinal uint32 `json:"ordinal"`
 	// Column name in the result
-	Name string
+	Name string `json:"name"`
 	// column data type as reported by the database
-	DbType string
+	DbType string `json:"dbType"`
 }
 
 // MEncode serializes a Column using msgpack
@@ -185,10 +185,10 @@ func CDecodeColumns(d *cbor.Decoder) (Columns, error) {
 // Result of an Execute operation
 type ExecuteResult struct {
 	// the number of rows affected by the query
-	RowsAffected uint64
+	RowsAffected uint64 `json:"rowsAffected"`
 	// optional error information.
 	// If error is included in the QueryResult, other values should be ignored.
-	Error *SqlDbError
+	Error *SqlDbError `json:"error"`
 }
 
 // MEncode serializes a ExecuteResult using msgpack
@@ -370,7 +370,7 @@ func CDecodeParameters(d *cbor.Decoder) (Parameters, error) {
 
 type PingResult struct {
 	// Optional error information.
-	Error *SqlDbError
+	Error *SqlDbError `json:"error"`
 }
 
 // MEncode serializes a PingResult using msgpack
@@ -471,15 +471,15 @@ func CDecodePingResult(d *cbor.Decoder) (PingResult, error) {
 // Result of a query
 type QueryResult struct {
 	// number of rows returned
-	NumRows uint64
+	NumRows uint64 `json:"numRows"`
 	// description of columns returned
-	Columns Columns
+	Columns Columns `json:"columns"`
 	// result rows, encoded in CBOR as
 	// an array (rows) of arrays (fields per row)
-	Rows []byte
+	Rows []byte `json:"rows"`
 	// optional error information.
 	// If error is included in the QueryResult, other values should be ignored.
-	Error *SqlDbError
+	Error *SqlDbError `json:"error"`
 }
 
 // MEncode serializes a QueryResult using msgpack
@@ -606,9 +606,9 @@ type SqlDbError struct {
 	// Type of error.
 	// The list of enum variants for this field may be expanded in the future
 	// to provide finer-granularity failure information
-	Code string
+	Code string `json:"code"`
 	// error message
-	Message string
+	Message string `json:"message"`
 }
 
 // MEncode serializes a SqlDbError using msgpack
@@ -701,11 +701,11 @@ func CDecodeSqlDbError(d *cbor.Decoder) (SqlDbError, error) {
 type Statement struct {
 	// Optional database in which the statement must be executed.
 	// The value in this field is case-sensitive.
-	Database   string
-	Parameters *Parameters
+	Database   string      `json:"database"`
+	Parameters *Parameters `json:"parameters"`
 	// A sql query or statement that is a non-empty string containing
 	// in the syntax of the back-end database.
-	Sql string
+	Sql string `json:"sql"`
 }
 
 // MEncode serializes a Statement using msgpack
@@ -961,4 +961,4 @@ func (s *SqlDbSender) Query(ctx *actor.Context, arg Statement) (*QueryResult, er
 	return &resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1

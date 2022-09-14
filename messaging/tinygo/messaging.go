@@ -10,11 +10,11 @@ import (
 // A message to be published
 type PubMessage struct {
 	// The subject, or topic, of the message
-	Subject string
+	Subject string `json:"subject"`
 	// An optional topic on which the reply should be sent.
-	ReplyTo string
+	ReplyTo string `json:"replyTo"`
 	// The message payload
-	Body []byte
+	Body []byte `json:"body"`
 }
 
 // MEncode serializes a PubMessage using msgpack
@@ -115,11 +115,11 @@ func CDecodePubMessage(d *cbor.Decoder) (PubMessage, error) {
 // Reply received from a Request operation
 type ReplyMessage struct {
 	// The subject, or topic, of the message
-	Subject string
+	Subject string `json:"subject"`
 	// An optional topic on which the reply should be sent.
-	ReplyTo string
+	ReplyTo string `json:"replyTo"`
 	// The message payload
-	Body []byte
+	Body []byte `json:"body"`
 }
 
 // MEncode serializes a ReplyMessage using msgpack
@@ -220,11 +220,11 @@ func CDecodeReplyMessage(d *cbor.Decoder) (ReplyMessage, error) {
 // Message sent as part of a request, with timeout
 type RequestMessage struct {
 	// The subject, or topic, of the message
-	Subject string
+	Subject string `json:"subject"`
 	// The message payload
-	Body []byte
+	Body []byte `json:"body"`
 	// A timeout, in milliseconds
-	TimeoutMs uint32
+	TimeoutMs uint32 `json:"timeoutMs"`
 }
 
 // MEncode serializes a RequestMessage using msgpack
@@ -325,11 +325,11 @@ func CDecodeRequestMessage(d *cbor.Decoder) (RequestMessage, error) {
 // Message received as part of a subscription
 type SubMessage struct {
 	// The subject, or topic, of the message
-	Subject string
+	Subject string `json:"subject"`
 	// An optional topic on which the reply should be sent.
-	ReplyTo string
+	ReplyTo string `json:"replyTo"`
 	// The message payload
-	Body []byte
+	Body []byte `json:"body"`
 }
 
 // MEncode serializes a SubMessage using msgpack
@@ -641,4 +641,4 @@ func (s *MessagingSender) Request(ctx *actor.Context, arg RequestMessage) (*Repl
 	return &resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1

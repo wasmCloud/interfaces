@@ -107,4 +107,4 @@ func (s *FactorialSender) Calculate(ctx *actor.Context, arg uint32) (uint64, err
 	return resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1

@@ -15,7 +15,7 @@ tinygo_cbor_version=v0.1.0
 
 WASH=${WASH:-wash}
 #$WASH gen -c ./codegen-go.toml
-../weld/target/debug/codegen ./codegen-go.toml
+../weld/codegen/target/debug/codegen ./codegen-go.toml
 
 here=$PWD
 for i in */tinygo; do
