@@ -169,4 +169,4 @@ func CDecodeUnit(d *cbor.Decoder) (Unit, error) {
 	return Unit{}, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.6
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.1
