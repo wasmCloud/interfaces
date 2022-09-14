@@ -8,8 +8,8 @@ files = [ "wasmcloud-model.smithy", "wasmcloud-core.smithy" ]
 output_dir = ""
 formatter = [ "goimports", "-w" ]
 files = [
-    { path = "tinygo/core.go", package="actor", namespace = "org.wasmcloud.core" },
-    { path = "tinygo/model.go", package="actor", namespace = "org.wasmcloud.model" },
+    { path = "tinygo/core.go", package="core", namespace = "org.wasmcloud.core" },
+    { path = "tinygo/model.go", package="core", namespace = "org.wasmcloud.model" },
 ]
 
 

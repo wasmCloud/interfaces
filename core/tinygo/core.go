@@ -1,5 +1,5 @@
 // wasmcloud platform core data structures
-package actor
+package core
 
 import (
 	cbor "github.com/wasmcloud/tinygo-cbor"       //nolint
@@ -349,27 +349,27 @@ func CDecodeHealthCheckResponse(d *cbor.Decoder) (HealthCheckResponse, error) {
 
 // initialization data for a capability provider
 type HostData struct {
-	HostId             string
-	LatticeRpcPrefix   string
-	LinkName           string
-	LatticeRpcUserJwt  string
-	LatticeRpcUserSeed string
-	LatticeRpcUrl      string
-	ProviderKey        string
-	InvocationSeed     string
-	EnvValues          HostEnvValues
-	InstanceId         string
+	HostId             string        `json:"host_id"`
+	LatticeRpcPrefix   string        `json:"lattice_rpc_prefix"`
+	LinkName           string        `json:"link_name"`
+	LatticeRpcUserJwt  string        `json:"lattice_rpc_user_jwt"`
+	LatticeRpcUserSeed string        `json:"lattice_rpc_user_seed"`
+	LatticeRpcUrl      string        `json:"lattice_rpc_url"`
+	ProviderKey        string        `json:"provider_key"`
+	InvocationSeed     string        `json:"invocation_seed"`
+	EnvValues          HostEnvValues `json:"env_values"`
+	InstanceId         string        `json:"instance_id"`
 	// initial list of links for provider
-	LinkDefinitions ActorLinks
+	LinkDefinitions ActorLinks `json:"link_definitions"`
 	// list of cluster issuers
-	ClusterIssuers ClusterIssuers
+	ClusterIssuers ClusterIssuers `json:"cluster_issuers"`
 	// Optional configuration JSON sent to a given link name of a provider
 	// without an actor context
-	ConfigJson string
+	ConfigJson string `json:"config_json"`
 	// Host-wide default RPC timeout for rpc messages, in milliseconds.  Defaults to 2000.
-	DefaultRpcTimeoutMs uint64
+	DefaultRpcTimeoutMs uint64 `json:"default_rpc_timeout_ms"`
 	// True if structured logging is enabled for the host. Providers should use the same setting as the host.
-	StructuredLogging bool
+	StructuredLogging bool `json:"structured_logging"`
 }
 
 // MEncode serializes a HostData using msgpack
@@ -1293,84 +1293,4 @@ func CDecodeWasmCloudEntity(d *cbor.Decoder) (WasmCloudEntity, error) {
 	return val, nil
 }
 
-// Actor service
-type Actor interface {
-	// Perform health check. Called at regular intervals by host
-	HealthRequest(ctx *Context, arg HealthCheckRequest) (*HealthCheckResponse, error)
-}
-
-// ActorHandler is called by an actor during `main` to generate a dispatch handler
-// The output of this call should be passed into `actor.RegisterHandlers`
-func ActorHandler(actor_ Actor) Handler {
-	return NewHandler("Actor", &ActorReceiver{}, actor_)
-}
-
-// ActorReceiver receives messages defined in the Actor service interface
-// Actor service
-type ActorReceiver struct{}
-
-func (r *ActorReceiver) Dispatch(ctx *Context, svc interface{}, message *Message) (*Message, error) {
-	svc_, _ := svc.(Actor)
-	switch message.Method {
-
-	case "HealthRequest":
-		{
-
-			d := msgpack.NewDecoder(message.Arg)
-			value, err_ := MDecodeHealthCheckRequest(&d)
-			if err_ != nil {
-				return nil, err_
-			}
-
-			resp, err := svc_.HealthRequest(ctx, value)
-			if err != nil {
-				return nil, err
-			}
-
-			var sizer msgpack.Sizer
-			size_enc := &sizer
-			resp.MEncode(size_enc)
-			buf := make([]byte, sizer.Len())
-			encoder := msgpack.NewEncoder(buf)
-			enc := &encoder
-			resp.MEncode(enc)
-			return &Message{Method: "Actor.HealthRequest", Arg: buf}, nil
-		}
-	default:
-		return nil, NewRpcError("MethodNotHandled", "Actor."+message.Method)
-	}
-}
-
-// ActorSender sends messages to a Actor service
-// Actor service
-type ActorSender struct{ transport Transport }
-
-// NewActorSender constructs a client for actor-to-actor messaging
-// using the recipient actor's public key
-func NewActorActorSender(actor_id string) *ActorSender {
-	transport := ToActor(actor_id)
-	return &ActorSender{transport: transport}
-}
-
-// Perform health check. Called at regular intervals by host
-func (s *ActorSender) HealthRequest(ctx *Context, arg HealthCheckRequest) (*HealthCheckResponse, error) {
-
-	var sizer msgpack.Sizer
-	size_enc := &sizer
-	arg.MEncode(size_enc)
-	buf := make([]byte, sizer.Len())
-
-	var encoder = msgpack.NewEncoder(buf)
-	enc := &encoder
-	arg.MEncode(enc)
-
-	out_buf, _ := s.transport.Send(ctx, Message{Method: "Actor.HealthRequest", Arg: buf})
-	d := msgpack.NewDecoder(out_buf)
-	resp, err_ := MDecodeHealthCheckResponse(&d)
-	if err_ != nil {
-		return nil, err_
-	}
-	return &resp, nil
-}
-
-// This file is generated automatically using wasmcloud/weld-codegen 0.5.0
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.6

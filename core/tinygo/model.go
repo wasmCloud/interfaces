@@ -1,5 +1,5 @@
 // wasmcloud core data models for messaging and code generation
-package actor
+package core
 
 import (
 	cbor "github.com/wasmcloud/tinygo-cbor"       //nolint
@@ -169,4 +169,4 @@ func CDecodeUnit(d *cbor.Decoder) (Unit, error) {
 	return Unit{}, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.5.0
+// This file is generated automatically using wasmcloud/weld-codegen 0.4.6
