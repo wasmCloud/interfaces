@@ -2,9 +2,9 @@
 package factorial
 
 import (
-	"github.com/wasmcloud/actor-tinygo"           //nolint
-	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 	//nolint
+	"github.com/wasmcloud/actor-tinygo"
+	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
 
 // The Factorial service has a single method, calculate, which

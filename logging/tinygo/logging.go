@@ -2,7 +2,8 @@
 package logging
 
 import (
-	"github.com/wasmcloud/actor-tinygo"           //nolint
+	//nolint
+	"github.com/wasmcloud/actor-tinygo"
 	cbor "github.com/wasmcloud/tinygo-cbor"       //nolint
 	msgpack "github.com/wasmcloud/tinygo-msgpack" //nolint
 )
