@@ -2573,6 +2573,10 @@ pub fn decode_provider_descriptions(
 pub struct RegistryCredential {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub password: Option<String>,
+    /// The type of the registry (either "oci" or "bindle")
+    #[serde(rename = "registryType")]
+    #[serde(default)]
+    pub registry_type: String,
     /// If supplied, token authentication will be used for the registry
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
@@ -2591,13 +2595,15 @@ pub fn encode_registry_credential<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(3)?;
+    e.map(4)?;
     if let Some(val) = val.password.as_ref() {
         e.str("password")?;
         e.str(val)?;
     } else {
         e.null()?;
     }
+    e.str("registryType")?;
+    e.str(&val.registry_type)?;
     if let Some(val) = val.token.as_ref() {
         e.str("token")?;
         e.str(val)?;
@@ -2620,6 +2626,7 @@ pub fn decode_registry_credential(
 ) -> Result<RegistryCredential, RpcError> {
     let __result = {
         let mut password: Option<Option<String>> = Some(None);
+        let mut registry_type: Option<String> = None;
         let mut token: Option<Option<String>> = Some(None);
         let mut username: Option<Option<String>> = Some(None);
 
@@ -2644,7 +2651,8 @@ pub fn decode_registry_credential(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    1 => {
+                    1 => registry_type = Some(d.str()?.to_string()),
+                    2 => {
                         token = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -2652,7 +2660,7 @@ pub fn decode_registry_credential(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
-                    2 => {
+                    3 => {
                         username = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -2676,6 +2684,7 @@ pub fn decode_registry_credential(
                             Some(Some(d.str()?.to_string()))
                         }
                     }
+                    "registryType" => registry_type = Some(d.str()?.to_string()),
                     "token" => {
                         token = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
@@ -2698,6 +2707,14 @@ pub fn decode_registry_credential(
         }
         RegistryCredential {
             password: password.unwrap(),
+
+            registry_type: if let Some(__x) = registry_type {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field RegistryCredential.registry_type (#1)".to_string(),
+                ));
+            },
             token: token.unwrap(),
             username: username.unwrap(),
         }
