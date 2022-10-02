@@ -62,3 +62,14 @@ impl From<RpcError> for SqlDbError {
         SqlDbError::new("rpc", e.to_string())
     }
 }
+
+/// Generates Statement from sql using default values for database (use current) and parameters (none)
+impl From<String> for Statement {
+    fn from(sql: String) -> Statement {
+        Statement {
+            database: None,
+            parameters: None,
+            sql,
+        }
+    }
+}

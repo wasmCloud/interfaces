@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-sqldb"
-version = "0.7.0"
+version = "0.8.0"
 description = "Interface for wasmCloud actors to connect to a relational database using the capability wasmcloud:sqldb"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
@@ -27,7 +27,7 @@ serde = { version = "1.0" , features = ["derive"] }
 serde_json = "1.0"
 serde_bytes = "0.11"
 minicbor = { version = "0.17", features = ["derive", "std", "half"] }
-wasmbus-rpc = "0.10.0"
+wasmbus-rpc = "0.10.1"
 
 [dev-dependencies]
 base64 = "0.13"
