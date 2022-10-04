@@ -63,7 +63,7 @@ async fn create_table(ctx: &Context) -> Result<(), SqlDbError> {
         );"#,
         TABLE_NAME
     );
-    let _resp = db.execute(ctx, &sql).await?;
+    let _resp = db.execute(ctx, sql.into()).await?;
     Ok(())
 }
 ```
