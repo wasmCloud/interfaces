@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-sqldb"
-version = "0.8.0"
+version = "0.7.1"
 description = "Interface for wasmCloud actors to connect to a relational database using the capability wasmcloud:sqldb"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
