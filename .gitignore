@@ -4,4 +4,3 @@
 **/html/
 *.bak.*
 __pycache__
-gpio

@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-logging"
-version = "0.7.1"
+version = "0.8.0"
 description = "interface for logging capability provider (wasmcloud:builtin:logging)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
@@ -28,7 +28,7 @@ serde = { version = "1.0" , features = ["derive"] }
 serde_json = "1.0"
 serde_bytes = "0.11"
 cfg-if = "1.0"
-wasmbus-rpc = { git = "https://github.com/wasmcloud/weld", rev="77f50ddd476e0b2a50915de6c4fb0f41e6e24c85" }
+wasmbus-rpc = "0.11.0-alpha.1"
 
 [dev-dependencies]
 base64 = "0.13"
