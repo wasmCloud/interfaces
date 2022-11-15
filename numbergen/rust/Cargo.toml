@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-numbergen"
-version = "0.7.0"
+version = "0.8.0"
 description = "interface for actors to generate random numbers and guids (wasmcloud:builtin:numbergen)"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
@@ -26,7 +26,7 @@ futures = "0.3"
 serde = { version = "1.0" , features = ["derive"] }
 serde_json = "1.0"
 serde_bytes = "0.11"
-wasmbus-rpc = "0.10.0"
+wasmbus-rpc = "0.11.0"
 
 [dev-dependencies]
 base64 = "0.13"
