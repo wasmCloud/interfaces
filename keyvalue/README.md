@@ -13,7 +13,8 @@ The following is a list of implementations of the `wasmcloud:keyvalue` contract.
 | [Redis](https://github.com/wasmCloud/capability-providers/tree/main/kvredis) | wasmCloud | wasmCloud key-value provider for the **Redis** database
 | [Vault](https://github.com/wasmCloud/capability-providers/tree/main/kv-vault) | wasmCloud | wasmCloud key-value provider for the Hashicorp [Vault](https://www.vaultproject.io/docs/secrets/kv/kv-v2) secrets engine.
 
-## Example Usage (🦀 Rust)
+## Example Usage 
+### 🦀 Rust
 Check if a value exists in the kvstore
 ```rust
 use wasmbus_rpc::actor::prelude::Context;
@@ -36,3 +37,27 @@ async fn increment_counter(ctx: &Context, key: String, value: i32) -> RpcResult<
     Ok(new_val)
 }
 ```
+
+### 🐭 Golang
+Check if a value exists in the kvstore
+```go
+import "github.com/wasmcloud/actor-tinygo"
+import keyvalue "github.com/wasmcloud/interfaces/keyvalue/tinygo"
+
+func KeyExists(ctx *actor.Context, key string) (bool, error){
+   client := keyvalue.NewProviderKeyValue()
+   return client.Contains(ctx, key)
+}
+```
+
+Increment a numeric value
+```go
+import "github.com/wasmcloud/actor-tinygo"
+import keyvalue "github.com/wasmcloud/interfaces/keyvalue/tinygo"
+
+func IncrementCounter(ctx *actor.Context, key string, value int32) (int32, error) {
+   client := keyvalue.NewProviderKeyValue()
+   return client.Increment(ctx, keyvalue.IncrementRequest{key, value})
+}
+```
+

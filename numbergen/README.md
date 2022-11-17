@@ -9,7 +9,8 @@ There are no external implementations of this provider as all implementations of
 
 This interface defines the wasmCloud built-in logging interface that comes with each of our supported host runtimes. Actors that use this interface must have the capability contract `wasmcloud:builtin:numbergen` in their claims list (`wash claims sign --cap wasmcloud:builtin:numbergen`).
 
-## Example Usage (🦀 Rust)
+## Example Usage 
+### 🦀 Rust
 ```rust
 use wasmbus_rpc::actor::prelude::*;
 use wasmcloud_interface_logging::info;
@@ -26,5 +27,24 @@ async fn generate_random() -> Result<(), RpcError> {
     let random_range: u32 = random_in_range(0, 55).await?;
     info!("Generated number between 0 and 55: {}", random_range);
     Ok(())
+}
+```
+### 🐭 Golang
+```go
+import numbergen "github.com/wasmcloud/interfaces/numbergen/tinygo"
+
+func GenerateThings(ctx *actor.Context) (string, error) {
+  client := numbergen.NewProviderNumberGen()
+
+  // Generate a random U32
+  randNum, _ := client.Random32(ctx)
+ 
+  // Generate a random U32 within an inclusive range
+  randNum010, _ := client.RandomInRange(ctx, numbergen.RangeLimit{Min: 0, Max: 10})
+ 
+  // Generate a Globally Unique ID (GUID)
+  guid, _ := client.GenerateGuid(ctx)
+  
+  return "", nil
 }
 ```

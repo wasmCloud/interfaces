@@ -18,7 +18,8 @@ The following is a list of implementations of the `wasmcloud:httpserver` contrac
 | [HTTPServer](https://github.com/wasmCloud/capability-providers/tree/main/httpserver-rs) | wasmCloud | wasmCloud HTTP Server implementation using the highly scalable [warp](https://docs.rs/warp/latest/warp/) web server.
 
 
-## Example Usage (🦀 Rust)
+## Example Usage 
+### 🦀 Rust
 Implementing the `HttpServer.HandleRequest` operation
 ```rust
 use wasmbus_rpc::actor::prelude::*;
@@ -36,5 +37,30 @@ impl HttpServer for HelloActor {
             ..Default::default()
         })
     }
+}
+```
+### 🐭Golang
+Implementing the `HttpServer.HandleRequest` operation
+```go 
+import (
+	"github.com/wasmcloud/actor-tinygo"
+	httpserver "github.com/wasmcloud/interfaces/httpserver/tinygo"
+)
+
+func main() {
+	me := Actor{}
+
+	actor.RegisterHandlers(httpserver.HttpServerHandler(&me))
+}
+
+type Actor struct {}
+
+func (e *Actor) HandleRequest(ctx *actor.Context, req httpserver.HttpRequest) (*httpserver.HttpResponse, error) {
+	r := httpserver.HttpResponse{
+		StatusCode: 200,
+		Header:     make(httpserver.HeaderMap, 0),
+		Body:       []byte("hello world"),
+	}
+	return &r, nil
 }
 ```
