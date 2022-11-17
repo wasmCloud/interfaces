@@ -20,3 +20,13 @@ output_dir = "rust"
 [[rust.files]]
 path = "src/control.rs"
 namespace = "org.wasmcloud.lattice.control"
+
+[tinygo]
+output_dir = "tinygo"
+formatter = ["goimports", "-w"]
+
+[[tinygo.files]]
+path = "control.go"
+package = "latticecontrol"
+namespace = "org.wasmcloud.lattice.control"
+
