@@ -32,7 +32,8 @@ The following is a list of implementations of the `wasmcloud:sqldb` contract. Fe
 | :--- | :---: | :--- |
 | [sqldb-postgres](https://github.com/wasmCloud/capability-providers/tree/main/sqldb-postgres) | wasmCloud | Implementation of the sqldb contract to interface with Postgres-compatible databases (also works for Azure CosmosDB with a Postgres backend, for example)
 
-## Example Usage (🦀 Rust)
+## Example Usage 
+### 🦀 Rust
 The following examples were pulled from the [Todo-sql example actor](https://github.com/wasmCloud/examples/tree/main/actor/todo-sql).
 Create a table to store `DbTodo` objects for a TODO list:
 ```rust
@@ -93,5 +94,31 @@ async fn get_db_todo(ctx: &Context, url: &str) -> Result<DbTodo, SqlDbError> {
     let mut rows: Vec<DbTodo> = decode(&resp.rows)?;
     let db_todo = rows.remove(0);
     Ok(db_todo)
+}
+```
+
+### 🐭Golang
+Create a table to store `DbTodo` objects for a TODO list:
+```go
+import (
+   "github.com/wasmcloud/actor-tinygo"
+   sqldb "github.com/wasmcloud/interfaces/sqldb/tinygo"
+)
+
+var sql string = `
+"create table if not exists {} (
+    id varchar(36) not null,
+    url varchar(42) not null,
+    title varchar(100) not null,
+    priority int4 not null default 0,
+    completed bool not null default false
+);
+`
+func CreateTable(ctx *actor.Context, db string) (*sqldb.ExecuteResult, error) {
+   client := sqldb.NewProviderSqlDb()
+   return client.Execute(ctx, sqldb.Statement{
+      Database: db,
+      Sql:      sql,
+   })
 }
 ```
