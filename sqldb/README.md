@@ -106,7 +106,7 @@ import (
 )
 
 var sql string = `
-"create table if not exists {} (
+create table if not exists {} (
     id varchar(36) not null,
     url varchar(42) not null,
     title varchar(100) not null,
