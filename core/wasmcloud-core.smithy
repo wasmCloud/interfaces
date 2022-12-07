@@ -22,14 +22,6 @@ use org.wasmcloud.model#n
 use org.wasmcloud.model#U64
 use org.wasmcloud.model#U32
 
-/// Actor service
-@wasmbus(
-    actorReceive: true,
-)
-service Actor {
-  version: "0.1",
-  operations: [ HealthRequest ]
-}
 
 /// Link definition for binding actor to provider
 @wasmbusData

@@ -41,6 +41,13 @@ output_dir = "rust"
 path = "src/keyvalue.rs"
 namespace = "org.wasmcloud.interface.keyvalue"
 
+[tinygo]
+output_dir = ""
+formatter = [ "goimports", "-w" ]
+files = [
+    { path = "tinygo/keyvalue.go", package="keyvalue", namespace = "org.wasmcloud.interface.keyvalue" },
+]
+
 
 #[python]
 #output_dir = "python"

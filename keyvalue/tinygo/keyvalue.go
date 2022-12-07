@@ -1604,4 +1604,4 @@ func (s *KeyValueSender) SetClear(ctx *actor.Context, arg string) (bool, error) 
 	return resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.4.5
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.0
