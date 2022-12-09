@@ -932,14 +932,14 @@ func CDecodeInvocationResponse(d *cbor.Decoder) (InvocationResponse, error) {
 // Link definition for binding actor to provider
 type LinkDefinition struct {
 	// actor public key
-	ActorId string
+	ActorId string `json:"actor_id"`
 	// provider public key
-	ProviderId string
+	ProviderId string `json:"provider_id"`
 	// link name
-	LinkName string
+	LinkName string `json:"link_name"`
 	// contract id
-	ContractId string
-	Values     LinkSettings
+	ContractId string       `json:"contract_id"`
+	Values     LinkSettings `json:"values"`
 }
 
 // MEncode serializes a LinkDefinition using msgpack
