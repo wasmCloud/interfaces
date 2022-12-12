@@ -859,7 +859,10 @@ func MDecodeInvocationResponse(d *msgpack.Decoder) (InvocationResponse, error) {
 		}
 		switch field {
 		case "msg":
-			val.Msg, err = d.ReadByteArray()
+			var ret string
+			ret, err = d.ReadString()
+			val.Msg = []byte(ret)
+			// val.Msg, err = d.ReadByteArray()
 		case "invocation_id":
 			val.InvocationId, err = d.ReadString()
 		case "error":

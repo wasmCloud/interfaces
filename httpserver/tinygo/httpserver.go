@@ -175,7 +175,11 @@ func (o *HttpRequest) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteString("header")
 	o.Header.MEncode(encoder)
 	encoder.WriteString("body")
-	encoder.WriteByteArray(o.Body)
+	if len(o.Body) > 0 {
+		encoder.WriteByteArray(o.Body)
+	} else {
+		encoder.WriteByteArray([]byte("empty"))
+	}
 
 	return encoder.CheckError()
 }
@@ -293,8 +297,11 @@ func (o *HttpResponse) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteString("header")
 	o.Header.MEncode(encoder)
 	encoder.WriteString("body")
-	encoder.WriteByteArray(o.Body)
-
+	if len(o.Body) > 0 {
+		encoder.WriteByteArray(o.Body)
+	} else {
+		encoder.WriteNil()
+	}
 	return encoder.CheckError()
 }
 
