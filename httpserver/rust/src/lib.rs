@@ -38,14 +38,11 @@ impl HttpResponse {
         })
     }
 
-    pub fn ok<S>(response: S) -> Result<HttpResponse, RpcError>
-    where
-        S: ToString,
-    {
-        Ok(HttpResponse {
-            body: response.to_string().as_bytes().to_vec(),
+    pub fn ok<S: Into<Vec<u8>>>(response: S) -> HttpResponse {
+        HttpResponse {
+            body: response.into(),
             ..Default::default()
-        })
+        }
     }
 
     /// Creates a response with a given status code, JSON-serialized payload, and headers specified by the header argument. Automatically includes the appropriate Content-Type header
