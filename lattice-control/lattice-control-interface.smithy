@@ -31,7 +31,7 @@ string ConfigurationString
     contractId: "wasmcloud:latticecontrol",
     providerReceive: true )
 service LatticeController {
-    version: "0.1"
+    version: "0.1",
     operations: [AuctionProvider, AuctionActor, GetHosts, 
                  GetHostInventory, GetClaims, ScaleActor,
                  StartActor, AdvertiseLink, RemoveLink,
@@ -45,14 +45,14 @@ service LatticeController {
 /// a set of host label constraints. Hosts on which this provider is already
 /// running will not be among the successful "bidders" in this auction.
 operation AuctionProvider {
-    input: ProviderAuctionRequest
+    input: ProviderAuctionRequest,
     output: ProviderAuctionAcks
 }
 
 /// Seek out a list of suitable hosts for an actor given a set of host
 /// label constraints.
 operation AuctionActor {
-    input: ActorAuctionRequest
+    input: ActorAuctionRequest,
     output: ActorAuctionAcks
 }
 
@@ -61,13 +61,13 @@ operation AuctionActor {
 /// network partition events, etc. The sole input to this query is the 
 /// lattice ID on which the request takes place.
 operation GetHosts {
-    input: String
+    input: String,
     output: Hosts
 }
 
 /// Queries for the contents of a host given the supplied 56-character unique ID
 operation GetHostInventory {
-    input: GetHostInventoryRequest
+    input: GetHostInventoryRequest,
     output: HostInventory
 }
 
@@ -75,14 +75,14 @@ operation GetHostInventory {
 /// from the first host that answers the query. The sole input to this request is
 /// the lattice ID on which the request takes place.
 operation GetClaims {    
-    input: String
+    input: String,
     output: GetClaimsResponse
 }
 
 /// Publish a link definition into the lattice, allowing it to be cached and
 /// delivered to the appropriate capability provider instances
 operation AdvertiseLink {
-    input: AdvertiseLinkRequest
+    input: AdvertiseLinkRequest,
     output: CtlOperationAck
 }
 
@@ -90,27 +90,27 @@ operation AdvertiseLink {
 /// from the cache and the relevant capability providers will be given a chance
 /// to de-provision any used resources
 operation RemoveLink {
-    input: RemoveLinkDefinitionRequest
+    input: RemoveLinkDefinitionRequest,
     output: CtlOperationAck
 }
 
 
 /// Instructs a given host to start the indicated actor
 operation StartActor {
-    input: StartActorCommand
+    input: StartActorCommand,
     output: CtlOperationAck
 }
 
 /// Instructs a given host to scale the indicated actor
 operation ScaleActor {
-    input: ScaleActorCommand
+    input: ScaleActorCommand,
     output: CtlOperationAck
 }
 
 /// Requests that a specific host perform a live update on the indicated
 /// actor
 operation UpdateActor {
-    input: UpdateActorCommand
+    input: UpdateActorCommand,
     output: CtlOperationAck
 }
 
@@ -118,30 +118,30 @@ operation UpdateActor {
 /// that receives this response will reply with the contents of the distributed
 /// cache
 operation GetLinks {
-    input: String
+    input: String,
     output: LinkDefinitionList
 }
 
 /// Requests that the given host start the indicated capability provider
 operation StartProvider {
-    input: StartProviderCommand
+    input: StartProviderCommand,
     output: CtlOperationAck
 }
 
 /// Requests that the given capability provider be stopped on the indicated host
 operation StopProvider {
-    input: StopProviderCommand
+    input: StopProviderCommand,
     output: CtlOperationAck
 }
 
 /// Requests that an actor be stopped on the given host
 operation StopActor {
-    input: StopActorCommand
+    input: StopActorCommand,
     output: CtlOperationAck
 }
 
 operation StopHost {
-    input: StopHostCommand
+    input: StopHostCommand,
     output: CtlOperationAck
 }
 
@@ -159,7 +159,7 @@ operation SetRegistryCredentials {
 /// multiple lattices, reducing overhead and making it easier to support secure multi-tenancy of
 /// lattices.
 operation SetLatticeCredentials {
-    input: SetLatticeCredentialsRequest
+    input: SetLatticeCredentialsRequest,
     output: CtlOperationAck
 }
 
@@ -216,6 +216,11 @@ structure SetLatticeCredentialsRequest {
     /// If natsUrl is supplied, then the capability provider will use this URL (and port) for 
     /// establishing a connection for the given lattice.    
     natsUrl: String,
+
+    /// If there is a JS domain required for communicating with the underlying KV metadata
+    /// bucket for this lattice, then that should be supplied in this parameter. Otherwise,
+    /// leave it blank
+    jsDomain: String
 }
 
 list ProviderAuctionAcks {
@@ -359,7 +364,7 @@ structure ActorDescription {
 structure ActorInstance {
     /// This instance's unique ID (guid)
     @required    
-    instanceId: String
+    instanceId: String,
 
     /// The revision number for this actor instance
     @required    
@@ -418,7 +423,7 @@ structure StartActorCommand {
 
     /// Optional set of annotations used to describe the nature of this actor start command. For
     /// example, autonomous agents may wish to "tag" start requests as part of a given deployment    
-    annotations: AnnotationMap
+    annotations: AnnotationMap,
 
     /// The number of actors to start
     /// A zero value will be interpreted as 1.
@@ -447,7 +452,7 @@ structure StartProviderCommand {
 
     /// Optional set of annotations used to describe the nature of this provider start command. For
     /// example, autonomous agents may wish to "tag" start requests as part of a given deployment    
-    annotations: AnnotationMap
+    annotations: AnnotationMap,
 
 
     /// Optional provider configuration in the form of an opaque string. Many
@@ -475,7 +480,7 @@ structure ScaleActorCommand {
 
     /// Optional set of annotations used to describe the nature of this actor scale command. For
     /// example, autonomous agents may wish to "tag" scale requests as part of a given deployment
-    annotations: AnnotationMap
+    annotations: AnnotationMap,
 
     /// The target number of actors
     @required
@@ -597,7 +602,7 @@ structure Host {
 
     /// uptime in seconds
     @required        
-    uptimeSeconds: U64
+    uptimeSeconds: U64,
 
     /// Human-friendly uptime description    
     uptimeHuman: String,
@@ -666,7 +671,7 @@ structure RemoveLinkDefinitionRequest {
 structure SetRegistryCredentialsRequest {
     /// The ID of the lattice on which this request will be performed
     @required
-    latticeId: String
+    latticeId: String,
 
     credentials: RegistryCredentialMap
 }
@@ -675,7 +680,7 @@ structure SetRegistryCredentialsRequest {
 map RegistryCredentialMap {
     /// The key of this map is the OCI/BINDLE URL without the artifact reference. Credentials
     /// are matched via substring comparison on the URL of an artifact.
-    key: String
+    key: String,
     value: RegistryCredential
 }
 
