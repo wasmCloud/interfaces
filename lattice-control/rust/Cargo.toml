@@ -1,8 +1,8 @@
 [package]
 name = "wasmcloud-interface-lattice-control"
-version = "0.16.1"
+version = "0.17.0"
 edition = "2021"
-homepage = "https://wasmcloud.dev"
+homepage = "https://wasmcloud.com"
 repository = "https://github.com/wasmCloud/interfaces"
 description = "This library contains types and service definitions used by actors and providers to support the wasmcloud:latticecontrol contract"
 license = "Apache-2.0"
@@ -24,4 +24,4 @@ serde = { version = "1.0.118", features = ["derive"] }
 wasmbus-rpc = "0.11.1"
 
 [build-dependencies]
-weld-codegen = "0.5.0"
+weld-codegen = "0.6.0"
