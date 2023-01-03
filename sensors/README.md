@@ -34,11 +34,11 @@ A sensor network is a _logical_ grouping of sensors. This logical grouping can b
 ### Sensor Identification
 Identifying sensors is a design and architecture concern. It might be tempting to assign an ID to a sensor for `temperature`, and another for `velocity` and another for something like barometric pressure, and so on. However, this isn't always practical or possible.
 
-For example, a group of sensors may contain multiple sensors of the same type with but with unique, meaningful identities. A quadcopter drone may have a sensor that reports wind speed and direction at each of the four motor locations. That data is collected and used to produce compensatory instructions sent to the motor controller(s). To accommodate this, you would use a different ID for each of the wind sensors, all of which would have the same _sensor type_. The sensor type gives the code a clue as to how to interpret the data in the measurement payload, while the sensor ID itself can either be treated as "just a unique value", or a value defined in a constants list that might be something like `ROTOR_1`, `ROTOR_2`, etc.
+For example, a group of sensors may contain multiple sensors of the same type with but with unique, meaningful identities. A quadcopter drone may have a sensor that reports wind speed and direction at each of the four motor locations. That data is collected and used to produce compensatory instructions sent to the motor controller(s). To accommodate this, you would use a different ID for each of the wind sensors, all of which would have the same _sensor type_. The sensor type gives the code a clue as to how to interpret the data in the measurement payload, while the sensor ID itself can either be treated as "just a unique value", or a value that might be something like `ROTOR_1`, `ROTOR_2`, etc.
 
-Another example of using the sensor ID to provide meaningful value might be in a vehicle that has obstacle detection sensors. Let's say that it has an array of 8 of those sensors. The IDs of those sensors could indicate the sensor's position code (`RIGHT_FRONT`, `MIDDLE_FRONT`, etc) and provide the application code with the metadata necessary to take appropriate action.
+Another example of using the sensor ID to provide meaningful value might be in a vehicle that has obstacle detection sensors. Let's say that it has an array of 8 of those sensors. The IDs of those sensors could indicate the sensor's position code (`RIGHT_FRONT`, `MIDDLE_FRONT`, etc) and provide the application logic with the metadata necessary to take appropriate action.
 
-Sensor IDs are numbers, as are network and type IDs. This is done to simplify the interface and optimize for small payload as much as possible. If an application wishes to maintain strings corresponding to IDs in a map, it can do so outside the bounds of this interface.
+Sensor, type, and network IDs are all opaque strings with meaning agreed upon between component and provider.
 
 ### Sampling Rates
 Sampling rates, both awareness and control thereof, are outside the scope of this interface. It is entirely up to an implementor of this interface to determine the rate at which measurements are delivered.
@@ -58,19 +58,19 @@ In the sample data below, the network ID, sensor ID, and sensor type never chang
 
 | Timestamp | Network ID | Sensor ID | Sensor Type | Measurement |
 | :-------- | :--------: | :-------: | :---------: | :---------- |
-| 1672597308100 | 0 | 1 | 1 | [`185.0`] |
-| 1672597391100 | 0 | 1 | 1 | [`200.0`] |
+| 1672597308100 | - | `t1` | `temp` | [`185.0`] |
+| 1672597391100 | - | `t1` | `temp` | [`200.0`] |
 | ... | - | - | - | ... |
 
 Another interesting example might be a badged entry system where you want to receive a measurement from the gate sensor each time a badge is swiped. Here, rather than having a single sensor and then differentiating "in" and "out" via the data, you typically see the entrance gate and exit gate having different sensor IDs, and the payload contains the ID of the card swiped. The payload could also include whether the access was granted or denied: 
 
 | Timestamp | Network ID | Sensor ID | Sensor Type | Measurement |
 | :-------- | :--------: | :-------: | :---------: | :---------- |
-| 1672597308100 | 2 | 1 | 50 | [`1.0`, `12384231.0`] |
-| 1672597391100 | 2 | 2 | 50| [`0.0`, `12319312.3`] |
+| 1672597308100 | `bldg-2` | `f1-in` | `badge-access` | [`1.0`, `12384231.0`] |
+| 1672597391100 | `bldg-2` | `f1-out` | `badge-access`| [`0.0`, `12319312.3`] |
 | ... | - | - | - | ... |
 
-In the above sample, we might use network `2` to identify the building in which the badge swipe sensors reside. The first measurement indicates an access grant (the door unlocked), whereas the second measurement indicates an access denial (0.0 == false).
+In the above sample, we might use network `bldg-2` to identify the building in which the badge swipe sensors reside. The first measurement indicates an access grant (the door unlocked), whereas the second measurement indicates an access denial (0.0 == false).
 
 ### Multi-Valued Measurements
 Not all sensors deliver a single value with a single measurement payload. In many cases the sensor will deliver multiple values. Sometimes these values are just an array, and other times the position of each data element is meaningful. 
@@ -79,10 +79,19 @@ Take, for example, a sensor that delivers _location_ data in measurement payload
 
 | Timestamp | Network ID | Sensor ID | Sensor Type | Measurement |
 | :-------- | :--------: | :-------: | :---------: | :---------- |
-| 1672597308 | 0 | 8320 | 51 | [`42.36`, `-71.05`, `175.0`] |
+| 1672597308 | - | `s1303` | `position` | [`42.36`, `-71.05`, `175.0`] |
 
 
 ## Interface Specification
+The interface, at its core, contains a definition for a measurement reading record, and calls for 3 functions:
+
+* `deliver` - delivers a reading to the consumer
+* `error` - indicates a sensor error
+* `latest-reading` - allows a WebAssembly component to query the most recent (if any) value on a given sensor
+
+
+⚠️ **NOTE** It is important to distinguish between error types. A value recorded by a sensor that is outside normal operating range will be _delivered_ with an appropriate value and should be handled by standard logic. A _failure_ to acquire a value, or some other detected failure in the sensor, will be indicated with an `error` call.
+
 The following are some files describing this interface:
 
 * [Smithy](./interface.smithy) - A codegen-ready interface definition

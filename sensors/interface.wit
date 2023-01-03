@@ -7,6 +7,12 @@ interface "wasmcloud:sensors" {
 
     // Handles a measurement record
     handle-record: func(measurement: measurement-record) -> result<_, Error>
+
+    // Handles an Error
+    handle-error: func(error: sensor-error) -> result<_, Error>
+
+    // Query the latest measurement
+    query-sensor: func(networkId: option<string>, sensorId: string) -> result<option<list<float>>, Error>
 }
 
 interface "wasmcloud:sensors/types" {
@@ -15,13 +21,13 @@ interface "wasmcloud:sensors/types" {
         timestamp: u64,
 
         // ID of sensor network from which the measurement originated
-        network-id: u64,
+        network-id: option<string>,
 
         // ID of the sensor
-        sensor-id: u64,
+        sensor-id: string,
 
         // Indicates the type of the sensor
-        sensor-type: u64,
+        sensor-type: string,
 
         // An array of floating point values containing the measurement payload
         data: list<float>
