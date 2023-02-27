@@ -10,7 +10,8 @@ The following is a list of implementations of the `wasmcloud:messaging` contract
 | :--- | :---: | :--- |
 | [NATS](https://github.com/wasmCloud/capability-providers/tree/main/nats) | wasmCloud | wasmCloud Messaging Provider for the [NATS](https://nats.io) broker
 
-## Example Usage (🦀 Rust)
+## Example Usage 
+### 🦀 Rust
 Implementing the `Messaging.HandleMessage` operation
 ```rust
 use wasmbus_rpc::actor::prelude::*;
@@ -76,5 +77,71 @@ async fn message_request(ctx: &Context, subject: &str, body: &[u8]) -> RpcResult
     } else {
         Ok(())
     }
+}
+```
+
+### 🐭 Golang
+Implementing the `Messaging.HandleMessage` operation
+```go
+ import (
+    "github.com/wasmcloud/actor-tinygo"
+    logging "github.com/wasmcloud/interfaces/logging/tinygo"
+    messaging "github.com/wasmcloud/interfaces/messaging/tinygo"
+ )
+ 
+type Actor struct {
+   logger *logging.LoggingSender
+}
+
+func main() {
+   me := Actor{
+      logger: logging.NewProviderLogging(),
+   }
+
+   actor.RegisterHandlers(messaging.MessageSubscriberHandler(&me))
+}
+
+func (e *Actor) HandleMessage(ctx *actor.Context, msg messaging.SubMessage) error {
+   return e.logger.WriteLog(ctx, logging.LogEntry{Level: "info", Text: string(msg.Body)})
+}
+```
+
+Sending a message via a `wasmcloud:messaging` provider without expecting a reply
+```go
+ import (
+    "github.com/wasmcloud/actor-tinygo"
+    messaging "github.com/wasmcloud/interfaces/messaging/tinygo"
+)
+
+func PublishMessage(ctx *actor.Context, subj string, body []byte) error {
+   client := messaging.NewProviderMessaging()
+   return client.Publish(ctx, messaging.PubMessage{
+      Subject: subj,
+      ReplyTo: "",
+      Body:    body,
+   })
+}
+```
+
+Sending a message via a `wasmcloud:messaging` provider, waiting one second for a reply
+```go
+ import (
+    "github.com/wasmcloud/actor-tinygo"
+    logging "github.com/wasmcloud/interfaces/logging/tinygo"
+    messaging "github.com/wasmcloud/interfaces/messaging/tinygo"
+)
+
+var logger *logging.NewProviderLogging()
+
+func MessageRequest(ctx *actor.Context, subj string, body []byte) error {
+    client := messaging.NewProviderMessaging()
+
+    reply, _ := client.Request(ctx, messaging.RequestMessage{
+       Subject:   subj,
+       Body:      body,
+       TimeoutMs: 1000,
+    })
+
+    return logger.WriteLog(ctx, logging.LogEntry{Level: "info", Text: "Response: " + string(reply.Body)})
 }
 ```

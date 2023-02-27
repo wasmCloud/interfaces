@@ -7,7 +7,9 @@ This interface defines the wasmCloud built-in logging interface that comes with 
 
 There are no external implementations for this provider as they are built directly into the host runtime.
 
-## Example Usage (🦀 Rust)
+## Example Usage 
+
+### 🦀 Rust
 
 Logging at all available levels:
 ```rust
@@ -23,5 +25,38 @@ async fn log_to_all() -> RpcResult<()> {
     error!("I can't let you do that, Dave");
 
     Ok(())
+}
+```
+
+## 🐭 Golang
+
+```go
+import (
+	"github.com/wasmcloud/actor-tinygo"
+	httpserver "github.com/wasmcloud/interfaces/httpserver/tinygo"
+	logging "github.com/wasmcloud/interfaces/logging/tinygo"
+)
+
+type Actor struct {
+	logger *logging.LoggingSender
+}
+
+func main() {
+	me := Actor{
+		logger: logging.NewProviderLogging(),
+	}
+ 
+    // The calls to WriteLog require an actor.Context that is
+    // accessed from any invocation 
+    actor.RegisterHandlers(httpserver.HttpServerHandler(&me))
+}
+
+func (e *Actor) HandleRequest(ctx *actor.Context, req httpserver.HttpRequest) (*httpserver.HttpResponse, error) {    
+    _ = e.logger.WriteLog(ctx, logging.LogEntry{Level: "debug", Text: "This is a debug log"})
+    _ = e.logger.WriteLog(ctx, logging.LogEntry{Level: "info",  Text: "This is an info log"})
+    _ = e.logger.WriteLog(ctx, logging.LogEntry{Level: "warn",  Text: "This is a warn log"})
+    _ = e.logger.WriteLog(ctx, logging.LogEntry{Level: "error", Text: "This is an error log"})
+ 
+    return nil, nil
 }
 ```

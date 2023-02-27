@@ -12,7 +12,8 @@ The following is a list of implementations of the `wasmcloud:httpclient` contrac
 | :--- | :---: | :--- |
 | [HTTPClient](https://github.com/wasmCloud/capability-providers/tree/main/httpclient) | wasmCloud | wasmCloud implementation of the HTTP Client Provider
 
-## Example Usage (🦀 Rust)
+## Example Usage 
+### 🦀 Rust
 Retrieve a random XKCD comic and format the response as an HTML page
 ```rust
 use serde::Deserialize;
@@ -63,4 +64,24 @@ async fn get_comic(ctx: &Context) -> RpcResult<HttpResponse> {
     Ok(resp)
 }
 
+```
+
+### 🐭 Golang
+Fetch IP address
+```go
+func GetIpAddress(ctx *actor.Context) ([]byte, error) {
+	client := httpclient.NewProviderHttpClient()
+
+	resp, err := client.Request(ctx, httpclient.HttpRequest{
+		Method: "GET",
+		Url:    "https://ifconfig.io/ip",
+		// Body can not be blank due to a bug
+		Body: []byte("a"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Body, nil
+}
 ```
