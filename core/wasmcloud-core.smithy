@@ -180,6 +180,11 @@ structure HostData {
     @serialization(name: "structured_logging")
     @n(14)
     structuredLogging: Boolean,
+
+    /// The log level providers should log at
+    @serialization(name: "log_level")
+    @n(15)
+    logLevel: LogLevel
 }
 
 list ClusterIssuers {
@@ -194,6 +199,30 @@ map HostEnvValues {
     key: String,
     value: String,
 }
+
+@enum([
+    {
+        value: "trace",
+        name: "trace",
+    },
+    {
+        value: "debug",
+        name: "debug",
+    },
+    {
+        value: "info",
+        name: "info",
+    },
+    {
+        value: "warn",
+        name: "warn",
+    },
+    {
+        value: "error",
+        name: "error",
+    },
+])
+string LogLevel
 
 /// RPC message to capability provider
 @wasmbusData
