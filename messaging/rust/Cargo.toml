@@ -1,6 +1,6 @@
 [package]
 name = "wasmcloud-interface-messaging"
-version = "0.8.1"
+version = "0.9.0"
 description = "Interface library for the wasmCloud messaging capability, wasmcloud:messaging"
 repository = "https://github.com/wasmcloud/interfaces"
 homepage = "https://github.com/wasmcloud/wasmcloud"
@@ -24,11 +24,11 @@ serde = { version = "1.0" , features = ["derive"] }
 serde_json = "1.0"
 serde_bytes = "0.11"
 log = "0.4"
-wasmbus-rpc = "0.11.1"
+wasmbus-rpc = "0.13"
 
 [dev-dependencies]
 base64 = "0.13"
 
 # build-dependencies needed for build.rs
 [build-dependencies]
-weld-codegen = "0.5.0"
+weld-codegen = "0.7"
