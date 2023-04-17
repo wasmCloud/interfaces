@@ -14,6 +14,7 @@ namespace org.wasmcloud.interface.numbergen
 
 use org.wasmcloud.model#U32
 use org.wasmcloud.model#U64
+use org.wasmcloud.model#U8
 use org.wasmcloud.model#n
 use org.wasmcloud.model#wasmbus
 
@@ -67,5 +68,5 @@ operation RandomBytes {
 }
 
 list Bytes {
-    member: u8
+    member: U8
 }
