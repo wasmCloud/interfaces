@@ -1,43 +1,38 @@
 // messaging.smithy
-//
+// 
 // Interface for messaging provider
 // supports publish, request-reply, and subscriptions
-//
-
+// 
 // Tell the code generator how to reference symbols defined in this namespace
 metadata package = [{
-    namespace: "org.wasmcloud.interface.messaging",
-    crate: "wasmcloud_interface_messaging",
-    py_module: "wasmcloud_interface_messaging",
-    doc: "Messaging: wasmcloud messaging capability provider: publish, request-reply, and subscriptions",
+    namespace: "org.wasmcloud.interface.messaging"
+    crate: "wasmcloud_interface_messaging"
+    py_module: "wasmcloud_interface_messaging"
+    doc: "Messaging: wasmcloud messaging capability provider: publish, request-reply, and subscriptions"
 }]
 
 namespace org.wasmcloud.interface.messaging
 
-use org.wasmcloud.model#wasmbus
-use org.wasmcloud.model#n
 use org.wasmcloud.model#U32
 use org.wasmcloud.model#U64
-
 /// The Messaging interface describes a service
 /// that can deliver messages
-@wasmbus(
-    contractId: "wasmcloud:messaging",
-    providerReceive: true )
+use org.wasmcloud.model#n
+use org.wasmcloud.model#wasmbus
+
+@wasmbus(contractId: "wasmcloud:messaging", providerReceive: true, actorReceive: true)
 service Messaging {
-  version: "0.1",
-  operations: [ Publish, Request ]
+    version: "0.1"
+    operations: [Publish, Request]
 }
 
 /// The MessageSubscriber interface describes
 /// an actor interface that receives messages
 /// sent by the Messaging provider
-@wasmbus(
-    contractId: "wasmcloud:messaging",
-    actorReceive: true )
+@wasmbus(contractId: "wasmcloud:messaging", actorReceive: true)
 service MessageSubscriber {
-  version: "0.1",
-  operations: [ HandleMessage ]
+    version: "0.1"
+    operations: [HandleMessage]
 }
 
 /// Publish - send a message
@@ -54,16 +49,14 @@ structure PubMessage {
     /// The subject, or topic, of the message
     @required
     @n(0)
-    subject: String,
-
+    subject: String
     /// An optional topic on which the reply should be sent.
     @n(1)
-    replyTo: String,
-
+    replyTo: String
     /// The message payload
     @required
     @n(2)
-    body: Blob,
+    body: Blob
 }
 
 /// Reply received from a Request operation
@@ -71,16 +64,14 @@ structure ReplyMessage {
     /// The subject, or topic, of the message
     @required
     @n(0)
-    subject: String,
-
+    subject: String
     /// An optional topic on which the reply should be sent.
     @n(1)
-    replyTo: String,
-
+    replyTo: String
     /// The message payload
     @required
     @n(2)
-    body: Blob,
+    body: Blob
 }
 
 /// Message received as part of a subscription
@@ -88,16 +79,14 @@ structure SubMessage {
     /// The subject, or topic, of the message
     @required
     @n(0)
-    subject: String,
-
+    subject: String
     /// An optional topic on which the reply should be sent.
     @n(1)
-    replyTo: String,
-
+    replyTo: String
     /// The message payload
     @required
     @n(2)
-    body: Blob,
+    body: Blob
 }
 
 /// Request - send a message in a request/reply pattern,
@@ -109,21 +98,18 @@ operation Request {
 
 /// Message sent as part of a request, with timeout
 structure RequestMessage {
-
     /// The subject, or topic, of the message
     @required
     @n(0)
-    subject: String,
-
+    subject: String
     /// The message payload
     @required
     @n(1)
-    body: Blob,
-
+    body: Blob
     /// A timeout, in milliseconds
     @required
     @n(2)
-    timeoutMs: u32,
+    timeoutMs: u32
 }
 
 /// subscription handler
