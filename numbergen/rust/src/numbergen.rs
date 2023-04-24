@@ -22,14 +22,14 @@ use wasmbus_rpc::{
 #[allow(dead_code)]
 pub const SMITHY_VERSION: &str = "1.0";
 
-pub type Bytes = Vec<u8>;
+pub type Bits = Vec<u8>;
 
-// Encode Bytes as CBOR and append to output stream
+// Encode Bits as CBOR and append to output stream
 #[doc(hidden)]
 #[allow(unused_mut)]
-pub fn encode_bytes<W: wasmbus_rpc::cbor::Write>(
+pub fn encode_bits<W: wasmbus_rpc::cbor::Write>(
     mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
-    val: &Bytes,
+    val: &Bits,
 ) -> RpcResult<()>
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
@@ -41,9 +41,9 @@ where
     Ok(())
 }
 
-// Decode Bytes from cbor input stream
+// Decode Bits from cbor input stream
 #[doc(hidden)]
-pub fn decode_bytes(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Bytes, RpcError> {
+pub fn decode_bits(d: &mut wasmbus_rpc::cbor::Decoder<'_>) -> Result<Bits, RpcError> {
     let __result = {
         if let Some(n) = d.array()? {
             let mut arr: Vec<u8> = Vec::with_capacity(n as usize);
@@ -166,8 +166,8 @@ pub trait NumberGen {
     async fn random_in_range(&self, ctx: &Context, arg: &RangeLimit) -> RpcResult<u32>;
     /// Request a 32-bit random number
     async fn random_32(&self, ctx: &Context) -> RpcResult<u32>;
-    /// Generate random bytes. Parameter is number of bytes requested
-    async fn random_bytes(&self, ctx: &Context, arg: &u32) -> RpcResult<Bytes>;
+    /// Generate random bits. Parameter is number of bits requested
+    async fn random_bits(&self, ctx: &Context, arg: &u32) -> RpcResult<Bits>;
 }
 
 /// NumberGenReceiver receives messages defined in the NumberGen service trait
@@ -197,11 +197,11 @@ pub trait NumberGenReceiver: MessageDispatch + NumberGen {
 
                 Ok(buf)
             }
-            "RandomBytes" => {
+            "RandomBits" => {
                 let value: u32 = wasmbus_rpc::common::deserialize(&message.arg)
                     .map_err(|e| RpcError::Deser(format!("'U32': {}", e)))?;
 
-                let resp = NumberGen::random_bytes(self, ctx, &value).await?;
+                let resp = NumberGen::random_bits(self, ctx, &value).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
 
                 Ok(buf)
@@ -323,8 +323,8 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
         Ok(value)
     }
     #[allow(unused)]
-    /// Generate random bytes. Parameter is number of bytes requested
-    async fn random_bytes(&self, ctx: &Context, arg: &u32) -> RpcResult<Bytes> {
+    /// Generate random bits. Parameter is number of bits requested
+    async fn random_bits(&self, ctx: &Context, arg: &u32) -> RpcResult<Bits> {
         let buf = wasmbus_rpc::common::serialize(arg)?;
 
         let resp = self
@@ -332,15 +332,15 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
             .send(
                 ctx,
                 Message {
-                    method: "NumberGen.RandomBytes",
+                    method: "NumberGen.RandomBits",
                     arg: Cow::Borrowed(&buf),
                 },
                 None,
             )
             .await?;
 
-        let value: Bytes = wasmbus_rpc::common::deserialize(&resp)
-            .map_err(|e| RpcError::Deser(format!("'{}': Bytes", e)))?;
+        let value: Bits = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': Bits", e)))?;
         Ok(value)
     }
 }
