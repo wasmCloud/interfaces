@@ -25,7 +25,7 @@ service NumberGen {
         GenerateGuid
         RandomInRange
         Random32
-        RandomBits
+        RandomBytes
     ]
 }
 
@@ -61,12 +61,12 @@ structure RangeLimit {
     max: U32
 }
 
-/// Generate random bits. Parameter is number of bits requested
-operation RandomBits {
+/// Generate random bytes. Parameter is number of bytes requested
+operation RandomBytes {
     input: U32
-    output: Bits
+    output: Bytes
 }
 
-list Bits {
+list Bytes {
     member: U8
 }
