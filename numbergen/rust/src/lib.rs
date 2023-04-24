@@ -34,9 +34,9 @@ pub async fn random_32() -> RpcResult<u32> {
 }
 
 #[cfg(target_arch = "wasm32")]
-/// Generate a random number based on user defined number of bytes.
-pub async fn random_bytes(bytes: u32) -> RpcResult<u32> {
+/// Generate a random number based on user defined number of bits.
+pub async fn random_bits(bits: u32) -> RpcResult<u32> {
     let ctx = wasmbus_rpc::common::Context::default();
     let ng = NumberGenSender::new();
-    ng.random_bytes(&ctx, &bytes).await
+    ng.random_bits(&ctx, &bits).await
 }
