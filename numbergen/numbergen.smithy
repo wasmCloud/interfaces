@@ -62,6 +62,8 @@ structure RangeLimit {
 }
 
 /// Generate random bytes. Parameter is number of bytes requested
+/// Input value must be less than 1024
+// SHOULD LOGIC BE WRITTEN INTO INTERFACE?
 operation RandomBytes {
     input: U32
     output: Bytes
