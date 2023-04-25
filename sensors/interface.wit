@@ -1,0 +1,35 @@
+// A sample WIT file containing the sensor interface description
+// NOTE: this is a sample for illustrative purposes and not likely to
+// work with the latest version of bindgen tooling
+
+interface "wasmcloud:sensors" {
+    use wasmcloud:sensors/types::{ Error, measurement-record }
+
+    // Handles a measurement record
+    handle-record: func(measurement: measurement-record) -> result<_, Error>
+
+    // Handles an Error
+    handle-error: func(error: sensor-error) -> result<_, Error>
+
+    // Query the latest measurement
+    query-sensor: func(networkId: option<string>, sensorId: string) -> result<option<list<float>>, Error>
+}
+
+interface "wasmcloud:sensors/types" {
+    record measurement-record {
+        // UNIX epoch timestamp in milliseconds resolution when the measurement was taken (not delivered)
+        timestamp: u64,
+
+        // ID of sensor network from which the measurement originated
+        network-id: option<string>,
+
+        // ID of the sensor
+        sensor-id: string,
+
+        // Indicates the type of the sensor
+        sensor-type: string,
+
+        // An array of floating point values containing the measurement payload
+        data: list<float>
+    }
+}
