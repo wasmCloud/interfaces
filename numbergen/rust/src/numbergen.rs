@@ -122,6 +122,8 @@ pub trait NumberGen {
     async fn random_in_range(&self, ctx: &Context, arg: &RangeLimit) -> RpcResult<u32>;
     /// Request a 32-bit random number
     async fn random_32(&self, ctx: &Context) -> RpcResult<u32>;
+    /// Returns the current time in UTC as milliseconds since the epoch. This timestamp should never be guaranteed to be monotonic
+    async fn utc_now_millis(&self, ctx: &Context) -> RpcResult<u64>;
 }
 
 /// NumberGenReceiver receives messages defined in the NumberGen service trait
@@ -147,6 +149,12 @@ pub trait NumberGenReceiver: MessageDispatch + NumberGen {
             }
             "Random32" => {
                 let resp = NumberGen::random_32(self, ctx).await?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
+
+                Ok(buf)
+            }
+            "UtcNowMillis" => {
+                let resp = NumberGen::utc_now_millis(self, ctx).await?;
                 let buf = wasmbus_rpc::common::serialize(&resp)?;
 
                 Ok(buf)
@@ -265,6 +273,26 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> NumberGen for NumberG
 
         let value: u32 = wasmbus_rpc::common::deserialize(&resp)
             .map_err(|e| RpcError::Deser(format!("'{}': U32", e)))?;
+        Ok(value)
+    }
+    #[allow(unused)]
+    /// Returns the current time in UTC as milliseconds since the epoch. This timestamp should never be guaranteed to be monotonic
+    async fn utc_now_millis(&self, ctx: &Context) -> RpcResult<u64> {
+        let buf = *b"";
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "NumberGen.UtcNowMillis",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        let value: u64 = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': U64", e)))?;
         Ok(value)
     }
 }

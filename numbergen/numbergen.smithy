@@ -23,7 +23,7 @@ use org.wasmcloud.model#U64
     providerReceive: true )
 service NumberGen {
   version: "0.1",
-  operations: [ GenerateGuid, RandomInRange, Random32 ]
+  operations: [ GenerateGuid, RandomInRange, Random32, UtcNowMillis ]
 }
 
 ///
@@ -45,6 +45,11 @@ operation RandomInRange {
 /// Request a 32-bit random number
 operation Random32 {
     output: U32
+}
+
+/// Returns the current time in UTC as milliseconds since the epoch. This timestamp should never be guaranteed to be monotonic
+operation UtcNowMillis {
+    output: U64
 }
 
 /// Input range for RandomInRange, inclusive. Result will be >= min and <= max

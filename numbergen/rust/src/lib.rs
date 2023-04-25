@@ -32,3 +32,11 @@ pub async fn random_32() -> RpcResult<u32> {
     let ng = NumberGenSender::new();
     ng.random_32(&ctx).await
 }
+
+/// Obtains the number of milliseconds since the epoch. This time is not guaranteed to be monotonic
+#[cfg(target_arch = "wasm32")]
+pub async fn utc_now_millis() -> RpcResult<u64> {
+    let ctx = wasmbus_rpc::common::Context::default();
+    let ng = NumberGenSender::new();
+    ng.utc_now_millis(&ctx).await
+}
