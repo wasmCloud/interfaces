@@ -2905,6 +2905,9 @@ pub struct ScaleActorCommand {
     /// example, autonomous agents may wish to "tag" scale requests as part of a given deployment
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub annotations: Option<AnnotationMap>,
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub correlation_id: Option<String>,
     /// The target number of actors
     #[serde(default)]
     pub count: u16,
@@ -2928,7 +2931,7 @@ pub fn encode_scale_actor_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(6)?;
+    e.map(7)?;
     e.str("actorId")?;
     e.str(&val.actor_id)?;
     e.str("actorRef")?;
@@ -2936,6 +2939,12 @@ where
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
         encode_annotation_map(e, val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.correlation_id.as_ref() {
+        e.str("correlation_id")?;
+        e.str(val)?;
     } else {
         e.null()?;
     }
@@ -2957,6 +2966,7 @@ pub fn decode_scale_actor_command(
         let mut actor_id: Option<String> = None;
         let mut actor_ref: Option<String> = None;
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
+        let mut correlation_id: Option<Option<String>> = Some(None);
         let mut count: Option<u16> = None;
         let mut host_id: Option<String> = None;
         let mut lattice_id: Option<String> = None;
@@ -2989,9 +2999,17 @@ pub fn decode_scale_actor_command(
                             })?))
                         }
                     }
-                    3 => count = Some(d.u16()?),
-                    4 => host_id = Some(d.str()?.to_string()),
-                    5 => lattice_id = Some(d.str()?.to_string()),
+                    3 => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    4 => count = Some(d.u16()?),
+                    5 => host_id = Some(d.str()?.to_string()),
+                    6 => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -3012,6 +3030,14 @@ pub fn decode_scale_actor_command(
                                     e
                                 )
                             })?))
+                        }
+                    }
+                    "correlation_id" => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
                         }
                     }
                     "count" => count = Some(d.u16()?),
@@ -3038,12 +3064,13 @@ pub fn decode_scale_actor_command(
                 ));
             },
             annotations: annotations.unwrap(),
+            correlation_id: correlation_id.unwrap(),
 
             count: if let Some(__x) = count {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ScaleActorCommand.count (#3)".to_string(),
+                    "missing field ScaleActorCommand.count (#4)".to_string(),
                 ));
             },
 
@@ -3051,7 +3078,7 @@ pub fn decode_scale_actor_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ScaleActorCommand.host_id (#4)".to_string(),
+                    "missing field ScaleActorCommand.host_id (#5)".to_string(),
                 ));
             },
 
@@ -3059,7 +3086,7 @@ pub fn decode_scale_actor_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field ScaleActorCommand.lattice_id (#5)".to_string(),
+                    "missing field ScaleActorCommand.lattice_id (#6)".to_string(),
                 ));
             },
         }
@@ -3368,6 +3395,9 @@ pub struct StartActorCommand {
     /// example, autonomous agents may wish to "tag" start requests as part of a given deployment
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub annotations: Option<AnnotationMap>,
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub correlation_id: Option<String>,
     /// The number of actors to start
     /// A zero value will be interpreted as 1.
     #[serde(default)]
@@ -3392,12 +3422,18 @@ pub fn encode_start_actor_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(5)?;
+    e.map(6)?;
     e.str("actorRef")?;
     e.str(&val.actor_ref)?;
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
         encode_annotation_map(e, val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.correlation_id.as_ref() {
+        e.str("correlation_id")?;
+        e.str(val)?;
     } else {
         e.null()?;
     }
@@ -3418,6 +3454,7 @@ pub fn decode_start_actor_command(
     let __result = {
         let mut actor_ref: Option<String> = None;
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
+        let mut correlation_id: Option<Option<String>> = Some(None);
         let mut count: Option<u16> = None;
         let mut host_id: Option<String> = None;
         let mut lattice_id: Option<String> = None;
@@ -3449,9 +3486,17 @@ pub fn decode_start_actor_command(
                             })?))
                         }
                     }
-                    2 => count = Some(d.u16()?),
-                    3 => host_id = Some(d.str()?.to_string()),
-                    4 => lattice_id = Some(d.str()?.to_string()),
+                    2 => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    3 => count = Some(d.u16()?),
+                    4 => host_id = Some(d.str()?.to_string()),
+                    5 => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -3473,6 +3518,14 @@ pub fn decode_start_actor_command(
                             })?))
                         }
                     }
+                    "correlation_id" => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
                     "count" => count = Some(d.u16()?),
                     "hostId" => host_id = Some(d.str()?.to_string()),
                     "latticeId" => lattice_id = Some(d.str()?.to_string()),
@@ -3489,12 +3542,13 @@ pub fn decode_start_actor_command(
                 ));
             },
             annotations: annotations.unwrap(),
+            correlation_id: correlation_id.unwrap(),
 
             count: if let Some(__x) = count {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StartActorCommand.count (#2)".to_string(),
+                    "missing field StartActorCommand.count (#3)".to_string(),
                 ));
             },
 
@@ -3502,7 +3556,7 @@ pub fn decode_start_actor_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StartActorCommand.host_id (#3)".to_string(),
+                    "missing field StartActorCommand.host_id (#4)".to_string(),
                 ));
             },
 
@@ -3510,7 +3564,7 @@ pub fn decode_start_actor_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StartActorCommand.lattice_id (#4)".to_string(),
+                    "missing field StartActorCommand.lattice_id (#5)".to_string(),
                 ));
             },
         }
@@ -3530,6 +3584,9 @@ pub struct StartProviderCommand {
     /// exceed 500KB
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub configuration: Option<ConfigurationString>,
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub correlation_id: Option<String>,
     /// The host ID on which to start the provider
     #[serde(rename = "hostId")]
     #[serde(default)]
@@ -3558,7 +3615,7 @@ pub fn encode_start_provider_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(6)?;
+    e.map(7)?;
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
         encode_annotation_map(e, val)?;
@@ -3568,6 +3625,12 @@ where
     if let Some(val) = val.configuration.as_ref() {
         e.str("configuration")?;
         encode_configuration_string(e, val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.correlation_id.as_ref() {
+        e.str("correlation_id")?;
+        e.str(val)?;
     } else {
         e.null()?;
     }
@@ -3590,6 +3653,7 @@ pub fn decode_start_provider_command(
     let __result = {
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
         let mut configuration: Option<Option<ConfigurationString>> = Some(None);
+        let mut correlation_id: Option<Option<String>> = Some(None);
         let mut host_id: Option<String> = None;
         let mut lattice_id: Option<String> = None;
         let mut link_name: Option<String> = None;
@@ -3629,10 +3693,18 @@ pub fn decode_start_provider_command(
                             Some(Some( decode_configuration_string(d).map_err(|e| format!("decoding 'org.wasmcloud.lattice.control#ConfigurationString': {}", e))? ))
                         }
                     }
-                    2 => host_id = Some(d.str()?.to_string()),
-                    3 => lattice_id = Some(d.str()?.to_string()),
-                    4 => link_name = Some(d.str()?.to_string()),
-                    5 => provider_ref = Some(d.str()?.to_string()),
+                    2 => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    3 => host_id = Some(d.str()?.to_string()),
+                    4 => lattice_id = Some(d.str()?.to_string()),
+                    5 => link_name = Some(d.str()?.to_string()),
+                    6 => provider_ref = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -3661,6 +3733,14 @@ pub fn decode_start_provider_command(
                             Some(Some( decode_configuration_string(d).map_err(|e| format!("decoding 'org.wasmcloud.lattice.control#ConfigurationString': {}", e))? ))
                         }
                     }
+                    "correlation_id" => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
                     "hostId" => host_id = Some(d.str()?.to_string()),
                     "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     "linkName" => link_name = Some(d.str()?.to_string()),
@@ -3672,12 +3752,13 @@ pub fn decode_start_provider_command(
         StartProviderCommand {
             annotations: annotations.unwrap(),
             configuration: configuration.unwrap(),
+            correlation_id: correlation_id.unwrap(),
 
             host_id: if let Some(__x) = host_id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StartProviderCommand.host_id (#2)".to_string(),
+                    "missing field StartProviderCommand.host_id (#3)".to_string(),
                 ));
             },
 
@@ -3685,7 +3766,7 @@ pub fn decode_start_provider_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StartProviderCommand.lattice_id (#3)".to_string(),
+                    "missing field StartProviderCommand.lattice_id (#4)".to_string(),
                 ));
             },
 
@@ -3693,7 +3774,7 @@ pub fn decode_start_provider_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StartProviderCommand.link_name (#4)".to_string(),
+                    "missing field StartProviderCommand.link_name (#5)".to_string(),
                 ));
             },
 
@@ -3701,7 +3782,7 @@ pub fn decode_start_provider_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StartProviderCommand.provider_ref (#5)".to_string(),
+                    "missing field StartProviderCommand.provider_ref (#6)".to_string(),
                 ));
             },
         }
@@ -3721,6 +3802,9 @@ pub struct StopActorCommand {
     /// annotations will be stopped
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub annotations: Option<AnnotationMap>,
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub correlation_id: Option<String>,
     /// The number of actors to stop
     /// A zero value means stop all actors
     #[serde(default)]
@@ -3745,12 +3829,18 @@ pub fn encode_stop_actor_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(5)?;
+    e.map(6)?;
     e.str("actorId")?;
     e.str(&val.actor_id)?;
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
         encode_annotation_map(e, val)?;
+    } else {
+        e.null()?;
+    }
+    if let Some(val) = val.correlation_id.as_ref() {
+        e.str("correlation_id")?;
+        e.str(val)?;
     } else {
         e.null()?;
     }
@@ -3771,6 +3861,7 @@ pub fn decode_stop_actor_command(
     let __result = {
         let mut actor_id: Option<String> = None;
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
+        let mut correlation_id: Option<Option<String>> = Some(None);
         let mut count: Option<u16> = None;
         let mut host_id: Option<String> = None;
         let mut lattice_id: Option<String> = None;
@@ -3802,9 +3893,17 @@ pub fn decode_stop_actor_command(
                             })?))
                         }
                     }
-                    2 => count = Some(d.u16()?),
-                    3 => host_id = Some(d.str()?.to_string()),
-                    4 => lattice_id = Some(d.str()?.to_string()),
+                    2 => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    3 => count = Some(d.u16()?),
+                    4 => host_id = Some(d.str()?.to_string()),
+                    5 => lattice_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -3826,6 +3925,14 @@ pub fn decode_stop_actor_command(
                             })?))
                         }
                     }
+                    "correlation_id" => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
                     "count" => count = Some(d.u16()?),
                     "hostId" => host_id = Some(d.str()?.to_string()),
                     "latticeId" => lattice_id = Some(d.str()?.to_string()),
@@ -3842,12 +3949,13 @@ pub fn decode_stop_actor_command(
                 ));
             },
             annotations: annotations.unwrap(),
+            correlation_id: correlation_id.unwrap(),
 
             count: if let Some(__x) = count {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopActorCommand.count (#2)".to_string(),
+                    "missing field StopActorCommand.count (#3)".to_string(),
                 ));
             },
 
@@ -3855,7 +3963,7 @@ pub fn decode_stop_actor_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopActorCommand.host_id (#3)".to_string(),
+                    "missing field StopActorCommand.host_id (#4)".to_string(),
                 ));
             },
 
@@ -3863,7 +3971,7 @@ pub fn decode_stop_actor_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopActorCommand.lattice_id (#4)".to_string(),
+                    "missing field StopActorCommand.lattice_id (#5)".to_string(),
                 ));
             },
         }
@@ -3873,6 +3981,9 @@ pub fn decode_stop_actor_command(
 /// A command sent to request that the given host purge and stop
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StopHostCommand {
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub correlation_id: Option<String>,
     /// The ID of the target host
     #[serde(rename = "hostId")]
     #[serde(default)]
@@ -3896,7 +4007,13 @@ pub fn encode_stop_host_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(3)?;
+    e.map(4)?;
+    if let Some(val) = val.correlation_id.as_ref() {
+        e.str("correlation_id")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
     e.str("hostId")?;
     e.str(&val.host_id)?;
     e.str("latticeId")?;
@@ -3916,6 +4033,7 @@ pub fn decode_stop_host_command(
     d: &mut wasmbus_rpc::cbor::Decoder<'_>,
 ) -> Result<StopHostCommand, RpcError> {
     let __result = {
+        let mut correlation_id: Option<Option<String>> = Some(None);
         let mut host_id: Option<String> = None;
         let mut lattice_id: Option<String> = None;
         let mut timeout: Option<Option<u64>> = Some(None);
@@ -3933,9 +4051,17 @@ pub fn decode_stop_host_command(
             let len = d.fixed_array()?;
             for __i in 0..(len as usize) {
                 match __i {
-                    0 => host_id = Some(d.str()?.to_string()),
-                    1 => lattice_id = Some(d.str()?.to_string()),
-                    2 => {
+                    0 => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    1 => host_id = Some(d.str()?.to_string()),
+                    2 => lattice_id = Some(d.str()?.to_string()),
+                    3 => {
                         timeout = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
                             d.skip()?;
                             Some(None)
@@ -3951,6 +4077,14 @@ pub fn decode_stop_host_command(
             let len = d.fixed_map()?;
             for __i in 0..(len as usize) {
                 match d.str()? {
+                    "correlation_id" => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
                     "hostId" => host_id = Some(d.str()?.to_string()),
                     "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     "timeout" => {
@@ -3966,11 +4100,13 @@ pub fn decode_stop_host_command(
             }
         }
         StopHostCommand {
+            correlation_id: correlation_id.unwrap(),
+
             host_id: if let Some(__x) = host_id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopHostCommand.host_id (#0)".to_string(),
+                    "missing field StopHostCommand.host_id (#1)".to_string(),
                 ));
             },
 
@@ -3978,7 +4114,7 @@ pub fn decode_stop_host_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopHostCommand.lattice_id (#1)".to_string(),
+                    "missing field StopHostCommand.lattice_id (#2)".to_string(),
                 ));
             },
             timeout: timeout.unwrap(),
@@ -3997,6 +4133,9 @@ pub struct StopProviderCommand {
     #[serde(rename = "contractId")]
     #[serde(default)]
     pub contract_id: String,
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub correlation_id: Option<String>,
     /// Host ID on which to stop the provider
     #[serde(rename = "hostId")]
     #[serde(default)]
@@ -4025,7 +4164,7 @@ pub fn encode_stop_provider_command<W: wasmbus_rpc::cbor::Write>(
 where
     <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
 {
-    e.map(6)?;
+    e.map(7)?;
     if let Some(val) = val.annotations.as_ref() {
         e.str("annotations")?;
         encode_annotation_map(e, val)?;
@@ -4034,6 +4173,12 @@ where
     }
     e.str("contractId")?;
     e.str(&val.contract_id)?;
+    if let Some(val) = val.correlation_id.as_ref() {
+        e.str("correlation_id")?;
+        e.str(val)?;
+    } else {
+        e.null()?;
+    }
     e.str("hostId")?;
     e.str(&val.host_id)?;
     e.str("latticeId")?;
@@ -4053,6 +4198,7 @@ pub fn decode_stop_provider_command(
     let __result = {
         let mut annotations: Option<Option<AnnotationMap>> = Some(None);
         let mut contract_id: Option<String> = None;
+        let mut correlation_id: Option<Option<String>> = Some(None);
         let mut host_id: Option<String> = None;
         let mut lattice_id: Option<String> = None;
         let mut link_name: Option<String> = None;
@@ -4085,10 +4231,18 @@ pub fn decode_stop_provider_command(
                         }
                     }
                     1 => contract_id = Some(d.str()?.to_string()),
-                    2 => host_id = Some(d.str()?.to_string()),
-                    3 => lattice_id = Some(d.str()?.to_string()),
-                    4 => link_name = Some(d.str()?.to_string()),
-                    5 => provider_id = Some(d.str()?.to_string()),
+                    2 => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
+                    3 => host_id = Some(d.str()?.to_string()),
+                    4 => lattice_id = Some(d.str()?.to_string()),
+                    5 => link_name = Some(d.str()?.to_string()),
+                    6 => provider_id = Some(d.str()?.to_string()),
                     _ => d.skip()?,
                 }
             }
@@ -4110,6 +4264,14 @@ pub fn decode_stop_provider_command(
                         }
                     }
                     "contractId" => contract_id = Some(d.str()?.to_string()),
+                    "correlation_id" => {
+                        correlation_id = if wasmbus_rpc::cbor::Type::Null == d.datatype()? {
+                            d.skip()?;
+                            Some(None)
+                        } else {
+                            Some(Some(d.str()?.to_string()))
+                        }
+                    }
                     "hostId" => host_id = Some(d.str()?.to_string()),
                     "latticeId" => lattice_id = Some(d.str()?.to_string()),
                     "linkName" => link_name = Some(d.str()?.to_string()),
@@ -4128,12 +4290,13 @@ pub fn decode_stop_provider_command(
                     "missing field StopProviderCommand.contract_id (#1)".to_string(),
                 ));
             },
+            correlation_id: correlation_id.unwrap(),
 
             host_id: if let Some(__x) = host_id {
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopProviderCommand.host_id (#2)".to_string(),
+                    "missing field StopProviderCommand.host_id (#3)".to_string(),
                 ));
             },
 
@@ -4141,7 +4304,7 @@ pub fn decode_stop_provider_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopProviderCommand.lattice_id (#3)".to_string(),
+                    "missing field StopProviderCommand.lattice_id (#4)".to_string(),
                 ));
             },
 
@@ -4149,7 +4312,7 @@ pub fn decode_stop_provider_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopProviderCommand.link_name (#4)".to_string(),
+                    "missing field StopProviderCommand.link_name (#5)".to_string(),
                 ));
             },
 
@@ -4157,7 +4320,7 @@ pub fn decode_stop_provider_command(
                 __x
             } else {
                 return Err(RpcError::Deser(
-                    "missing field StopProviderCommand.provider_id (#5)".to_string(),
+                    "missing field StopProviderCommand.provider_id (#6)".to_string(),
                 ));
             },
         }

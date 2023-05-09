@@ -429,6 +429,9 @@ structure StartActorCommand {
     /// A zero value will be interpreted as 1.
     @required
     count: U16,
+
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    correlation_id: String,
 }
 
 /// A command sent to a host requesting a capability provider be started with the 
@@ -454,11 +457,13 @@ structure StartProviderCommand {
     /// example, autonomous agents may wish to "tag" start requests as part of a given deployment    
     annotations: AnnotationMap,
 
-
     /// Optional provider configuration in the form of an opaque string. Many
     /// providers prefer base64-encoded JSON here, though that data should never
     /// exceed 500KB
-    configuration: ConfigurationString
+    configuration: ConfigurationString,
+
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    correlation_id: String,
 }
 
 structure ScaleActorCommand {
@@ -485,6 +490,9 @@ structure ScaleActorCommand {
     /// The target number of actors
     @required
     count: U16,
+
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    correlation_id: String,
 }
 
 /// A command sent to a host to request that instances of a given actor
@@ -510,7 +518,10 @@ structure StopActorCommand {
     /// Optional set of annotations used to describe the nature of this
     /// stop request. If supplied, the only instances of this actor with these
     /// annotations will be stopped
-    annotations: AnnotationMap
+    annotations: AnnotationMap,
+
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    correlation_id: String,
 }
 
 /// A request to stop the given provider on the indicated host
@@ -537,7 +548,10 @@ structure StopProviderCommand {
 
     /// Optional set of annotations used to describe the nature of this
     /// stop request
-    annotations: AnnotationMap
+    annotations: AnnotationMap,
+
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    correlation_id: String,
 }
 
 /// A command sent to request that the given host purge and stop
@@ -551,7 +565,10 @@ structure StopHostCommand {
     hostId: String,
 
     /// An optional timeout, in seconds
-    timeout: U64
+    timeout: U64,
+
+    /// Optional correlation ID which will be attached to all resulting events from this command
+    correlation_id: String,
 }
 
 /// A command instructing a specific host to perform a live update
