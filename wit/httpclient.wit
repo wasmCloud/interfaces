@@ -1,0 +1,26 @@
+package wasmcloud:httpclient@0.1.0
+
+interface types {
+    record http-request {
+        method: string,
+        url: string,
+        headers: map<string, string>,
+        body: option<list<u8>>        
+    }
+
+    record http-response {
+        status-code: u16,
+        headers: map<string, string>,
+        body: option<list<u8>>
+    }
+}
+
+interface client {
+    use types.{http-request, http-response}
+
+    request: func(request: http-request) -> result<http-response, string>
+}
+
+default world httpclient {
+    import client
+}

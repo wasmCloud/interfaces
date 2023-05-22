@@ -1,0 +1,15 @@
+package wasmcloud:messaging@0.1.0
+
+interface handler {
+    handle-message: func(subject: string, body: option<list<u8>>, reply-to: option<string>) -> result<_, string>
+}
+
+interface consumer {
+    request: func(subject: string, body: option<list<u8>>, timeout-ms: u32) -> result<_, string>
+    publish: func(subject: string, body: option<list<u8>>, reply-to: option<string>) -> result<_, string>
+}
+
+default world messaging {
+    import consumer
+    export handler
+}
