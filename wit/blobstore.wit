@@ -1,0 +1,44 @@
+package wasmcloud:blobstore@0.1.0
+
+interface types {
+    record container-info {
+        container-id: string
+        created-at: u64
+    }
+
+    record object-info {
+        container-id: string
+        object-id: string
+        content-length: u64
+        last-modified: u64
+        content-type: option<string>
+        content-encoding: option<string>
+    }
+
+    record chunk {
+        object-id: string
+        container-id: string
+        bytes: list<u8>
+        offset: u64
+        is-last: bool
+    }
+}
+
+interface consumer {
+    use types.{container-info, object-info, chunk}
+
+    container-exists: func(container-id: string) -> bool
+    create-container: func(container-id: string) -> result<_, string>
+    remove-container: func(container-id: string) -> result<_, string>
+    get-container-info: func(container-id: string) -> result<option<container-info>, string>        
+    get-object-info: func(container-id: string, object-id: string) -> result<option<object-info>, string>
+    remove-object: func(container-id: string, object-id: string) -> result<bool, string>
+    put-object: func(chunk: chunk, content-type: string, content-encoding: string) -> result<string, string>
+    put-chunk: func(stream-id: string, chunk: chunk, cancel: bool) -> result<_, string>
+}
+
+interface handler {
+    use types.chunk
+
+    receive-chunk: func(chunk: chunk) -> result<bool, string>
+}
