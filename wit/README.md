@@ -19,10 +19,9 @@ In the following list, the `Phase` refers to which phase of _our_ migration and 
 ### Core Interfaces
 The following are considered core or "first party" supported interfaces.
 
-| Interface | Phase | WASI Std | Description |
-|--|:-:|--|--|
-| `logging` | 1 | [wasi-logging](https://github.com/WebAssembly/wasi-logging) | Standard level-oriented logging |
-| `numbergen` | 1 | **N/A** | Generate random numbers and Guids |
+| wasmCloud Interface | Phase | WASI Std | Description |
+|:-:|:-:|--|--|
+| N/A | 1 | [wasi-logging](https://github.com/WebAssembly/wasi-logging) | Standard level-oriented logging |
 | `messaging` | 1 | [wasi-messaging](https://github.com/WebAssembly/wasi-messaging) | Interact with message brokers like NATS or RabbitMQ |
 | `keyvalue` | 1 | [wasi-keyvalue](https://github.com/WebAssembly/wasi-keyvalue) | Interact with key value stores |
 | `blobstore` | 1 | [wasi-blob-store](https://github.com/WebAssembly/wasi-blob-store) | Interact with blob stores, which could abstract over a file system |
