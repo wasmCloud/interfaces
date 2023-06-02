@@ -1,0 +1,32 @@
+// The HTTP client interface
+// This is a phase 1 interface, and is subject to change
+
+package wasmcloud:httpclient@0.1.0
+
+interface types {
+    // Represents a single HTTP request
+    record http-request {
+        method: string,
+        url: string,
+        headers: map<string, string>,
+        body: option<list<u8>>        
+    }
+
+    // Represents a single HTTP response
+    record http-response {
+        status-code: u16,
+        headers: map<string, string>,
+        body: option<list<u8>>
+    }
+}
+
+interface client {
+    use types.{http-request, http-response}
+
+    // Performs an  HTTP request
+    request: func(request: http-request) -> result<http-response, string>
+}
+
+default world httpclient {
+    import client
+}

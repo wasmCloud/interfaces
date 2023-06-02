@@ -1,0 +1,32 @@
+// Key Value interface
+// This is a phase 1 interface, and is subject to change
+// This interface has been dramatically trimmed from the previous wasmcloud:keyvalue in order to
+// prepare for eventually adopting (during phase 2) the wasi-keyvalue interface
+package wasmcloud:keyvalue@0.1.0
+
+// An interface for reading and writing keys and their respective values
+interface readwrite {
+    // Retrieves a string value from the store
+    get: func(key: string) -> result<option<string>, error>
+
+	// Sets a value in the store
+	set: func(key: string, value: string) -> result<_, error>
+
+    // Deletes a value from the store
+	delete: func(key: key) -> result<_, error>
+
+	// Perform a (potentially) optimized check to see if a key exists. Provider makes no guarantee this is faster than a `get`
+	exists: func(key: key) -> result<bool, error>
+}
+
+// An interface for performing atomic operations
+interface atomic {
+    // Atomoically increment a number by an amount. Use negative numbers for decrement
+    increment: func(key: string, amount: i32) -> result<i32, error>
+}
+
+// Keyvalue world for wasmCloud. Note that set and list operations are no longer supported
+default world keyvalue {
+    import readwrite
+    import atomic
+}

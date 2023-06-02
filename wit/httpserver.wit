@@ -1,0 +1,32 @@
+// This is the HTTP server interface
+// This is a phase 1 interface, and is subject to change
+
+package wasmcloud:httpserver@0.1.0
+
+interface types {
+    // Represents an HTTP request. NOTE: may get moved into a shared set of HTTP types
+    record http-request {
+        method: string,
+        url: string,
+        headers: map<string, string>,
+        body: option<list<u8>>        
+    }
+
+    // Represents an HTTP response
+    record http-response {
+        status-code: u16,
+        headers: map<string, string>,
+        body: option<list<u8>>
+    }
+}
+
+interface handler {
+    use types.{http-request, http-response}
+
+    // Callback invoked to handle an incoming HTTP request
+    handle-request: func(request: http-request) -> result<http-response, string>
+}
+
+default world httpclient {
+    export handler
+}
