@@ -30,7 +30,7 @@ func MDecodeActorLinks(d *msgpack.Decoder) (ActorLinks, error) {
 	if err != nil {
 		return make([]LinkDefinition, 0), err
 	}
-	val := make([]LinkDefinition, size)
+	val := make([]LinkDefinition, 0, size)
 	for i := uint32(0); i < size; i++ {
 		item, err := MDecodeLinkDefinition(d)
 		if err != nil {
@@ -65,7 +65,7 @@ func CDecodeActorLinks(d *cbor.Decoder) (ActorLinks, error) {
 	if err != nil {
 		return make([]LinkDefinition, 0), err
 	}
-	val := make([]LinkDefinition, size)
+	val := make([]LinkDefinition, 0, size)
 	for i := uint32(0); i < size; i++ {
 		item, err := CDecodeLinkDefinition(d)
 		if err != nil {
@@ -131,7 +131,7 @@ func MDecodeClusterIssuers(d *msgpack.Decoder) (ClusterIssuers, error) {
 	if err != nil {
 		return make([]ClusterIssuerKey, 0), err
 	}
-	val := make([]ClusterIssuerKey, size)
+	val := make([]ClusterIssuerKey, 0, size)
 	for i := uint32(0); i < size; i++ {
 		item, err := MDecodeClusterIssuerKey(d)
 		if err != nil {
@@ -166,7 +166,7 @@ func CDecodeClusterIssuers(d *cbor.Decoder) (ClusterIssuers, error) {
 	if err != nil {
 		return make([]ClusterIssuerKey, 0), err
 	}
-	val := make([]ClusterIssuerKey, size)
+	val := make([]ClusterIssuerKey, 0, size)
 	for i := uint32(0); i < size; i++ {
 		item, err := CDecodeClusterIssuerKey(d)
 		if err != nil {
@@ -255,9 +255,9 @@ func CDecodeHealthCheckRequest(d *cbor.Decoder) (HealthCheckRequest, error) {
 // Return value from actors and providers for health check status
 type HealthCheckResponse struct {
 	// A flag that indicates the the actor is healthy
-	Healthy bool
+	Healthy bool `json:"healthy"`
 	// A message containing additional information about the actors health
-	Message string
+	Message string `json:"message"`
 }
 
 // MEncode serializes a HealthCheckResponse using msgpack
@@ -349,32 +349,34 @@ func CDecodeHealthCheckResponse(d *cbor.Decoder) (HealthCheckResponse, error) {
 
 // initialization data for a capability provider
 type HostData struct {
-	HostId             string
-	LatticeRpcPrefix   string
-	LinkName           string
-	LatticeRpcUserJwt  string
-	LatticeRpcUserSeed string
-	LatticeRpcUrl      string
-	ProviderKey        string
-	InvocationSeed     string
-	EnvValues          HostEnvValues
-	InstanceId         string
+	HostId             string        `json:"host_id"`
+	LatticeRpcPrefix   string        `json:"lattice_rpc_prefix"`
+	LinkName           string        `json:"link_name"`
+	LatticeRpcUserJwt  string        `json:"lattice_rpc_user_jwt"`
+	LatticeRpcUserSeed string        `json:"lattice_rpc_user_seed"`
+	LatticeRpcUrl      string        `json:"lattice_rpc_url"`
+	ProviderKey        string        `json:"provider_key"`
+	InvocationSeed     string        `json:"invocation_seed"`
+	EnvValues          HostEnvValues `json:"env_values"`
+	InstanceId         string        `json:"instance_id"`
 	// initial list of links for provider
-	LinkDefinitions ActorLinks
+	LinkDefinitions ActorLinks `json:"link_definitions"`
 	// list of cluster issuers
-	ClusterIssuers ClusterIssuers
+	ClusterIssuers ClusterIssuers `json:"cluster_issuers"`
 	// Optional configuration JSON sent to a given link name of a provider
 	// without an actor context
-	ConfigJson string
+	ConfigJson string `json:"config_json"`
 	// Host-wide default RPC timeout for rpc messages, in milliseconds.  Defaults to 2000.
-	DefaultRpcTimeoutMs uint64
+	DefaultRpcTimeoutMs uint64 `json:"default_rpc_timeout_ms"`
 	// True if structured logging is enabled for the host. Providers should use the same setting as the host.
-	StructuredLogging bool
+	StructuredLogging bool `json:"structured_logging"`
+	// The log level providers should log at
+	LogLevel LogLevel `json:"log_level"`
 }
 
 // MEncode serializes a HostData using msgpack
 func (o *HostData) MEncode(encoder msgpack.Writer) error {
-	encoder.WriteMapSize(15)
+	encoder.WriteMapSize(16)
 	encoder.WriteString("host_id")
 	encoder.WriteString(o.HostId)
 	encoder.WriteString("lattice_rpc_prefix")
@@ -405,6 +407,8 @@ func (o *HostData) MEncode(encoder msgpack.Writer) error {
 	encoder.WriteUint64(o.DefaultRpcTimeoutMs)
 	encoder.WriteString("structured_logging")
 	encoder.WriteBool(o.StructuredLogging)
+	encoder.WriteString("log_level")
+	o.LogLevel.MEncode(encoder)
 
 	return encoder.CheckError()
 }
@@ -456,6 +460,8 @@ func MDecodeHostData(d *msgpack.Decoder) (HostData, error) {
 			val.DefaultRpcTimeoutMs, err = d.ReadUint64()
 		case "structured_logging":
 			val.StructuredLogging, err = d.ReadBool()
+		case "log_level":
+			val.LogLevel, err = MDecodeLogLevel(d)
 		default:
 			err = d.Skip()
 		}
@@ -468,7 +474,7 @@ func MDecodeHostData(d *msgpack.Decoder) (HostData, error) {
 
 // CEncode serializes a HostData using cbor
 func (o *HostData) CEncode(encoder cbor.Writer) error {
-	encoder.WriteMapSize(15)
+	encoder.WriteMapSize(16)
 	encoder.WriteString("host_id")
 	encoder.WriteString(o.HostId)
 	encoder.WriteString("lattice_rpc_prefix")
@@ -499,6 +505,8 @@ func (o *HostData) CEncode(encoder cbor.Writer) error {
 	encoder.WriteUint64(o.DefaultRpcTimeoutMs)
 	encoder.WriteString("structured_logging")
 	encoder.WriteBool(o.StructuredLogging)
+	encoder.WriteString("log_level")
+	o.LogLevel.CEncode(encoder)
 
 	return encoder.CheckError()
 }
@@ -553,6 +561,8 @@ func CDecodeHostData(d *cbor.Decoder) (HostData, error) {
 			val.DefaultRpcTimeoutMs, err = d.ReadUint64()
 		case "structured_logging":
 			val.StructuredLogging, err = d.ReadBool()
+		case "log_level":
+			val.LogLevel, err = CDecodeLogLevel(d)
 		default:
 			err = d.Skip()
 		}
@@ -637,17 +647,17 @@ func CDecodeHostEnvValues(d *cbor.Decoder) (HostEnvValues, error) {
 
 // RPC message to capability provider
 type Invocation struct {
-	Origin        WasmCloudEntity
-	Target        WasmCloudEntity
-	Operation     string
-	Msg           []byte
-	Id            string
-	EncodedClaims string
-	HostId        string
+	Origin        WasmCloudEntity `json:"origin"`
+	Target        WasmCloudEntity `json:"target"`
+	Operation     string          `json:"operation"`
+	Msg           []byte          `json:"msg"`
+	Id            string          `json:"id"`
+	EncodedClaims string          `json:"encoded_claims"`
+	HostId        string          `json:"host_id"`
 	// total message size (optional)
-	ContentLength uint64
+	ContentLength uint64 `json:"content_length"`
 	// Open Telemetry tracing support
-	TraceContext *TraceContext
+	TraceContext *TraceContext `json:"traceContext"`
 }
 
 // MEncode serializes a Invocation using msgpack
@@ -812,13 +822,13 @@ func CDecodeInvocation(d *cbor.Decoder) (Invocation, error) {
 // Response to an invocation
 type InvocationResponse struct {
 	// serialize response message
-	Msg []byte
+	Msg []byte `json:"msg"`
 	// id connecting this response to the invocation
-	InvocationId string
+	InvocationId string `json:"invocation_id"`
 	// optional error message
-	Error string
+	Error string `json:"error"`
 	// total message size (optional)
-	ContentLength uint64
+	ContentLength uint64 `json:"content_length"`
 }
 
 // MEncode serializes a InvocationResponse using msgpack
@@ -927,14 +937,14 @@ func CDecodeInvocationResponse(d *cbor.Decoder) (InvocationResponse, error) {
 // Link definition for binding actor to provider
 type LinkDefinition struct {
 	// actor public key
-	ActorId string
+	ActorId string `json:"actor_id"`
 	// provider public key
-	ProviderId string
+	ProviderId string `json:"provider_id"`
 	// link name
-	LinkName string
+	LinkName string `json:"link_name"`
 	// contract id
-	ContractId string
-	Values     LinkSettings
+	ContractId string       `json:"contract_id"`
+	Values     LinkSettings `json:"values"`
 }
 
 // MEncode serializes a LinkDefinition using msgpack
@@ -1120,6 +1130,38 @@ func CDecodeLinkSettings(d *cbor.Decoder) (LinkSettings, error) {
 	return val, nil
 }
 
+type LogLevel string
+
+// MEncode serializes a LogLevel using msgpack
+func (o *LogLevel) MEncode(encoder msgpack.Writer) error {
+	encoder.WriteString(string(*o))
+	return encoder.CheckError()
+}
+
+// MDecodeLogLevel deserializes a LogLevel using msgpack
+func MDecodeLogLevel(d *msgpack.Decoder) (LogLevel, error) {
+	val, err := d.ReadString()
+	if err != nil {
+		return "", err
+	}
+	return LogLevel(val), nil
+}
+
+// CEncode serializes a LogLevel using cbor
+func (o *LogLevel) CEncode(encoder cbor.Writer) error {
+	encoder.WriteString(string(*o))
+	return encoder.CheckError()
+}
+
+// CDecodeLogLevel deserializes a LogLevel using cbor
+func CDecodeLogLevel(d *cbor.Decoder) (LogLevel, error) {
+	val, err := d.ReadString()
+	if err != nil {
+		return "", err
+	}
+	return LogLevel(val), nil
+}
+
 // Environment settings for initializing a capability provider
 type TraceContext map[string]string
 
@@ -1193,9 +1235,9 @@ func CDecodeTraceContext(d *cbor.Decoder) (TraceContext, error) {
 }
 
 type WasmCloudEntity struct {
-	PublicKey  string
-	LinkName   string
-	ContractId CapabilityContractId
+	PublicKey  string               `json:"public_key"`
+	LinkName   string               `json:"link_name"`
+	ContractId CapabilityContractId `json:"contract_id"`
 }
 
 // MEncode serializes a WasmCloudEntity using msgpack
@@ -1373,4 +1415,4 @@ func (s *ActorSender) HealthRequest(ctx *Context, arg HealthCheckRequest) (*Heal
 	return &resp, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.5.0
+// This file is generated automatically using wasmcloud/weld-codegen 0.7.0
