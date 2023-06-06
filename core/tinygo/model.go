@@ -83,7 +83,7 @@ func MDecodeIdentifierList(d *msgpack.Decoder) (IdentifierList, error) {
 	if err != nil {
 		return make([]string, 0), err
 	}
-	val := make([]string, 0, size)
+	val := make([]string, size)
 	for i := uint32(0); i < size; i++ {
 		item, err := d.ReadString()
 		if err != nil {
@@ -118,7 +118,7 @@ func CDecodeIdentifierList(d *cbor.Decoder) (IdentifierList, error) {
 	if err != nil {
 		return make([]string, 0), err
 	}
-	val := make([]string, 0, size)
+	val := make([]string, size)
 	for i := uint32(0); i < size; i++ {
 		item, err := d.ReadString()
 		if err != nil {
@@ -169,4 +169,4 @@ func CDecodeUnit(d *cbor.Decoder) (Unit, error) {
 	return Unit{}, nil
 }
 
-// This file is generated automatically using wasmcloud/weld-codegen 0.7.0
+// This file is generated automatically using wasmcloud/weld-codegen 0.5.0
