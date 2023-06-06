@@ -1,5 +1,5 @@
 // wasmcloud core data models for messaging and code generation
-package actor
+package core
 
 import (
 	cbor "github.com/wasmcloud/tinygo-cbor"       //nolint

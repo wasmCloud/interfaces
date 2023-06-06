@@ -1,5 +1,5 @@
 // wasmcloud platform core data structures
-package actor
+package core
 
 import (
 	cbor "github.com/wasmcloud/tinygo-cbor"       //nolint
