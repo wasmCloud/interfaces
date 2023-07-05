@@ -53,15 +53,15 @@ interface types {
   }
 
   record invocation {
-      origin: wasmcloud-entity,
-      target: wasmcloud-entity,
-      operation: string,
-      msg: blob,
-      id: string,
+      origin:         wasmcloud-entity,
+      target:         wasmcloud-entity,
+      operation:      string,
+      msg:            blob,
+      id:             string,
       encoded-claims: string,
-      host-id: string,
+      host-id:        string,
       content-length: u64,
-      trace-context: trace-context,
+      trace-context:  trace-context,
     }
 
   record wasmcloud-entity {
@@ -71,9 +71,9 @@ interface types {
   }
 
   record invocation-response {
-    msg: blob,
-    invocation-id: string,
-    error: string,
+    msg:            blob,
+    invocation-id:  string,
+    error:          string,
     content-length: u64,
   }
 }
