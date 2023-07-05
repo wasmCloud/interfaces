@@ -39,7 +39,7 @@ interface types {
       msg:            blob,
       id:             string,
       encoded-claims: string,
-      source-host-id:        string,
+      source-host-id: string,
       content-length: u64,
       trace-context:  trace-context,
     }
