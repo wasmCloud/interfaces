@@ -32,25 +32,6 @@ interface types {
     message: string,
   }
 
-  record host-data {
-    host-id: string,
-    lattice-rpc-prefix:     string,
-    link-name:              string,
-    lattice-rpc-user-jwt:   string,
-    lattice-rpc-user-seed:  string,
-    lattice-rpc-url:        string,
-    provider-key:           string,
-    invocation-seed:        string,
-    env-values:             host-env-values,
-    instance-id:            string,
-    link-definitions:       actor-links,
-    cluster-issuers:        cluster-issuers,
-    config-json:            string,
-    default-rpc-timeout-ms: u64,
-    structured-logging:     bool,
-    log-level:              log-level,
-  }
-
   record invocation {
       origin:         wasmcloud-entity,
       target:         wasmcloud-entity,
