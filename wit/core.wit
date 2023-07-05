@@ -1,14 +1,15 @@
 package wasmcloud:core@0.1.0
 
 interface types {
-  type link-settings =          tuple<string, string>
-  type host-env-values =        tuple<string, string>
-  type actor-links =            list<link-defination>
+  type link-settings =          list<tuple<string, string>>
+  type host-env-values =        list<tuple<string, string>>
+  type trace-context =          list<tuple<string, string>>
+  type actor-links =            list<link-definition>
   type cluster-issuers =        list<cluster-issuer-key>
   type cluster-issuer-key =     string 
   type capability-contract-id = string
   type blob =                   list<u8>
-  type trace-context =          tuple<string, string>
+  type public-key =             string
 
   enum log-level {
     trace,
@@ -18,7 +19,7 @@ interface types {
     error,
   }
 
-  record link-defination {
+  record link-definition {
     actor-id:     string,
     provider-id:  string,
     link-name:    string,
@@ -31,8 +32,6 @@ interface types {
     message: string,
   }
 
-  record health-check-request { }
-  
   record host-data {
     host-id: string,
     lattice-rpc-prefix:     string,
@@ -44,7 +43,7 @@ interface types {
     invocation-seed:        string,
     env-values:             host-env-values,
     instance-id:            string,
-    link-definations:       actor-links,
+    link-definitions:       actor-links,
     cluster-issuers:        cluster-issuers,
     config-json:            string,
     default-rpc-timeout-ms: u64,
@@ -59,31 +58,36 @@ interface types {
       msg:            blob,
       id:             string,
       encoded-claims: string,
-      host-id:        string,
+      source-host-id:        string,
       content-length: u64,
       trace-context:  trace-context,
     }
 
-  record wasmcloud-entity {
-    public-key:   string,
-    link-name:    string,
-    contract-id:  capability-contract-id,
-  }
-
   record invocation-response {
     msg:            blob,
     invocation-id:  string,
-    error:          string,
+    error:          option<string>,
     content-length: u64,
+  }
+
+  record provider-identifier {
+    public-key: public-key,
+    contract-id: string,
+    link-name: string,
+  }
+
+  variant wasmcloud-entity {
+    actor(public-key),
+    provider(provider-identifier),
   }
 }
 
 interface health-check {
-  use types.{health-check-request, health-check-response}
+  use types.{health-check-response}
 
-  health-request: func(input: health-check-request) -> health-check-response
+  health-request: func() -> health-check-response
 }
 
 world wasmcloud-core {
-  use types.{host-data, invocation, invocation-response, health-check-request, health-check-response, link-defination}
+  use types.{host-data, invocation, invocation-response, health-check-response, link-definition, provider-identifier, wasmcloud-entity}
 }
