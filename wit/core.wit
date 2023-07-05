@@ -70,5 +70,5 @@ interface health-check {
 }
 
 world wasmcloud-core {
-  use types.{host-data, invocation, invocation-response, health-check-response, link-definition, provider-identifier, wasmcloud-entity}
+  use types.{invocation, invocation-response, health-check-response, link-definition, provider-identifier, wasmcloud-entity}
 }
