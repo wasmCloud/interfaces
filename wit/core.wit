@@ -52,9 +52,9 @@ interface types {
   }
 
   record provider-identifier {
-    public-key: public-key,
+    public-key:  public-key,
     contract-id: string,
-    link-name: string,
+    link-name:   string,
   }
 
   variant wasmcloud-entity {
