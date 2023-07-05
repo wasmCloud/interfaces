@@ -33,16 +33,16 @@ interface types {
   }
 
   record invocation {
-      origin:         wasmcloud-entity,
-      target:         wasmcloud-entity,
-      operation:      string,
-      msg:            blob,
-      id:             string,
-      encoded-claims: string,
-      source-host-id: string,
-      content-length: u64,
-      trace-context:  trace-context,
-    }
+    origin:         wasmcloud-entity,
+    target:         wasmcloud-entity,
+    operation:      string,
+    msg:            blob,
+    id:             string,
+    encoded-claims: string,
+    source-host-id: string,
+    content-length: u64,
+    trace-context:  trace-context,
+  }
 
   record invocation-response {
     msg:            blob,
