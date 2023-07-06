@@ -11,14 +11,6 @@ interface types {
   type blob =                   list<u8>
   type public-key =             string
 
-  enum log-level {
-    trace,
-    debug,
-    info,
-    warn,
-    error,
-  }
-
   record link-definition {
     actor-id:     string,
     provider-id:  string,
@@ -70,5 +62,6 @@ interface health-check {
 }
 
 world wasmcloud-core {
+  import wasi:logging/logging
   use types.{invocation, invocation-response, health-check-response, link-definition, provider-identifier, wasmcloud-entity}
 }
