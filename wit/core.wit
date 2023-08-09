@@ -1,0 +1,67 @@
+package wasmcloud:core@0.1.0
+
+interface types {
+  type link-settings =          list<tuple<string, string>>
+  type host-env-values =        list<tuple<string, string>>
+  type trace-context =          list<tuple<string, string>>
+  type actor-links =            list<link-definition>
+  type cluster-issuers =        list<cluster-issuer-key>
+  type cluster-issuer-key =     string 
+  type capability-contract-id = string
+  type blob =                   list<u8>
+  type public-key =             string
+
+  record link-definition {
+    actor-id:     string,
+    provider-id:  string,
+    link-name:    string,
+    contract-id:  string,
+    values:       option<link-settings>,
+  }
+
+  record health-check-response {
+    healthy: bool,
+    message: string,
+  }
+
+  record invocation {
+    origin:         wasmcloud-entity,
+    target:         wasmcloud-entity,
+    operation:      string,
+    msg:            blob,
+    id:             string,
+    encoded-claims: string,
+    source-host-id: string,
+    content-length: u64,
+    trace-context:  trace-context,
+  }
+
+  record invocation-response {
+    msg:            blob,
+    invocation-id:  string,
+    error:          option<string>,
+    content-length: u64,
+  }
+
+  record provider-identifier {
+    public-key:  public-key,
+    contract-id: string,
+    link-name:   string,
+  }
+
+  variant wasmcloud-entity {
+    actor(public-key),
+    provider(provider-identifier),
+  }
+}
+
+interface health-check {
+  use types.{health-check-response}
+
+  health-request: func() -> health-check-response
+}
+
+world wasmcloud-core {
+  import wasi:logging/logging
+  use types.{invocation, invocation-response, health-check-response, link-definition, provider-identifier, wasmcloud-entity}
+}
