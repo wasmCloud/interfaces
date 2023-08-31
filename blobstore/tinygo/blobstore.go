@@ -2097,8 +2097,8 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 	case "ContainerExists":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodeContainerId(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodeContainerId(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2108,11 +2108,11 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
 			size_enc.WriteBool(resp)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
 			enc.WriteBool(resp)
 			return &actor.Message{Method: "Blobstore.ContainerExists", Arg: buf}, nil
@@ -2120,8 +2120,8 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 	case "CreateContainer":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodeContainerId(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodeContainerId(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2136,8 +2136,8 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 	case "GetContainerInfo":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodeContainerId(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodeContainerId(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2147,13 +2147,13 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.CEncode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.CEncode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "Blobstore.GetContainerInfo", Arg: buf}, nil
 		}
 	case "ListContainers":
@@ -2163,20 +2163,20 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.CEncode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.CEncode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "Blobstore.ListContainers", Arg: buf}, nil
 		}
 	case "RemoveContainers":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodeContainerIds(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodeContainerIds(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2186,20 +2186,20 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.CEncode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.CEncode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "Blobstore.RemoveContainers", Arg: buf}, nil
 		}
 	case "ObjectExists":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodeContainerObject(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodeContainerObject(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2209,11 +2209,11 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
 			size_enc.WriteBool(resp)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
 			enc.WriteBool(resp)
 			return &actor.Message{Method: "Blobstore.ObjectExists", Arg: buf}, nil
@@ -2221,8 +2221,8 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 	case "GetObjectInfo":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodeContainerObject(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodeContainerObject(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2232,20 +2232,20 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.CEncode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.CEncode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "Blobstore.GetObjectInfo", Arg: buf}, nil
 		}
 	case "ListObjects":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodeListObjectsRequest(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodeListObjectsRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2255,20 +2255,20 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.CEncode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.CEncode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "Blobstore.ListObjects", Arg: buf}, nil
 		}
 	case "RemoveObjects":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodeRemoveObjectsRequest(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodeRemoveObjectsRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2278,20 +2278,20 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.CEncode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.CEncode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "Blobstore.RemoveObjects", Arg: buf}, nil
 		}
 	case "PutObject":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodePutObjectRequest(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodePutObjectRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2301,20 +2301,20 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.CEncode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.CEncode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "Blobstore.PutObject", Arg: buf}, nil
 		}
 	case "GetObject":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodeGetObjectRequest(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodeGetObjectRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2324,20 +2324,20 @@ func (r *BlobstoreReceiver) Dispatch(ctx *actor.Context, svc interface{}, messag
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.CEncode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.CEncode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "Blobstore.GetObject", Arg: buf}, nil
 		}
 	case "PutChunk":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodePutChunkRequest(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodePutChunkRequest(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2375,17 +2375,17 @@ func NewProviderBlobstoreLink(linkName string) *BlobstoreSender {
 // Returns whether the container exists
 func (s *BlobstoreSender) ContainerExists(ctx *actor.Context, arg ContainerId) (bool, error) {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Blobstore.ContainerExists", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
+	d := msgpack.NewDecoder(out_buf)
 	resp, err_ := d.ReadBool()
 	if err_ != nil {
 		return false, err_
@@ -2398,14 +2398,14 @@ func (s *BlobstoreSender) ContainerExists(ctx *actor.Context, arg ContainerId) (
 // "namespace" of the connecting actor and linkdef
 func (s *BlobstoreSender) CreateContainer(ctx *actor.Context, arg ContainerId) error {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	s.transport.Send(ctx, actor.Message{Method: "Blobstore.CreateContainer", Arg: buf})
 	return nil
@@ -2415,18 +2415,18 @@ func (s *BlobstoreSender) CreateContainer(ctx *actor.Context, arg ContainerId) e
 // Returns error if the container id is invalid or not found.
 func (s *BlobstoreSender) GetContainerInfo(ctx *actor.Context, arg ContainerId) (*ContainerMetadata, error) {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Blobstore.GetContainerInfo", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
-	resp, err_ := CDecodeContainerMetadata(&d)
+	d := msgpack.NewDecoder(out_buf)
+	resp, err_ := MDecodeContainerMetadata(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -2437,8 +2437,8 @@ func (s *BlobstoreSender) GetContainerInfo(ctx *actor.Context, arg ContainerId) 
 func (s *BlobstoreSender) ListContainers(ctx *actor.Context) (*ContainersInfo, error) {
 	buf := make([]byte, 0)
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Blobstore.ListContainers", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
-	resp, err_ := CDecodeContainersInfo(&d)
+	d := msgpack.NewDecoder(out_buf)
+	resp, err_ := MDecodeContainersInfo(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -2451,18 +2451,18 @@ func (s *BlobstoreSender) ListContainers(ctx *actor.Context) (*ContainersInfo, e
 // If the MultiResult list is empty, all container removals succeeded.
 func (s *BlobstoreSender) RemoveContainers(ctx *actor.Context, arg ContainerIds) (*MultiResult, error) {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Blobstore.RemoveContainers", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
-	resp, err_ := CDecodeMultiResult(&d)
+	d := msgpack.NewDecoder(out_buf)
+	resp, err_ := MDecodeMultiResult(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -2472,17 +2472,17 @@ func (s *BlobstoreSender) RemoveContainers(ctx *actor.Context, arg ContainerIds)
 // Returns whether the object exists
 func (s *BlobstoreSender) ObjectExists(ctx *actor.Context, arg ContainerObject) (bool, error) {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Blobstore.ObjectExists", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
+	d := msgpack.NewDecoder(out_buf)
 	resp, err_ := d.ReadBool()
 	if err_ != nil {
 		return false, err_
@@ -2494,18 +2494,18 @@ func (s *BlobstoreSender) ObjectExists(ctx *actor.Context, arg ContainerObject) 
 // Returns error if the object id is invalid or not found.
 func (s *BlobstoreSender) GetObjectInfo(ctx *actor.Context, arg ContainerObject) (*ObjectMetadata, error) {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Blobstore.GetObjectInfo", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
-	resp, err_ := CDecodeObjectMetadata(&d)
+	d := msgpack.NewDecoder(out_buf)
+	resp, err_ := MDecodeObjectMetadata(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -2524,18 +2524,18 @@ func (s *BlobstoreSender) GetObjectInfo(ctx *actor.Context, arg ContainerObject)
 // filled in for ListObjects response. To get complete object metadata, use GetObjectInfo.
 func (s *BlobstoreSender) ListObjects(ctx *actor.Context, arg ListObjectsRequest) (*ListObjectsResponse, error) {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Blobstore.ListObjects", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
-	resp, err_ := CDecodeListObjectsResponse(&d)
+	d := msgpack.NewDecoder(out_buf)
+	resp, err_ := MDecodeListObjectsResponse(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -2548,18 +2548,18 @@ func (s *BlobstoreSender) ListObjects(ctx *actor.Context, arg ListObjectsRequest
 // that did not succeed. If the list is empty, all removals succeeded.
 func (s *BlobstoreSender) RemoveObjects(ctx *actor.Context, arg RemoveObjectsRequest) (*MultiResult, error) {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Blobstore.RemoveObjects", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
-	resp, err_ := CDecodeMultiResult(&d)
+	d := msgpack.NewDecoder(out_buf)
+	resp, err_ := MDecodeMultiResult(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -2570,18 +2570,18 @@ func (s *BlobstoreSender) RemoveObjects(ctx *actor.Context, arg RemoveObjectsReq
 // It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
 func (s *BlobstoreSender) PutObject(ctx *actor.Context, arg PutObjectRequest) (*PutObjectResponse, error) {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Blobstore.PutObject", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
-	resp, err_ := CDecodePutObjectResponse(&d)
+	d := msgpack.NewDecoder(out_buf)
+	resp, err_ := MDecodePutObjectResponse(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -2593,18 +2593,18 @@ func (s *BlobstoreSender) PutObject(ctx *actor.Context, arg PutObjectRequest) (*
 // It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
 func (s *BlobstoreSender) GetObject(ctx *actor.Context, arg GetObjectRequest) (*GetObjectResponse, error) {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "Blobstore.GetObject", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
-	resp, err_ := CDecodeGetObjectResponse(&d)
+	d := msgpack.NewDecoder(out_buf)
+	resp, err_ := MDecodeGetObjectResponse(&d)
 	if err_ != nil {
 		return nil, err_
 	}
@@ -2615,14 +2615,14 @@ func (s *BlobstoreSender) GetObject(ctx *actor.Context, arg GetObjectRequest) (*
 // It is recommended to keep chunks under 1MB to avoid exceeding nats default message size
 func (s *BlobstoreSender) PutChunk(ctx *actor.Context, arg PutChunkRequest) error {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	s.transport.Send(ctx, actor.Message{Method: "Blobstore.PutChunk", Arg: buf})
 	return nil
@@ -2656,8 +2656,8 @@ func (r *ChunkReceiverReceiver) Dispatch(ctx *actor.Context, svc interface{}, me
 	case "ReceiveChunk":
 		{
 
-			d := cbor.NewDecoder(message.Arg)
-			value, err_ := CDecodeChunk(&d)
+			d := msgpack.NewDecoder(message.Arg)
+			value, err_ := MDecodeChunk(&d)
 			if err_ != nil {
 				return nil, err_
 			}
@@ -2667,13 +2667,13 @@ func (r *ChunkReceiverReceiver) Dispatch(ctx *actor.Context, svc interface{}, me
 				return nil, err
 			}
 
-			var sizer cbor.Sizer
+			var sizer msgpack.Sizer
 			size_enc := &sizer
-			resp.CEncode(size_enc)
+			resp.MEncode(size_enc)
 			buf := make([]byte, sizer.Len())
-			encoder := cbor.NewEncoder(buf)
+			encoder := msgpack.NewEncoder(buf)
 			enc := &encoder
-			resp.CEncode(enc)
+			resp.MEncode(enc)
 			return &actor.Message{Method: "ChunkReceiver.ReceiveChunk", Arg: buf}, nil
 		}
 	default:
@@ -2697,18 +2697,18 @@ func NewActorChunkReceiverSender(actor_id string) *ChunkReceiverSender {
 // If the response sets cancelDownload, the provider will stop downloading chunks
 func (s *ChunkReceiverSender) ReceiveChunk(ctx *actor.Context, arg Chunk) (*ChunkResponse, error) {
 
-	var sizer cbor.Sizer
+	var sizer msgpack.Sizer
 	size_enc := &sizer
-	arg.CEncode(size_enc)
+	arg.MEncode(size_enc)
 	buf := make([]byte, sizer.Len())
 
-	var encoder = cbor.NewEncoder(buf)
+	var encoder = msgpack.NewEncoder(buf)
 	enc := &encoder
-	arg.CEncode(enc)
+	arg.MEncode(enc)
 
 	out_buf, _ := s.transport.Send(ctx, actor.Message{Method: "ChunkReceiver.ReceiveChunk", Arg: buf})
-	d := cbor.NewDecoder(out_buf)
-	resp, err_ := CDecodeChunkResponse(&d)
+	d := msgpack.NewDecoder(out_buf)
+	resp, err_ := MDecodeChunkResponse(&d)
 	if err_ != nil {
 		return nil, err_
 	}
