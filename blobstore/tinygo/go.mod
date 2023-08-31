@@ -1,7 +1,5 @@
 module github.com/wasmcloud/interfaces/blobstore/tinygo
 
-replace github.com/wasmcloud/actor-tinygo => ../../../actor-tinygo
-
 go 1.17
 
 require (
