@@ -29,4 +29,4 @@ For more information on Smithy, see
 
 For more on wasmcloud, see
 
-- [wasmCloud](https://wasmcloud.dev)
+- [wasmCloud](https://wasmcloud.com)
