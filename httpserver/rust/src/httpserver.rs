@@ -372,6 +372,322 @@ pub fn decode_http_response(
     };
     Ok(__result)
 }
+/// WebSocketMessage contains data sent to actor about the websocket message
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct WebsocketMessage {
+  /// message as a byte array. May be empty.
+  #[serde(with = "serde_bytes")]
+  #[serde(default)]
+  pub message: Vec<u8>
+}
+
+// Encode WebsocketMessage as CBOR and append to output stream
+#[doc(hidden)]
+#[allow(unused_mut)]
+pub fn encode_websocket_message<W: wasmbus_rpc::cbor::Write>(
+    mut e: &mut wasmbus_rpc::cbor::Encoder<W>,
+    val: &WebsocketMessage,
+) -> RpcResult<()>
+    where
+        <W as wasmbus_rpc::cbor::Write>::Error: std::fmt::Display,
+{
+    e.array(1)?;
+    e.bytes(&val.message)?;
+    Ok(())
+}
+
+// Decode WebsocketMessage from cbor input stream
+#[doc(hidden)]
+pub fn decode_websocket_message(
+    d: &mut wasmbus_rpc::cbor::Decoder<'_>,
+) -> Result<WebsocketMessage, RpcError> {
+    let __result = {
+        let mut message: Option<Vec<u8>> = None;
+
+        let is_array = match d.datatype()? {
+            wasmbus_rpc::cbor::Type::Array => true,
+            _ => {
+                return Err(RpcError::Deser(
+                    "decoding struct WebsocketMessage, expected array".to_string(),
+                ))
+            }
+        };
+        if is_array {
+            let len = d.fixed_array()?;
+            for __i in 0..(len as usize) {
+                match __i {
+                    0 =>  message = Some(d.bytes()?.to_vec()),
+                    _ => d.skip()?,
+                }
+            }
+        }
+        WebsocketMessage {
+            message: if let Some(__x) = message {
+                __x
+            } else {
+                return Err(RpcError::Deser(
+                    "missing field WebsocketMessage.message (#0)".to_string(),
+                ));
+            },
+        }
+    };
+    Ok(__result)
+}
+#[async_trait]
+pub trait WebsocketServer{
+    fn contract_id() -> &'static str {
+        "wasmcloud:httpserver"
+    }
+    async fn handle_message(&self, ctx: &Context, arg: &WebsocketMessage) -> RpcResult<WebsocketMessage>;
+
+    async fn handle_assign_new_channel_id(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<String>;
+}
+
+/// WebsocketServerReceiver receives messages defined in the WebsocketServer service trait
+/// WebsocketServer is the contract to be implemented by actor
+#[doc(hidden)]
+#[async_trait]
+pub trait WebsocketServerReceiver: MessageDispatch + WebsocketServer {
+    async fn dispatch(&self, ctx: &Context, message: Message<'_>) -> Result<Vec<u8>, RpcError> {
+        match message.method {
+            "HandleMessage" => {
+                let value: WebsocketMessage = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'WebsocketMessage': {}", e)))?;
+
+                let resp = WebsocketServer::handle_message(self, ctx, &value).await?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
+
+                Ok(buf)
+            }
+            "HandleAssignNewChannelId" =>{
+                let value: HttpRequest = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'HttpRequest': {}", e)))?;
+
+                let resp = WebsocketServer::handle_assign_new_channel_id(self, ctx, &value).await?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
+
+                Ok(buf)
+            }
+            _ => Err(RpcError::MethodNotHandled(format!(
+                "WebsocketServer::{}",
+                message.method
+            ))),
+        }
+    }
+}
+
+/// WebsocketServerSender sends messages to a WebsocketServer service
+/// WebsocketServer is the contract to be implemented by actor
+/// client for sending WebsocketServer messages
+#[derive(Clone, Debug)]
+pub struct WebsocketServerSender<T: Transport> {
+    transport: T,
+}
+
+impl<T: Transport> crate::WebsocketServerSender<T> {
+    /// Constructs a WebsocketServerSender with the specified transport
+    pub fn via(transport: T) -> Self {
+        Self { transport }
+    }
+
+    pub fn set_timeout(&self, interval: std::time::Duration) {
+        self.transport.set_timeout(interval);
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl<'send> crate::WebsocketServerSender<wasmbus_rpc::provider::ProviderTransport<'send>> {
+    /// Constructs a Sender using an actor's LinkDefinition,
+    /// Uses the provider's HostBridge for rpc
+    pub fn for_actor(ld: &'send wasmbus_rpc::core::LinkDefinition) -> Self {
+        Self {
+            transport: wasmbus_rpc::provider::ProviderTransport::new(ld, None),
+        }
+    }
+}
+#[cfg(target_arch = "wasm32")]
+impl crate::WebsocketServerSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for actor-to-actor messaging
+    /// using the recipient actor's public key
+    pub fn to_actor(actor_id: &str) -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_actor(actor_id.to_string()).unwrap();
+        Self { transport }
+    }
+}
+#[async_trait]
+impl<T: Transport + std::marker::Sync + std::marker::Send> WebsocketServer for crate::WebsocketServerSender<T> {
+    #[allow(unused)]
+    async fn handle_message(&self, ctx: &Context, arg: &WebsocketMessage) -> RpcResult<WebsocketMessage> {
+        let buf = wasmbus_rpc::common::serialize(arg)?;
+
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "WebsocketServer.HandleMessage",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        let value: WebsocketMessage = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': WebsocketMessage", e)))?;
+        Ok(value)
+    }
+    #[allow(unused)]
+    async fn handle_assign_new_channel_id(&self, ctx: &Context, arg: &HttpRequest) -> RpcResult<String> {
+        let buf = wasmbus_rpc::common::serialize(arg)?;
+
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "WebsocketServer.HandleAssignNewChannelId",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        let value: String = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': String", e)))?;
+        Ok(value)
+    }
+}
+
+#[async_trait]
+pub trait WebsocketClient {
+    /// returns the capability contract id for this interface
+    fn contract_id() -> &'static str {
+        "wasmcloud:httpserver"
+    }
+    /// returns list of websocket client ids that are active in the http server. Maybe an empty array
+    async fn get_available_websocket_client_ids(&self, ctx: &Context) -> RpcResult<Box<[String]>>;
+    /// send websocket message as byte array and accept allow/deny websocket client ids
+    async fn send_message(&self, ctx: &Context, message: WebsocketMessage, allow_list: Box<[String]>, deny_list: Box<[String]>) -> RpcResult<()>;
+}
+
+
+/// WebsocketClientReceiver receives messages defined in the WebsocketClient service trait
+/// WebsocketClient - issue outgoing websocket message via an external provider
+/// To use this capability, the actor must be linked
+/// with "wasmcloud:httpserver"
+#[doc(hidden)]
+#[async_trait]
+pub trait WebsocketClientReceiver: MessageDispatch + WebsocketClient {
+    async fn dispatch(&self, ctx: &Context, message: Message<'_>) -> Result<Vec<u8>, RpcError> {
+        match message.method {
+            "SendMessage" => {
+                let value: (WebsocketMessage, Box<[String]>, Box<[String]>) = wasmbus_rpc::common::deserialize(&message.arg)
+                    .map_err(|e| RpcError::Deser(format!("'(WebsocketMessage, [String], [String])': {}", e)))?;
+
+                let resp = WebsocketClient::send_message(self, ctx, value.0, value.1, value.2).await?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
+
+                Ok(buf)
+            }
+            "GetWebsocketClientIds" => {
+                let resp = WebsocketClient::get_available_websocket_client_ids(self,ctx).await?;
+                let buf = wasmbus_rpc::common::serialize(&resp)?;
+
+                Ok(buf)
+            }
+            _ => Err(RpcError::MethodNotHandled(format!(
+                "WebsocketClient::{}",
+                message.method
+            ))),
+        }
+    }
+}
+
+/// WebsocketClientSender sends messages to a WebsocketClient service
+/// WebsocketClient - issue outgoing websocket message via an external provider
+/// To use this capability, the actor must be linked
+/// with "wasmcloud:httpserver"
+/// client for sending Websocket messages
+#[derive(Clone, Debug)]
+pub struct WebsocketClientSender<T: Transport> {
+    transport: T,
+}
+
+impl<T: Transport> WebsocketClientSender<T> {
+    /// Constructs a Websocket
+    /// ClientSender with the specified transport
+    pub fn via(transport: T) -> Self {
+        Self { transport }
+    }
+
+    pub fn set_timeout(&self, interval: std::time::Duration) {
+        self.transport.set_timeout(interval);
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl WebsocketClientSender<wasmbus_rpc::actor::prelude::WasmHost> {
+    /// Constructs a client for sending to a WebsocketClient provider
+    /// implementing the 'wasmcloud:httpserver' capability contract, with the "default" link
+    pub fn new() -> Self {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:httpserver", "default")
+                .unwrap();
+        Self { transport }
+    }
+
+    /// Constructs a client for sending to a WebsocketClient provider
+    /// implementing the 'wasmcloud:httpserver' capability contract, with the specified link name
+    pub fn new_with_link(link_name: &str) -> wasmbus_rpc::error::RpcResult<Self> {
+        let transport =
+            wasmbus_rpc::actor::prelude::WasmHost::to_provider("wasmcloud:httpserver", link_name)?;
+        Ok(Self { transport })
+    }
+}
+#[async_trait]
+impl<T: Transport + std::marker::Sync + std::marker::Send> WebsocketClient for WebsocketClientSender<T> {
+    #[allow(unused)]
+    /// get available websocket client ids
+    async fn get_available_websocket_client_ids(&self, ctx: &Context) -> RpcResult<Box<[String]>> {
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "WebsocketClient.GetWebsocketClientIds",
+                    arg: Default::default(),
+                },
+                None,
+            )
+            .await?;
+        let value: Box<[String]> = wasmbus_rpc::common::deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("'{}': [String]", e)))?;
+        Ok(value)
+    }
+
+    #[allow(unused)]
+    /// Issue outgoing websocket message
+    async fn send_message(&self, ctx: &Context, message: WebsocketMessage, allow_list: Box<[String]>, deny_list: Box<[String]>) -> RpcResult<()> {
+        let buf = wasmbus_rpc::common::serialize(&(message, allow_list, deny_list))?;
+
+         self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "WebsocketClient.SendMessage",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+
+        Ok(())
+    }
+}
+
+
 /// HttpServer is the contract to be implemented by actor
 /// wasmbus.contractId: wasmcloud:httpserver
 /// wasmbus.actorReceive
